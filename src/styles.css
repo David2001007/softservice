@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@plugin '@tailwindcss/typography';
+@custom-variant dark (&:is(.dark *));
+
+/* ────────────────────────────────────────────
+   Design System – SoftService
+   Cores: fundo escuro, azul primário, dourado
+───────────────────────────────────────────── */
+:root {
+  --background: #020617;
+  --surface: #0F172A;
+  --surface-hover: #162033;
+
+  --primary: #1D4ED8;
+  --primary-hover: #2563EB;
+
+  --gold: #D4AF37;
+  --gold-hover: #EAB308;
+  --gold-soft: #FDE68A;
+
+  --text: #E5E7EB;
+  --text-muted: #9CA3AF;
+
+  --border: #1F2937;
+  --border-strong: #374151;
+
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  --shadow-soft: 0 4px 20px rgba(0,0,0,0.3);
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --font-sans: 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Mapping Tailwind tokens to CSS vars */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-gold-soft: var(--gold-soft);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  /* shadcn/radix compatibility tokens */
+  --color-foreground: var(--text);
+  --color-muted-foreground: var(--text-muted);
+  --color-muted: #1E293B;
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-secondary: #1E293B;
+  --color-secondary-foreground: var(--text);
+  --color-accent: #1E293B;
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: #fff;
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-soft: var(--shadow-soft);
+}
+
+/* ── Base ── */
+html, body, #app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Tailwind base layer ── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--text);
+  }
+  input, textarea, select {
+    color: var(--text);
+    background-color: var(--surface);
+  }
+}
+
+/* ── Utility classes ── */
+.card-surface {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 150ms ease;
+  text-decoration: none;
+}
+
+.sidebar-link:hover {
+  background-color: var(--surface-hover);
+  color: var(--text);
+}
+
+.sidebar-link.active {
+  background-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(29, 78, 216, 0.4);
+}
+
+/* ── Animations ── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: fade-in 250ms ease both; }
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}

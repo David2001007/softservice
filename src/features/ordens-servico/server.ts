@@ -1,0 +1,161 @@
+import { createServerFn } from '@tanstack/react-start'
+import { db } from '@/db'
+import { ordensServico, osHistorico, osMateriais, materiais } from '@/db/schema'
+import { eq, sql } from 'drizzle-orm'
+import { osSchema, osConclusaoSchema, osReagendamentoSchema, osCancelamentoSchema } from './schema'
+import { z } from 'zod'
+
+export const getOrdensServico = createServerFn({ method: 'GET' }).handler(async () => {
+  return await db.query.ordensServico.findMany({
+    with: {
+      cliente: true,
+      tecnico: true,
+    },
+    orderBy: (os, { desc }) => [desc(os.createdAt)],
+  })
+})
+
+export const getOrdemServico = createServerFn({ method: 'GET' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    const os = await db.query.ordensServico.findFirst({
+      where: eq(ordensServico.id, data),
+      with: {
+        cliente: true,
+        tecnico: true,
+        materiais: { with: { material: true } },
+        historico: { with: { usuario: true }, orderBy: (h, { desc }) => [desc(h.dataHora)] },
+      },
+    })
+    return os
+  })
+
+export const createOrdemServico = createServerFn({ method: 'POST' })
+  .inputValidator(osSchema)
+  .handler(async ({ data }) => {
+    const [novaOs] = await db
+      .insert(ordensServico)
+      .values({
+        numero: `OS${new Date().getFullYear()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+        clienteId: data.clienteId,
+        tipoServico: data.tipoServico,
+        descricaoProblema: data.descricaoProblema,
+        observacoes: data.observacoes,
+        prioridade: data.prioridade,
+        dataAgendada: data.dataAgendada ? new Date(data.dataAgendada) : null,
+        tecnicoId: data.tecnicoId,
+        valor: data.valor || null,
+        status: data.status || 'aberta',
+      })
+      .returning()
+      
+    // Registrar no histórico
+    await db.insert(osHistorico).values({
+      osId: novaOs.id,
+      acao: 'criacao',
+      statusNovo: novaOs.status,
+      detalhes: 'OS criada pelo sistema',
+    })
+
+    return novaOs
+  })
+
+export const concluirOrdemServico = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.number(), data: osConclusaoSchema }))
+  .handler(async ({ data }) => {
+    return await db.transaction(async (tx) => {
+      // 1. Atualizar a OS
+      const [osAtualizada] = await tx
+        .update(ordensServico)
+        .set({
+          status: 'concluida',
+          dataInicioEfetivo: data.data.dataInicioEfetivo ? new Date(data.data.dataInicioEfetivo) : null,
+          dataTerminoEfetivo: data.data.dataTerminoEfetivo ? new Date(data.data.dataTerminoEfetivo) : null,
+          resultadoServico: data.data.resultadoServico,
+          observacoesFinais: data.data.observacoesFinais,
+        })
+        .where(eq(ordensServico.id, data.id))
+        .returning()
+
+      // 2. Registrar Materiais Utilizados e Dar Baixa no Estoque
+      if (data.data.materiais && data.data.materiais.length > 0) {
+        for (const mat of data.data.materiais) {
+          await tx.insert(osMateriais).values({
+            osId: data.id,
+            materialId: mat.materialId,
+            quantidade: mat.quantidade,
+            tipoUso: mat.tipoUso,
+            localSaida: mat.localSaida,
+          })
+          
+          // Baixa de estoque
+          await tx
+            .update(materiais)
+            .set({ quantidade: sql`${materiais.quantidade} - ${mat.quantidade}` })
+            .where(eq(materiais.id, mat.materialId))
+        }
+      }
+
+      // 3. Registrar Histórico
+      await tx.insert(osHistorico).values({
+        osId: data.id,
+        acao: 'conclusao',
+        statusNovo: 'concluida',
+        detalhes: 'OS finalizada pelo técnico',
+      })
+
+      return osAtualizada
+    })
+  })
+
+export const reagendarOrdemServico = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.number(), data: osReagendamentoSchema }))
+  .handler(async ({ data }) => {
+    return await db.transaction(async (tx) => {
+      const [osAtualizada] = await tx
+        .update(ordensServico)
+        .set({
+          status: 'reagendada',
+          dataAgendada: new Date(data.data.novaDataAgendada),
+          ...(data.data.tecnicoId ? { tecnicoId: data.data.tecnicoId } : {}),
+        })
+        .where(eq(ordensServico.id, data.id))
+        .returning()
+
+      await tx.insert(osHistorico).values({
+        osId: data.id,
+        acao: 'reagendamento',
+        statusNovo: 'reagendada',
+        motivo: data.data.motivoReagendamento,
+        detalhes: `Reagendado para ${data.data.novaDataAgendada}`,
+      })
+
+      return osAtualizada
+    })
+  })
+
+export const cancelarOrdemServico = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.number(), data: osCancelamentoSchema }))
+  .handler(async ({ data }) => {
+    return await db.transaction(async (tx) => {
+      const [osAtualizada] = await tx
+        .update(ordensServico)
+        .set({
+          status: 'cancelada',
+          motivoCancelamento: data.data.motivoCancelamento,
+          dataCancelamento: new Date(),
+        })
+        .where(eq(ordensServico.id, data.id))
+        .returning()
+
+      await tx.insert(osHistorico).values({
+        osId: data.id,
+        acao: 'cancelamento',
+        statusNovo: 'cancelada',
+        motivo: data.data.motivoCancelamento,
+        detalhes: data.data.observacoes || 'Cancelado sem observações',
+      })
+
+      return osAtualizada
+    })
+  })
