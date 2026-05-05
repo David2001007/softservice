@@ -39,19 +39,20 @@ function LandingPage() {
     () => ({
       linesGradient:    GRADIENT,
       enabledWaves:     ['top', 'middle', 'bottom'] as const,
-      // Desktop: [4,6,8] total=18 lines; mobile auto-reduces to [0,3,0]
-      lineCount:        [4, 6, 8] as number[],
-      lineDistance:     [8, 6, 4] as number[],
-      // Rotation in degrees – baked to sin/cos on CPU, never computed per pixel
-      topWavePosition:    { x: 10.0, y:  0.5, rotate: -15 },
-      middleWavePosition: { x:  5.0, y:  0.0, rotate:  10 },
-      bottomWavePosition: { x:  2.0, y: -0.7, rotate: -20 },
-      bendRadius:       6.0,
-      bendStrength:     -0.4,
-      animationSpeed:   0.65,
+      // Original example uses [10,15,20]; we use [8,12,16] – full visual effect,
+      // still fine because canvas renders at 60% resolution (SCALE=0.6)
+      lineCount:        [8, 12, 16],
+      lineDistance:     [8, 6, 4],
+      // rotate uses the original small-float scale that feeds log(length(uv)+1)
+      topWavePosition:    { x: 10.0, y:  0.5, rotate: -0.4 },
+      middleWavePosition: { x:  5.0, y:  0.0, rotate:  0.2 },
+      bottomWavePosition: { x:  2.0, y: -0.7, rotate: -1.0 },
+      bendRadius:       5.0,
+      bendStrength:     -0.5,
+      animationSpeed:   0.8,
       interactive:      true,
       parallax:         true,
-      parallaxStrength: 0.10,
+      parallaxStrength: 0.15,
       mixBlendMode:     'screen' as const,
     }),
     [],
