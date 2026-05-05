@@ -7,19 +7,22 @@
 
 /* ────────────────────────────────────────────
    Design System – SoftService
-   Cores: fundo escuro, azul primário, dourado
-───────────────────────────────────────────── */
+   Cores: fundo escuro, roxo primário (CTA), roxo escuro (Confirmar)
+ ───────────────────────────────────────────── */
 :root {
-  --background: #020617;
-  --surface: #0F172A;
-  --surface-hover: #162033;
+  --background: #050814;
+  --surface: #0D1121;
+  --surface-hover: #151A31;
 
-  --primary: #1D4ED8;
-  --primary-hover: #2563EB;
+  --primary: #7D12FF;
+  --primary-hover: #9333FF;
 
-  --gold: #D4AF37;
-  --gold-hover: #EAB308;
-  --gold-soft: #FDE68A;
+  --confirm: #2A0A5E;
+  --secondary: #C7A6FF;
+
+  --gold: #C7A6FF;
+  --gold-hover: #DDBBFF;
+  --gold-soft: #E6D5FF;
 
   --text: #E5E7EB;
   --text-muted: #9CA3AF;
@@ -44,6 +47,8 @@
   --color-surface: var(--surface);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+  --color-confirm: var(--confirm);
+  --color-secondary-button: var(--secondary);
   --color-gold: var(--gold);
   --color-gold-hover: var(--gold-hover);
   --color-gold-soft: var(--gold-soft);
@@ -63,8 +68,8 @@
   --color-card-foreground: var(--text);
   --color-popover: var(--surface);
   --color-popover-foreground: var(--text);
-  --color-secondary: #1E293B;
-  --color-secondary-foreground: var(--text);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: #050814;
   --color-accent: #1E293B;
   --color-accent-foreground: var(--text);
   --color-destructive: var(--danger);
@@ -145,7 +150,7 @@ body {
 .sidebar-link.active {
   background-color: var(--primary);
   color: #fff;
-  box-shadow: 0 0 12px rgba(29, 78, 216, 0.4);
+  box-shadow: 0 0 12px rgba(125, 18, 255, 0.4);
 }
 
 /* ── Animations ── */

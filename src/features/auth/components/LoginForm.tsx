@@ -47,7 +47,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   return (
     <div className="w-full max-w-[440px] mx-auto fade-in">
-      <Card className="bg-[#0A0F1E]/80 backdrop-blur-xl border-white/10 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] overflow-hidden">
+      <Card className="bg-surface/80 backdrop-blur-xl border-white/10 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] overflow-hidden">
         <CardContent className="p-6 sm:p-8 xl:p-12">
           
           {/* Header / Logo */}
@@ -87,7 +87,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   {...form.register('email')}
                   type="email"
                   placeholder="seu@email.com"
-                  className="h-14 pl-12 rounded-2xl bg-[#13192B]/50 border-white/5 text-text placeholder:text-text-muted/50 focus:border-primary/50 focus:ring-primary/10 transition-all"
+                  className="h-14 pl-12 rounded-2xl bg-background/50 border-white/5 text-text placeholder:text-text-muted/50 focus:border-primary/50 focus:ring-primary/10 transition-all"
                 />
               </div>
               {form.formState.errors.email && (
@@ -109,7 +109,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   {...form.register('password')}
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="h-14 pl-12 pr-12 rounded-2xl bg-[#13192B]/50 border-white/5 text-text placeholder:text-text-muted/50 focus:border-primary/50 focus:ring-primary/10 transition-all"
+                  className="h-14 pl-12 pr-12 rounded-2xl bg-background/50 border-white/5 text-text placeholder:text-text-muted/50 focus:border-primary/50 focus:ring-primary/10 transition-all"
                 />
                 <button
                   type="button"
@@ -128,7 +128,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] hover:from-[#D97706] hover:to-[#B45309] text-[#2D1B02] font-black uppercase tracking-widest transition-all shadow-[0_10px_20px_-5px_rgba(245,158,11,0.3)] hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.5)] active:scale-[0.98]"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-primary-hover text-white font-black uppercase tracking-widest transition-all shadow-[0_10px_20px_-5px_rgba(125,18,255,0.3)] hover:shadow-[0_15px_30px_-10px_rgba(125,18,255,0.5)] active:scale-[0.98]"
             >
               {form.formState.isSubmitting ? (
                 <Loader2 className="w-6 h-6 animate-spin" />

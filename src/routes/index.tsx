@@ -1,178 +1,175 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Zap, Shield, BarChart3, LogIn, ArrowRight, X } from 'lucide-react'
-import Hyperspeed from '@/components/animations/Hyperspeed'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+
+// Lazy-load the heavy WebGL component – page content renders immediately
+const FloatingLines = lazy(() => import('@/components/animations/FloatingLines'))
 
 export const Route = createFileRoute('/')({
   beforeLoad: () => {
     if (typeof window === 'undefined') return
-
-    const raw = localStorage.getItem('softservice-auth')
-    if (raw) {
-      try {
-        const state = JSON.parse(raw)
-        if (state?.state?.isAuthenticated) {
-          throw redirect({ to: '/dashboard' })
-        }
-      } catch (e: unknown) {
-        if (e && typeof e === 'object' && 'to' in e) throw e
-      }
+    try {
+      const raw = localStorage.getItem('softservice-auth')
+      if (!raw) return
+      const state = JSON.parse(raw)
+      if (state?.state?.isAuthenticated) throw redirect({ to: '/dashboard' })
+    } catch (e: unknown) {
+      if (e && typeof e === 'object' && 'to' in e) throw e
     }
   },
   component: LandingPage,
 })
 
+// Defined outside component – never recreated
+const GRADIENT = ['#2A0A5E', '#7D12FF', '#9333FF', '#C7A6FF', '#7D12FF', '#2A0A5E']
+
+const FEATURES = [
+  { icon: Zap,       title: 'Agilidade',    sub: 'Fluxos otimizados para execução rápida.' },
+  { icon: Shield,    title: 'Segurança',    sub: 'Dados protegidos com criptografia de ponta.' },
+  { icon: BarChart3, title: 'Inteligência', sub: 'Relatórios dinâmicos para decisões precisas.' },
+]
+
 function LandingPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
 
-  const hyperspeedOptions = useMemo(() => ({
-    distortion: 'turbulentDistortion' as const,
-    length: 400,
-    roadWidth: 10,
-    islandWidth: 2,
-    lanesPerRoad: 3,
-    fov: 90,
-    fovSpeedUp: 150,
-    speedUp: 2,
-    carLightsFade: 0.4,
-    totalSideLightSticks: 12,
-    lightPairsPerRoadWay: 30,
-    shoulderLinesWidthPercentage: 0.05,
-    brokenLinesWidthPercentage: 0.1,
-    brokenLinesLengthPercentage: 0.5,
-    lightStickWidth: [0.12, 0.5],
-    lightStickHeight: [1.3, 1.7],
-    movingAwaySpeed: [60, 80],
-    movingCloserSpeed: [-120, -160],
-    carLightsLength: [12, 80],
-    carLightsRadius: [0.05, 0.14],
-    carWidthPercentage: [0.3, 0.5],
-    carShiftX: [-0.8, 0.8],
-    carFloorSeparation: [0, 5],
-    colors: {
-      roadColor: 0x020617,
-      islandColor: 0x0F172A,
-      background: 0x020617,
-      shoulderLines: 0xFFFFFF,
-      brokenLines: 0xFFFFFF,
-      leftCars: [0x1D4ED8, 0x2563EB, 0x3B82F6],
-      rightCars: [0xD4AF37, 0xEAB308, 0xFDE68A],
-      sticks: 0x1D4ED8,
-    }
-  }), [])
+  const floatingLinesProps = useMemo(
+    () => ({
+      linesGradient:    GRADIENT,
+      enabledWaves:     ['top', 'middle', 'bottom'] as const,
+      // Desktop: [4,6,8] total=18 lines; mobile auto-reduces to [0,3,0]
+      lineCount:        [4, 6, 8] as number[],
+      lineDistance:     [8, 6, 4] as number[],
+      // Rotation in degrees – baked to sin/cos on CPU, never computed per pixel
+      topWavePosition:    { x: 10.0, y:  0.5, rotate: -15 },
+      middleWavePosition: { x:  5.0, y:  0.0, rotate:  10 },
+      bottomWavePosition: { x:  2.0, y: -0.7, rotate: -20 },
+      bendRadius:       6.0,
+      bendStrength:     -0.4,
+      animationSpeed:   0.65,
+      interactive:      true,
+      parallax:         true,
+      parallaxStrength: 0.10,
+      mixBlendMode:     'screen' as const,
+    }),
+    [],
+  )
 
   return (
-    <div className="min-h-screen w-screen bg-[#020617] relative overflow-x-hidden font-sans flex flex-col items-center justify-center">
-      {/* Background Effect */}
-      <div className="fixed inset-0 z-0">
-        <Hyperspeed effectOptions={hyperspeedOptions} />
+    <div className="relative min-h-screen w-screen overflow-x-hidden bg-background font-sans">
+      {/* ── Background animation (lazy, non-blocking) ── */}
+      <div className="fixed inset-0 z-0" aria-hidden="true">
+        <Suspense fallback={null}>
+          <FloatingLines {...floatingLinesProps} />
+        </Suspense>
       </div>
 
-      {/* Content Overlay */}
-      <div className="relative z-10 w-full flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 text-center">
-        <div className="absolute inset-0 z-[-1] bg-gradient-to-b from-[#020617]/20 via-[#020617]/60 to-[#020617] pointer-events-none" />
-        
-        {/* Logo Section */}
-        <div className="flex flex-col items-center mb-8 sm:mb-12 animate-float">
-          <div className="relative mb-4 sm:mb-6">
-            <div className="absolute inset-0 bg-primary/30 blur-[24px] rounded-full animate-pulse" />
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-2xl border border-white/10">
-              <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+      {/* ── Gradient overlay ── */}
+      <div className="fixed inset-0 z-[1] pointer-events-none bg-gradient-to-b from-background/30 via-background/55 to-background" />
+
+      {/* ── Main content ── */}
+      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8 md:px-12 lg:px-16">
+
+        {/* Logo */}
+        <div className="mb-10 flex flex-col items-center animate-float sm:mb-14">
+          <div className="relative mb-5">
+            <div className="absolute inset-0 animate-pulse rounded-full bg-primary/30 blur-[28px]" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-primary to-primary-hover shadow-2xl sm:h-20 sm:w-20">
+              <Zap className="h-8 w-8 text-white sm:h-10 sm:w-10" />
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-white tracking-[0.2em] uppercase">
+
+          <h1 className="text-3xl font-black uppercase tracking-[0.2em] text-white sm:text-4xl md:text-5xl lg:text-6xl">
             Pulse<span className="text-primary">Net</span>
           </h1>
-          <div className="flex items-center gap-3 mt-2">
-            <div className="h-[1px] w-6 sm:w-8 bg-gold/50" />
-            <p className="text-[10px] sm:text-xs font-bold text-gold uppercase tracking-[0.4em]">Gestão de OS</p>
-            <div className="h-[1px] w-6 sm:w-8 bg-gold/50" />
+
+          <div className="mt-2 flex items-center gap-3">
+            <div className="h-px w-6 bg-gold/50 sm:w-8" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold sm:text-xs">Gestão de OS</p>
+            <div className="h-px w-6 bg-gold/50 sm:w-8" />
           </div>
         </div>
 
-        {/* Hero Section */}
-        <div className="max-w-4xl space-y-6 sm:space-y-10 mb-12 sm:mb-16">
-          <h2 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[0.9] text-white uppercase italic">
-            <span className="text-text/60 block">Conectando</span>
-            <span className="text-primary block">Pessoas.</span>
-            <span className="text-text/60 block">Impulsionando</span>
-            <span className="text-gold block">Soluções.</span>
+        {/* Hero */}
+        <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">
+          <h2 className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
+                         sm:text-6xl md:text-7xl lg:text-8xl">
+            <span className="block text-text/60">Conectando</span>
+            <span className="block text-primary">Pessoas.</span>
+            <span className="block text-text/60">Impulsionando</span>
+            <span className="block text-gold">Soluções.</span>
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-text-muted max-w-lg mx-auto leading-relaxed">
+          <p className="mx-auto max-w-md text-sm leading-relaxed text-text-muted sm:text-base md:text-lg lg:max-w-lg">
             A plataforma definitiva para agilizar, organizar e escalar sua gestão de serviços em tempo real.
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* CTA Buttons */}
+        <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
           <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
             <DialogTrigger asChild>
-              <Button 
-                size="lg" 
-                className="h-16 px-8 sm:px-12 rounded-2xl bg-gradient-to-r from-primary to-primary-hover text-white font-black uppercase tracking-widest transition-all shadow-[0_10px_30px_-5px_rgba(29,78,216,0.5)] hover:scale-105 active:scale-95 group"
+              <Button
+                size="lg"
+                className="group h-14 w-full rounded-2xl bg-gradient-to-r from-primary to-primary-hover px-8
+                           font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-5px_rgba(125,18,255,0.5)]
+                           transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:h-16"
               >
-                <div className="flex items-center gap-3">
-                  <LogIn className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                  Acessar Sistema
-                </div>
+                <LogIn className="mr-2 h-5 w-5 transition-transform group-hover:rotate-12" />
+                Acessar Sistema
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[480px] p-0 bg-transparent border-none shadow-none outline-none [&>button]:hidden">
               <div className="relative">
                 <LoginForm onSuccess={() => setIsLoginOpen(false)} />
-                <button 
+                <button
                   onClick={() => setIsLoginOpen(false)}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all z-[60] border border-white/10"
+                  className="absolute right-4 top-4 z-[60] flex h-10 w-10 items-center justify-center
+                             rounded-full border border-white/10 bg-white/5 text-white/50
+                             transition-all hover:bg-white/10 hover:text-white"
+                  aria-label="Fechar"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
             </DialogContent>
           </Dialog>
 
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-16 px-8 sm:px-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest transition-all group"
+          <Button
+            variant="outline"
+            size="lg"
+            className="group h-14 w-full rounded-2xl border-white/10 bg-white/5 px-8 font-black
+                       uppercase tracking-widest text-white transition-all hover:bg-white/10
+                       sm:w-auto sm:px-12 sm:h-16"
           >
-            <div className="flex items-center gap-3">
-              Saiba Mais
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </div>
+            Saiba Mais
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>
 
-        {/* Features Minimal Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 mt-24 max-w-4xl w-full">
-          {[
-            { icon: Zap, title: "Agilidade", sub: "Fluxos otimizados para execução rápida." },
-            { icon: Shield, title: "Segurança", sub: "Dados protegidos com criptografia de ponta." },
-            { icon: BarChart3, title: "Inteligência", sub: "Relatórios dinâmicos para decisões precisas." },
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center text-center space-y-3 group">
-              <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-text-muted group-hover:text-primary transition-all group-hover:border-primary/50">
-                <item.icon className="w-6 h-6" />
+        {/* Feature cards */}
+        <div className="mt-20 grid w-full max-w-3xl grid-cols-1 gap-8 sm:mt-24 sm:grid-cols-3 sm:gap-10">
+          {FEATURES.map(({ icon: Icon, title, sub }) => (
+            <div key={title} className="group flex flex-col items-center space-y-3 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10
+                              bg-white/5 text-text-muted transition-all
+                              group-hover:border-primary/50 group-hover:text-primary">
+                <Icon className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-xs font-black text-white uppercase tracking-widest">{item.title}</h3>
-                <p className="text-[11px] text-text-muted mt-1 leading-relaxed px-4">{item.sub}</p>
+                <h3 className="text-xs font-black uppercase tracking-widest text-white">{title}</h3>
+                <p className="mt-1 px-2 text-[11px] leading-relaxed text-text-muted">{sub}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Footer info */}
-        <div className="absolute bottom-8 text-[10px] text-text-muted uppercase tracking-[0.4em] opacity-50">
+        {/* Footer */}
+        <footer className="mt-16 text-[10px] uppercase tracking-[0.4em] text-text-muted/40 sm:absolute sm:bottom-8 sm:mt-0">
           PulseNet © 2026 – Advanced Management System
-        </div>
-      </div>
+        </footer>
+      </main>
     </div>
   )
 }
