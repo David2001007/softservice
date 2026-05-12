@@ -54,3 +54,10 @@ export const updateMaterial = createServerFn({ method: 'POST' })
       .returning()
     return atualizado
   })
+
+export const deleteMaterial = createServerFn({ method: 'POST' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    await db.delete(materiais).where(eq(materiais.id, data))
+    return { success: true }
+  })

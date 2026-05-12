@@ -62,3 +62,10 @@ export const updateTecnico = createServerFn({ method: 'POST' })
       .returning()
     return atualizado
   })
+
+export const deleteTecnico = createServerFn({ method: 'POST' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    await db.delete(tecnicos).where(eq(tecnicos.id, data))
+    return { success: true }
+  })

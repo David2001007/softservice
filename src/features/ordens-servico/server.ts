@@ -159,3 +159,31 @@ export const cancelarOrdemServico = createServerFn({ method: 'POST' })
       return osAtualizada
     })
   })
+
+export const updateOrdemServico = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.number(), data: osSchema }))
+  .handler(async ({ data }) => {
+    const [atualizada] = await db
+      .update(ordensServico)
+      .set({
+        clienteId: data.data.clienteId,
+        tipoServico: data.data.tipoServico,
+        descricaoProblema: data.data.descricaoProblema,
+        observacoes: data.data.observacoes,
+        prioridade: data.data.prioridade,
+        dataAgendada: data.data.dataAgendada ? new Date(data.data.dataAgendada) : null,
+        tecnicoId: data.data.tecnicoId,
+        valor: data.data.valor || null,
+        status: data.data.status,
+      })
+      .where(eq(ordensServico.id, data.id))
+      .returning()
+    return atualizada
+  })
+
+export const deleteOrdemServico = createServerFn({ method: 'POST' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    await db.delete(ordensServico).where(eq(ordensServico.id, data))
+    return { success: true }
+  })

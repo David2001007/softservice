@@ -1,21 +1,21 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Plus, Pencil, Settings2 } from 'lucide-react'
+import { Plus, Pencil, Settings2, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
 import { DefaultTable, type Column } from '@/components/default-table'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { formatDate } from '@/lib/utils'
 
-import { getOrdensServico } from '@/features/ordens-servico/server'
+import { getOrdensServico, deleteOrdemServico } from '@/features/ordens-servico/server'
 
 export const Route = createFileRoute('/_app/ordens-servico/')({
   loader: async () => await getOrdensServico(),
   component: OrdensServicoPage,
 })
-
-
 
 const tipoServicoLabel: Record<string, string> = {
   instalacao: 'Instalação',
@@ -25,34 +25,60 @@ const tipoServicoLabel: Record<string, string> = {
   outro: 'Outro',
 }
 
-const columns: Column<any>[] = [
-  { header: 'Nº OS', cell: (r) => <span className="font-mono text-gold text-xs font-semibold">{r.numero}</span> },
-  { header: 'Abertura', cell: (r) => <span className="text-sm text-text-muted">{formatDate(new Date(r.dataAbertura))}</span> },
-  { header: 'Cliente', cell: (r) => r.cliente?.nome || '-' },
-  { header: 'Cidade', cell: (r) => r.cliente?.cidade || '-', className: 'text-text-muted text-sm' },
-  { header: 'Tipo', cell: (r) => <span className="text-sm">{tipoServicoLabel[r.tipoServico] ?? r.tipoServico}</span> },
-  { header: 'Técnico', cell: (r) => r.tecnico?.nome || '-', className: 'text-text-muted text-sm' },
-  { header: 'Agendada', cell: (r) => <span className="text-sm text-text-muted whitespace-nowrap">{r.dataAgendada ? formatDate(new Date(r.dataAgendada), { time: true }) : '—'}</span> },
-  { header: 'Status', cell: (r) => <StatusBadge value={r.status} type="os" /> },
-  {
-    header: 'Ações',
-    cell: (r) => (
-      <div className="flex items-center gap-1">
-        <Link to="/ordens-servico/$id/gerenciar" params={{ id: String(r.id) }}>
-          <DefaultButton size="sm" leftIcon={<Settings2 className="w-3.5 h-3.5" />} label="Gerenciar" className="h-7 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20" />
-        </Link>
-        <Link to="/ordens-servico/$id/editar" params={{ id: String(r.id) }}>
-          <DefaultButton size="sm" variant="ghost" leftIcon={<Pencil className="w-3.5 h-3.5" />} className="h-7 text-xs" />
-        </Link>
-      </div>
-    ),
-  },
-]
-
 function OrdensServicoPage() {
   const ordens = Route.useLoaderData()
+  const router = useRouter()
   const [filtros, setFiltros] = useState({ numero: '', cliente: '', tecnico: '', status: '', tipoServico: '' })
   const [page, setPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; numero: string } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      await deleteOrdemServico({ data: deleteTarget.id })
+      toast.success(`OS "${deleteTarget.numero}" excluída com sucesso!`)
+      setDeleteTarget(null)
+      router.invalidate()
+    } catch {
+      toast.error('Erro ao excluir OS')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const columns: Column<any>[] = [
+    { header: 'Nº OS', cell: (r) => <span className="font-mono text-gold text-xs font-semibold">{r.numero}</span> },
+    { header: 'Abertura', cell: (r) => <span className="text-sm text-text-muted">{formatDate(new Date(r.dataAbertura))}</span> },
+    { header: 'Cliente', cell: (r) => r.cliente?.nome || '-' },
+    { header: 'Cidade', cell: (r) => r.cliente?.cidade || '-', className: 'text-text-muted text-sm' },
+    { header: 'Tipo', cell: (r) => <span className="text-sm">{tipoServicoLabel[r.tipoServico] ?? r.tipoServico}</span> },
+    { header: 'Técnico', cell: (r) => r.tecnico?.nome || '-', className: 'text-text-muted text-sm' },
+    { header: 'Agendada', cell: (r) => <span className="text-sm text-text-muted whitespace-nowrap">{r.dataAgendada ? formatDate(new Date(r.dataAgendada), { time: true }) : '—'}</span> },
+    { header: 'Status', cell: (r) => <StatusBadge value={r.status} type="os" /> },
+    {
+      header: 'Ações',
+      cell: (r) => (
+        <div className="flex items-center gap-1">
+          <Link to="/ordens-servico/$id/gerenciar" params={{ id: String(r.id) }}>
+            <DefaultButton size="sm" leftIcon={<Settings2 className="w-3.5 h-3.5" />} label="Gerenciar" className="h-7 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20" />
+          </Link>
+          <Link to="/ordens-servico/$id/editar" params={{ id: String(r.id) }}>
+            <DefaultButton size="sm" variant="ghost" leftIcon={<Pencil className="w-3.5 h-3.5" />} label="Editar" className="h-7 text-xs" />
+          </Link>
+          <DefaultButton
+            size="sm"
+            variant="ghost"
+            leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+            label="Excluir"
+            className="h-7 text-xs text-danger hover:text-danger hover:bg-danger/10"
+            onClick={() => setDeleteTarget({ id: r.id, numero: r.numero })}
+          />
+        </div>
+      ),
+    },
+  ]
 
   const filtered = ordens.filter((o: any) =>
     (!filtros.numero || o.numero.toLowerCase().includes(filtros.numero.toLowerCase())) &&
@@ -120,6 +146,15 @@ function OrdensServicoPage() {
         data={filtered.slice((page - 1) * 10, page * 10)}
         emptyMessage="Nenhuma ordem de serviço encontrada"
         pagination={{ currentPage: page, totalPages: Math.ceil(filtered.length / 10), totalItems: filtered.length, onPageChange: setPage }}
+      />
+
+      <DeleteConfirmationModal
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        title="Excluir Ordem de Serviço"
+        description={`Tem certeza que deseja excluir a OS "${deleteTarget?.numero}"? Esta ação não pode ser desfeita.`}
       />
     </div>
   )

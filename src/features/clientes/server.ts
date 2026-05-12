@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { clienteSchema } from './schema'
 import { z } from 'zod'
 
+
 export const getClientes = createServerFn({ method: 'GET' }).handler(async () => {
   return await db.select().from(clientes)
 })
@@ -66,4 +67,11 @@ export const updateCliente = createServerFn({ method: 'POST' })
       .where(eq(clientes.id, data.id))
       .returning()
     return atualizado
+  })
+
+export const deleteCliente = createServerFn({ method: 'POST' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    await db.delete(clientes).where(eq(clientes.id, data))
+    return { success: true }
   })

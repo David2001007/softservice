@@ -27,8 +27,8 @@ export const Route = createFileRoute('/')({
 const GRADIENT = ['#2A0A5E', '#7D12FF', '#9333FF', '#C7A6FF', '#7D12FF', '#2A0A5E']
 
 const FEATURES = [
-  { icon: Zap,       title: 'Agilidade',    sub: 'Fluxos otimizados para execução rápida.' },
-  { icon: Shield,    title: 'Segurança',    sub: 'Dados protegidos com criptografia de ponta.' },
+  { icon: Zap, title: 'Agilidade', sub: 'Fluxos otimizados para execução rápida.' },
+  { icon: Shield, title: 'Segurança', sub: 'Dados protegidos com criptografia de ponta.' },
   { icon: BarChart3, title: 'Inteligência', sub: 'Relatórios dinâmicos para decisões precisas.' },
 ]
 
@@ -37,30 +37,26 @@ function LandingPage() {
 
   const floatingLinesProps = useMemo(
     () => ({
-      linesGradient:    GRADIENT,
-      enabledWaves:     ['top', 'middle', 'bottom'] as const,
-      // Original example uses [10,15,20]; we use [8,12,16] – full visual effect,
-      // still fine because canvas renders at 60% resolution (SCALE=0.6)
-      lineCount:        [8, 12, 16],
-      lineDistance:     [8, 6, 4],
-      // rotate uses the original small-float scale that feeds log(length(uv)+1)
-      topWavePosition:    { x: 10.0, y:  0.5, rotate: -0.4 },
-      middleWavePosition: { x:  5.0, y:  0.0, rotate:  0.2 },
-      bottomWavePosition: { x:  2.0, y: -0.7, rotate: -1.0 },
-      bendRadius:       5.0,
-      bendStrength:     -0.5,
-      animationSpeed:   0.8,
-      interactive:      true,
-      parallax:         true,
+      linesGradient: GRADIENT,
+      enabledWaves: ['top', 'middle', 'bottom'] as const,
+      lineCount: [8, 12, 16],
+      lineDistance: [8, 6, 4],
+      topWavePosition: { x: 10.0, y: 0.5, rotate: -0.4 },
+      middleWavePosition: { x: 5.0, y: 0.0, rotate: 0.2 },
+      bottomWavePosition: { x: 2.0, y: -0.7, rotate: -1.0 },
+      bendRadius: 5.0,
+      bendStrength: -0.5,
+      animationSpeed: 0.8,
+      interactive: true,
+      parallax: true,
       parallaxStrength: 0.15,
-      mixBlendMode:     'screen' as const,
+      mixBlendMode: 'screen' as const,
     }),
     [],
   )
 
   return (
     <div className="relative min-h-screen w-screen overflow-x-hidden bg-background font-sans">
-      {/* ── Background animation (lazy, non-blocking) ── */}
       <div className="fixed inset-0 z-0" aria-hidden="true">
         <Suspense fallback={null}>
           <FloatingLines {...floatingLinesProps} />
@@ -74,7 +70,7 @@ function LandingPage() {
       <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8 md:px-12 lg:px-16">
 
         {/* Logo */}
-        <div className="mb-10 flex flex-col items-center animate-float sm:mb-14">
+        {/* <div className="mb-10 flex flex-col items-center animate-float sm:mb-14">
           <div className="relative mb-5">
             <div className="absolute inset-0 animate-pulse rounded-full bg-primary/30 blur-[28px]" />
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-primary to-primary-hover shadow-2xl sm:h-20 sm:w-20">
@@ -91,7 +87,7 @@ function LandingPage() {
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold sm:text-xs">Gestão de OS</p>
             <div className="h-px w-6 bg-gold/50 sm:w-8" />
           </div>
-        </div>
+        </div> */}
 
         {/* Hero */}
         <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">

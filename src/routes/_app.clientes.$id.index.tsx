@@ -1,0 +1,99 @@
+import { createFileRoute, useNavigate, useParams, Link } from '@tanstack/react-router'
+import { useState } from 'react'
+import { ArrowLeft, Trash2, Pencil } from 'lucide-react'
+import { toast } from 'sonner'
+import { PageHeader } from '@/components/page-header'
+import { DefaultButton } from '@/components/default-button'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
+import { getCliente, deleteCliente } from '@/features/clientes/server'
+import { formatCPFCNPJ, formatPhone } from '@/lib/utils'
+
+export const Route = createFileRoute('/_app/clientes/$id/')({
+  loader: async ({ params }) => await getCliente({ data: Number(params.id) }),
+  component: VerClientePage,
+})
+
+function VerClientePage() {
+  const navigate = useNavigate()
+  const { id } = useParams({ from: '/_app/clientes/$id/' })
+  const cliente = Route.useLoaderData()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  if (!cliente) return null
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await deleteCliente({ data: Number(id) })
+      toast.success('Cliente excluído com sucesso!')
+      navigate({ to: '/clientes' })
+    } catch {
+      toast.error('Erro ao excluir cliente')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteModal(false)
+    }
+  }
+
+  const details = {
+    'Código': cliente.codigo,
+    'Nome / Razão Social': cliente.nome,
+    'CPF/CNPJ': formatCPFCNPJ(cliente.cpfCnpj),
+    'Telefone': formatPhone(cliente.telefone),
+    'Cidade': cliente.cidade,
+    'UF': cliente.uf,
+    'Logradouro': cliente.logradouro,
+    'Número': cliente.numero,
+    'Bairro': cliente.bairro,
+    'CEP': cliente.cep,
+    'Referência': cliente.referencia,
+    'Plano': cliente.plano,
+    'Situação do Contrato': cliente.situacaoContrato,
+    'Status': cliente.status,
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-5 fade-in">
+      <PageHeader
+        title={`Cliente #${id}`}
+        action={
+          <div className="flex gap-2">
+            <DefaultButton variant="ghost" leftIcon={<ArrowLeft className="w-4 h-4" />} label="Voltar" onClick={() => navigate({ to: '/clientes' })} />
+            <DefaultButton 
+              variant="outline" 
+              leftIcon={<Trash2 className="w-4 h-4" />} 
+              label="Excluir" 
+              className="text-danger border-danger/20 hover:bg-danger/10"
+              onClick={() => setShowDeleteModal(true)} 
+            />
+            <Link to="/clientes/$id/editar" params={{ id }}>
+              <DefaultButton 
+                label="Editar" 
+                leftIcon={<Pencil className="w-4 h-4" />}
+                className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20" 
+              />
+            </Link>
+          </div>
+        }
+      />
+      <div className="bg-surface border border-border rounded-xl p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+        {Object.entries(details).map(([k, v]) => (
+          <div key={k}>
+            <p className="text-xs text-text-muted font-medium uppercase tracking-wider">{k}</p>
+            <p className="text-sm text-text mt-0.5">{v || '-'}</p>
+          </div>
+        ))}
+      </div>
+
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        title="Excluir Cliente"
+        description={`Tem certeza que deseja excluir o cliente "${cliente.nome}"? Esta ação não pode ser desfeita.`}
+      />
+    </div>
+  )
+}

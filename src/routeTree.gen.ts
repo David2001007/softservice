@@ -20,14 +20,14 @@ import { Route as AppClientesIndexRouteImport } from './routes/_app.clientes.ind
 import { Route as AppAtendentesIndexRouteImport } from './routes/_app.atendentes.index'
 import { Route as AppAgendaIndexRouteImport } from './routes/_app.agenda.index'
 import { Route as AppTecnicosNovoRouteImport } from './routes/_app.tecnicos.novo'
-import { Route as AppTecnicosIdRouteImport } from './routes/_app.tecnicos.$id'
 import { Route as AppOrdensServicoNovaRouteImport } from './routes/_app.ordens-servico.nova'
 import { Route as AppMateriaisNovoRouteImport } from './routes/_app.materiais.novo'
-import { Route as AppMateriaisIdRouteImport } from './routes/_app.materiais.$id'
 import { Route as AppClientesNovoRouteImport } from './routes/_app.clientes.novo'
-import { Route as AppClientesIdRouteImport } from './routes/_app.clientes.$id'
 import { Route as AppAtendentesNovoRouteImport } from './routes/_app.atendentes.novo'
-import { Route as AppAtendentesIdRouteImport } from './routes/_app.atendentes.$id'
+import { Route as AppTecnicosIdIndexRouteImport } from './routes/_app.tecnicos.$id.index'
+import { Route as AppMateriaisIdIndexRouteImport } from './routes/_app.materiais.$id.index'
+import { Route as AppClientesIdIndexRouteImport } from './routes/_app.clientes.$id.index'
+import { Route as AppAtendentesIdIndexRouteImport } from './routes/_app.atendentes.$id.index'
 import { Route as AppTecnicosIdEditarRouteImport } from './routes/_app.tecnicos.$id.editar'
 import { Route as AppOrdensServicoIdGerenciarRouteImport } from './routes/_app.ordens-servico.$id.gerenciar'
 import { Route as AppOrdensServicoIdEditarRouteImport } from './routes/_app.ordens-servico.$id.editar'
@@ -89,11 +89,6 @@ const AppTecnicosNovoRoute = AppTecnicosNovoRouteImport.update({
   path: '/tecnicos/novo',
   getParentRoute: () => AppRoute,
 } as any)
-const AppTecnicosIdRoute = AppTecnicosIdRouteImport.update({
-  id: '/tecnicos/$id',
-  path: '/tecnicos/$id',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppOrdensServicoNovaRoute = AppOrdensServicoNovaRouteImport.update({
   id: '/ordens-servico/nova',
   path: '/ordens-servico/nova',
@@ -104,19 +99,9 @@ const AppMateriaisNovoRoute = AppMateriaisNovoRouteImport.update({
   path: '/materiais/novo',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMateriaisIdRoute = AppMateriaisIdRouteImport.update({
-  id: '/materiais/$id',
-  path: '/materiais/$id',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppClientesNovoRoute = AppClientesNovoRouteImport.update({
   id: '/clientes/novo',
   path: '/clientes/novo',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppClientesIdRoute = AppClientesIdRouteImport.update({
-  id: '/clientes/$id',
-  path: '/clientes/$id',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAtendentesNovoRoute = AppAtendentesNovoRouteImport.update({
@@ -124,15 +109,30 @@ const AppAtendentesNovoRoute = AppAtendentesNovoRouteImport.update({
   path: '/atendentes/novo',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAtendentesIdRoute = AppAtendentesIdRouteImport.update({
-  id: '/atendentes/$id',
-  path: '/atendentes/$id',
+const AppTecnicosIdIndexRoute = AppTecnicosIdIndexRouteImport.update({
+  id: '/tecnicos/$id/',
+  path: '/tecnicos/$id/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMateriaisIdIndexRoute = AppMateriaisIdIndexRouteImport.update({
+  id: '/materiais/$id/',
+  path: '/materiais/$id/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClientesIdIndexRoute = AppClientesIdIndexRouteImport.update({
+  id: '/clientes/$id/',
+  path: '/clientes/$id/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAtendentesIdIndexRoute = AppAtendentesIdIndexRouteImport.update({
+  id: '/atendentes/$id/',
+  path: '/atendentes/$id/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTecnicosIdEditarRoute = AppTecnicosIdEditarRouteImport.update({
-  id: '/editar',
-  path: '/editar',
-  getParentRoute: () => AppTecnicosIdRoute,
+  id: '/tecnicos/$id/editar',
+  path: '/tecnicos/$id/editar',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppOrdensServicoIdGerenciarRoute =
   AppOrdensServicoIdGerenciarRouteImport.update({
@@ -147,33 +147,29 @@ const AppOrdensServicoIdEditarRoute =
     getParentRoute: () => AppRoute,
   } as any)
 const AppMateriaisIdEditarRoute = AppMateriaisIdEditarRouteImport.update({
-  id: '/editar',
-  path: '/editar',
-  getParentRoute: () => AppMateriaisIdRoute,
+  id: '/materiais/$id/editar',
+  path: '/materiais/$id/editar',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppClientesIdEditarRoute = AppClientesIdEditarRouteImport.update({
-  id: '/editar',
-  path: '/editar',
-  getParentRoute: () => AppClientesIdRoute,
+  id: '/clientes/$id/editar',
+  path: '/clientes/$id/editar',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAtendentesIdEditarRoute = AppAtendentesIdEditarRouteImport.update({
-  id: '/editar',
-  path: '/editar',
-  getParentRoute: () => AppAtendentesIdRoute,
+  id: '/atendentes/$id/editar',
+  path: '/atendentes/$id/editar',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AppDashboardRoute
-  '/atendentes/$id': typeof AppAtendentesIdRouteWithChildren
   '/atendentes/novo': typeof AppAtendentesNovoRoute
-  '/clientes/$id': typeof AppClientesIdRouteWithChildren
   '/clientes/novo': typeof AppClientesNovoRoute
-  '/materiais/$id': typeof AppMateriaisIdRouteWithChildren
   '/materiais/novo': typeof AppMateriaisNovoRoute
   '/ordens-servico/nova': typeof AppOrdensServicoNovaRoute
-  '/tecnicos/$id': typeof AppTecnicosIdRouteWithChildren
   '/tecnicos/novo': typeof AppTecnicosNovoRoute
   '/agenda/': typeof AppAgendaIndexRoute
   '/atendentes/': typeof AppAtendentesIndexRoute
@@ -187,19 +183,19 @@ export interface FileRoutesByFullPath {
   '/ordens-servico/$id/editar': typeof AppOrdensServicoIdEditarRoute
   '/ordens-servico/$id/gerenciar': typeof AppOrdensServicoIdGerenciarRoute
   '/tecnicos/$id/editar': typeof AppTecnicosIdEditarRoute
+  '/atendentes/$id/': typeof AppAtendentesIdIndexRoute
+  '/clientes/$id/': typeof AppClientesIdIndexRoute
+  '/materiais/$id/': typeof AppMateriaisIdIndexRoute
+  '/tecnicos/$id/': typeof AppTecnicosIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AppDashboardRoute
-  '/atendentes/$id': typeof AppAtendentesIdRouteWithChildren
   '/atendentes/novo': typeof AppAtendentesNovoRoute
-  '/clientes/$id': typeof AppClientesIdRouteWithChildren
   '/clientes/novo': typeof AppClientesNovoRoute
-  '/materiais/$id': typeof AppMateriaisIdRouteWithChildren
   '/materiais/novo': typeof AppMateriaisNovoRoute
   '/ordens-servico/nova': typeof AppOrdensServicoNovaRoute
-  '/tecnicos/$id': typeof AppTecnicosIdRouteWithChildren
   '/tecnicos/novo': typeof AppTecnicosNovoRoute
   '/agenda': typeof AppAgendaIndexRoute
   '/atendentes': typeof AppAtendentesIndexRoute
@@ -213,6 +209,10 @@ export interface FileRoutesByTo {
   '/ordens-servico/$id/editar': typeof AppOrdensServicoIdEditarRoute
   '/ordens-servico/$id/gerenciar': typeof AppOrdensServicoIdGerenciarRoute
   '/tecnicos/$id/editar': typeof AppTecnicosIdEditarRoute
+  '/atendentes/$id': typeof AppAtendentesIdIndexRoute
+  '/clientes/$id': typeof AppClientesIdIndexRoute
+  '/materiais/$id': typeof AppMateriaisIdIndexRoute
+  '/tecnicos/$id': typeof AppTecnicosIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -220,14 +220,10 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/atendentes/$id': typeof AppAtendentesIdRouteWithChildren
   '/_app/atendentes/novo': typeof AppAtendentesNovoRoute
-  '/_app/clientes/$id': typeof AppClientesIdRouteWithChildren
   '/_app/clientes/novo': typeof AppClientesNovoRoute
-  '/_app/materiais/$id': typeof AppMateriaisIdRouteWithChildren
   '/_app/materiais/novo': typeof AppMateriaisNovoRoute
   '/_app/ordens-servico/nova': typeof AppOrdensServicoNovaRoute
-  '/_app/tecnicos/$id': typeof AppTecnicosIdRouteWithChildren
   '/_app/tecnicos/novo': typeof AppTecnicosNovoRoute
   '/_app/agenda/': typeof AppAgendaIndexRoute
   '/_app/atendentes/': typeof AppAtendentesIndexRoute
@@ -241,6 +237,10 @@ export interface FileRoutesById {
   '/_app/ordens-servico/$id/editar': typeof AppOrdensServicoIdEditarRoute
   '/_app/ordens-servico/$id/gerenciar': typeof AppOrdensServicoIdGerenciarRoute
   '/_app/tecnicos/$id/editar': typeof AppTecnicosIdEditarRoute
+  '/_app/atendentes/$id/': typeof AppAtendentesIdIndexRoute
+  '/_app/clientes/$id/': typeof AppClientesIdIndexRoute
+  '/_app/materiais/$id/': typeof AppMateriaisIdIndexRoute
+  '/_app/tecnicos/$id/': typeof AppTecnicosIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -248,14 +248,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
-    | '/atendentes/$id'
     | '/atendentes/novo'
-    | '/clientes/$id'
     | '/clientes/novo'
-    | '/materiais/$id'
     | '/materiais/novo'
     | '/ordens-servico/nova'
-    | '/tecnicos/$id'
     | '/tecnicos/novo'
     | '/agenda/'
     | '/atendentes/'
@@ -269,19 +265,19 @@ export interface FileRouteTypes {
     | '/ordens-servico/$id/editar'
     | '/ordens-servico/$id/gerenciar'
     | '/tecnicos/$id/editar'
+    | '/atendentes/$id/'
+    | '/clientes/$id/'
+    | '/materiais/$id/'
+    | '/tecnicos/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/dashboard'
-    | '/atendentes/$id'
     | '/atendentes/novo'
-    | '/clientes/$id'
     | '/clientes/novo'
-    | '/materiais/$id'
     | '/materiais/novo'
     | '/ordens-servico/nova'
-    | '/tecnicos/$id'
     | '/tecnicos/novo'
     | '/agenda'
     | '/atendentes'
@@ -295,20 +291,20 @@ export interface FileRouteTypes {
     | '/ordens-servico/$id/editar'
     | '/ordens-servico/$id/gerenciar'
     | '/tecnicos/$id/editar'
+    | '/atendentes/$id'
+    | '/clientes/$id'
+    | '/materiais/$id'
+    | '/tecnicos/$id'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
     | '/_app/dashboard'
-    | '/_app/atendentes/$id'
     | '/_app/atendentes/novo'
-    | '/_app/clientes/$id'
     | '/_app/clientes/novo'
-    | '/_app/materiais/$id'
     | '/_app/materiais/novo'
     | '/_app/ordens-servico/nova'
-    | '/_app/tecnicos/$id'
     | '/_app/tecnicos/novo'
     | '/_app/agenda/'
     | '/_app/atendentes/'
@@ -322,6 +318,10 @@ export interface FileRouteTypes {
     | '/_app/ordens-servico/$id/editar'
     | '/_app/ordens-servico/$id/gerenciar'
     | '/_app/tecnicos/$id/editar'
+    | '/_app/atendentes/$id/'
+    | '/_app/clientes/$id/'
+    | '/_app/materiais/$id/'
+    | '/_app/tecnicos/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -409,13 +409,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTecnicosNovoRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/tecnicos/$id': {
-      id: '/_app/tecnicos/$id'
-      path: '/tecnicos/$id'
-      fullPath: '/tecnicos/$id'
-      preLoaderRoute: typeof AppTecnicosIdRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/ordens-servico/nova': {
       id: '/_app/ordens-servico/nova'
       path: '/ordens-servico/nova'
@@ -430,25 +423,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMateriaisNovoRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/materiais/$id': {
-      id: '/_app/materiais/$id'
-      path: '/materiais/$id'
-      fullPath: '/materiais/$id'
-      preLoaderRoute: typeof AppMateriaisIdRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/clientes/novo': {
       id: '/_app/clientes/novo'
       path: '/clientes/novo'
       fullPath: '/clientes/novo'
       preLoaderRoute: typeof AppClientesNovoRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/clientes/$id': {
-      id: '/_app/clientes/$id'
-      path: '/clientes/$id'
-      fullPath: '/clientes/$id'
-      preLoaderRoute: typeof AppClientesIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/atendentes/novo': {
@@ -458,19 +437,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAtendentesNovoRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/atendentes/$id': {
-      id: '/_app/atendentes/$id'
+    '/_app/tecnicos/$id/': {
+      id: '/_app/tecnicos/$id/'
+      path: '/tecnicos/$id'
+      fullPath: '/tecnicos/$id/'
+      preLoaderRoute: typeof AppTecnicosIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/materiais/$id/': {
+      id: '/_app/materiais/$id/'
+      path: '/materiais/$id'
+      fullPath: '/materiais/$id/'
+      preLoaderRoute: typeof AppMateriaisIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clientes/$id/': {
+      id: '/_app/clientes/$id/'
+      path: '/clientes/$id'
+      fullPath: '/clientes/$id/'
+      preLoaderRoute: typeof AppClientesIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/atendentes/$id/': {
+      id: '/_app/atendentes/$id/'
       path: '/atendentes/$id'
-      fullPath: '/atendentes/$id'
-      preLoaderRoute: typeof AppAtendentesIdRouteImport
+      fullPath: '/atendentes/$id/'
+      preLoaderRoute: typeof AppAtendentesIdIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tecnicos/$id/editar': {
       id: '/_app/tecnicos/$id/editar'
-      path: '/editar'
+      path: '/tecnicos/$id/editar'
       fullPath: '/tecnicos/$id/editar'
       preLoaderRoute: typeof AppTecnicosIdEditarRouteImport
-      parentRoute: typeof AppTecnicosIdRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/ordens-servico/$id/gerenciar': {
       id: '/_app/ordens-servico/$id/gerenciar'
@@ -488,86 +488,34 @@ declare module '@tanstack/react-router' {
     }
     '/_app/materiais/$id/editar': {
       id: '/_app/materiais/$id/editar'
-      path: '/editar'
+      path: '/materiais/$id/editar'
       fullPath: '/materiais/$id/editar'
       preLoaderRoute: typeof AppMateriaisIdEditarRouteImport
-      parentRoute: typeof AppMateriaisIdRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/clientes/$id/editar': {
       id: '/_app/clientes/$id/editar'
-      path: '/editar'
+      path: '/clientes/$id/editar'
       fullPath: '/clientes/$id/editar'
       preLoaderRoute: typeof AppClientesIdEditarRouteImport
-      parentRoute: typeof AppClientesIdRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/atendentes/$id/editar': {
       id: '/_app/atendentes/$id/editar'
-      path: '/editar'
+      path: '/atendentes/$id/editar'
       fullPath: '/atendentes/$id/editar'
       preLoaderRoute: typeof AppAtendentesIdEditarRouteImport
-      parentRoute: typeof AppAtendentesIdRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
 
-interface AppAtendentesIdRouteChildren {
-  AppAtendentesIdEditarRoute: typeof AppAtendentesIdEditarRoute
-}
-
-const AppAtendentesIdRouteChildren: AppAtendentesIdRouteChildren = {
-  AppAtendentesIdEditarRoute: AppAtendentesIdEditarRoute,
-}
-
-const AppAtendentesIdRouteWithChildren = AppAtendentesIdRoute._addFileChildren(
-  AppAtendentesIdRouteChildren,
-)
-
-interface AppClientesIdRouteChildren {
-  AppClientesIdEditarRoute: typeof AppClientesIdEditarRoute
-}
-
-const AppClientesIdRouteChildren: AppClientesIdRouteChildren = {
-  AppClientesIdEditarRoute: AppClientesIdEditarRoute,
-}
-
-const AppClientesIdRouteWithChildren = AppClientesIdRoute._addFileChildren(
-  AppClientesIdRouteChildren,
-)
-
-interface AppMateriaisIdRouteChildren {
-  AppMateriaisIdEditarRoute: typeof AppMateriaisIdEditarRoute
-}
-
-const AppMateriaisIdRouteChildren: AppMateriaisIdRouteChildren = {
-  AppMateriaisIdEditarRoute: AppMateriaisIdEditarRoute,
-}
-
-const AppMateriaisIdRouteWithChildren = AppMateriaisIdRoute._addFileChildren(
-  AppMateriaisIdRouteChildren,
-)
-
-interface AppTecnicosIdRouteChildren {
-  AppTecnicosIdEditarRoute: typeof AppTecnicosIdEditarRoute
-}
-
-const AppTecnicosIdRouteChildren: AppTecnicosIdRouteChildren = {
-  AppTecnicosIdEditarRoute: AppTecnicosIdEditarRoute,
-}
-
-const AppTecnicosIdRouteWithChildren = AppTecnicosIdRoute._addFileChildren(
-  AppTecnicosIdRouteChildren,
-)
-
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
-  AppAtendentesIdRoute: typeof AppAtendentesIdRouteWithChildren
   AppAtendentesNovoRoute: typeof AppAtendentesNovoRoute
-  AppClientesIdRoute: typeof AppClientesIdRouteWithChildren
   AppClientesNovoRoute: typeof AppClientesNovoRoute
-  AppMateriaisIdRoute: typeof AppMateriaisIdRouteWithChildren
   AppMateriaisNovoRoute: typeof AppMateriaisNovoRoute
   AppOrdensServicoNovaRoute: typeof AppOrdensServicoNovaRoute
-  AppTecnicosIdRoute: typeof AppTecnicosIdRouteWithChildren
   AppTecnicosNovoRoute: typeof AppTecnicosNovoRoute
   AppAgendaIndexRoute: typeof AppAgendaIndexRoute
   AppAtendentesIndexRoute: typeof AppAtendentesIndexRoute
@@ -575,20 +523,24 @@ interface AppRouteChildren {
   AppMateriaisIndexRoute: typeof AppMateriaisIndexRoute
   AppOrdensServicoIndexRoute: typeof AppOrdensServicoIndexRoute
   AppTecnicosIndexRoute: typeof AppTecnicosIndexRoute
+  AppAtendentesIdEditarRoute: typeof AppAtendentesIdEditarRoute
+  AppClientesIdEditarRoute: typeof AppClientesIdEditarRoute
+  AppMateriaisIdEditarRoute: typeof AppMateriaisIdEditarRoute
   AppOrdensServicoIdEditarRoute: typeof AppOrdensServicoIdEditarRoute
   AppOrdensServicoIdGerenciarRoute: typeof AppOrdensServicoIdGerenciarRoute
+  AppTecnicosIdEditarRoute: typeof AppTecnicosIdEditarRoute
+  AppAtendentesIdIndexRoute: typeof AppAtendentesIdIndexRoute
+  AppClientesIdIndexRoute: typeof AppClientesIdIndexRoute
+  AppMateriaisIdIndexRoute: typeof AppMateriaisIdIndexRoute
+  AppTecnicosIdIndexRoute: typeof AppTecnicosIdIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
-  AppAtendentesIdRoute: AppAtendentesIdRouteWithChildren,
   AppAtendentesNovoRoute: AppAtendentesNovoRoute,
-  AppClientesIdRoute: AppClientesIdRouteWithChildren,
   AppClientesNovoRoute: AppClientesNovoRoute,
-  AppMateriaisIdRoute: AppMateriaisIdRouteWithChildren,
   AppMateriaisNovoRoute: AppMateriaisNovoRoute,
   AppOrdensServicoNovaRoute: AppOrdensServicoNovaRoute,
-  AppTecnicosIdRoute: AppTecnicosIdRouteWithChildren,
   AppTecnicosNovoRoute: AppTecnicosNovoRoute,
   AppAgendaIndexRoute: AppAgendaIndexRoute,
   AppAtendentesIndexRoute: AppAtendentesIndexRoute,
@@ -596,8 +548,16 @@ const AppRouteChildren: AppRouteChildren = {
   AppMateriaisIndexRoute: AppMateriaisIndexRoute,
   AppOrdensServicoIndexRoute: AppOrdensServicoIndexRoute,
   AppTecnicosIndexRoute: AppTecnicosIndexRoute,
+  AppAtendentesIdEditarRoute: AppAtendentesIdEditarRoute,
+  AppClientesIdEditarRoute: AppClientesIdEditarRoute,
+  AppMateriaisIdEditarRoute: AppMateriaisIdEditarRoute,
   AppOrdensServicoIdEditarRoute: AppOrdensServicoIdEditarRoute,
   AppOrdensServicoIdGerenciarRoute: AppOrdensServicoIdGerenciarRoute,
+  AppTecnicosIdEditarRoute: AppTecnicosIdEditarRoute,
+  AppAtendentesIdIndexRoute: AppAtendentesIdIndexRoute,
+  AppClientesIdIndexRoute: AppClientesIdIndexRoute,
+  AppMateriaisIdIndexRoute: AppMateriaisIdIndexRoute,
+  AppTecnicosIdIndexRoute: AppTecnicosIdIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -1,58 +1,82 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Plus, Eye, Pencil } from 'lucide-react'
+import { Plus, Eye, Pencil, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
 import { DefaultTable, type Column } from '@/components/default-table'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { formatPhone } from '@/lib/utils'
 
-import { getTecnicos } from '@/features/tecnicos/server'
+import { getTecnicos, deleteTecnico } from '@/features/tecnicos/server'
 
 export const Route = createFileRoute('/_app/tecnicos/')({
   loader: async () => await getTecnicos(),
   component: TecnicosPage,
 })
 
-
-
-
-
-const columns: Column<any>[] = [
-  { header: 'Código', accessorKey: 'codigo', className: 'font-mono text-gold text-xs' },
-  { header: 'Nome', accessorKey: 'nome' },
-  {
-    header: 'Tipo',
-    cell: (r) => (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${r.tipo === 'interno' ? 'bg-info/15 text-info border-info/30' : 'bg-gold/15 text-gold border-gold/30'}`}>
-        {r.tipo === 'interno' ? 'Interno' : 'Terceiro'}
-      </span>
-    ),
-  },
-  { header: 'Empresa', accessorKey: 'empresa', className: 'text-text-muted text-sm' },
-  { header: 'Telefone', cell: (r) => formatPhone(r.telefone) },
-  { header: 'Região', accessorKey: 'regiao', className: 'text-sm text-text-muted' },
-  { header: 'Status', cell: (r) => <StatusBadge value={r.status} type="cliente" /> },
-  {
-    header: 'Ações',
-    cell: (r) => (
-      <div className="flex items-center gap-1">
-        <Link to="/tecnicos/$id" params={{ id: String(r.id) }}>
-          <DefaultButton size="sm" variant="ghost" leftIcon={<Eye className="w-3.5 h-3.5" />} label="Ver" className="h-7 text-xs" />
-        </Link>
-        <Link to="/tecnicos/$id/editar" params={{ id: String(r.id) }}>
-          <DefaultButton size="sm" variant="ghost" leftIcon={<Pencil className="w-3.5 h-3.5" />} label="Editar" className="h-7 text-xs" />
-        </Link>
-      </div>
-    ),
-  },
-]
-
 function TecnicosPage() {
   const tecnicos = Route.useLoaderData()
+  const router = useRouter()
   const [filtros, setFiltros] = useState({ nome: '', tipo: '', regiao: '', status: '' })
   const [page, setPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; nome: string } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      await deleteTecnico({ data: deleteTarget.id })
+      toast.success(`Técnico "${deleteTarget.nome}" excluído com sucesso!`)
+      setDeleteTarget(null)
+      router.invalidate()
+    } catch {
+      toast.error('Erro ao excluir técnico')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const columns: Column<any>[] = [
+    { header: 'Código', accessorKey: 'codigo', className: 'font-mono text-gold text-xs' },
+    { header: 'Nome', accessorKey: 'nome' },
+    {
+      header: 'Tipo',
+      cell: (r) => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${r.tipo === 'interno' ? 'bg-info/15 text-info border-info/30' : 'bg-gold/15 text-gold border-gold/30'}`}>
+          {r.tipo === 'interno' ? 'Interno' : 'Terceiro'}
+        </span>
+      ),
+    },
+    { header: 'Empresa', accessorKey: 'empresa', className: 'text-text-muted text-sm' },
+    { header: 'Telefone', cell: (r) => formatPhone(r.telefone) },
+    { header: 'Região', accessorKey: 'regiao', className: 'text-sm text-text-muted' },
+    { header: 'Status', cell: (r) => <StatusBadge value={r.status} type="cliente" /> },
+    {
+      header: 'Ações',
+      cell: (r) => (
+        <div className="flex items-center gap-1">
+          <Link to="/tecnicos/$id" params={{ id: String(r.id) }}>
+            <DefaultButton size="sm" variant="ghost" leftIcon={<Eye className="w-3.5 h-3.5" />} label="Ver" className="h-7 text-xs" />
+          </Link>
+          <Link to="/tecnicos/$id/editar" params={{ id: String(r.id) }}>
+            <DefaultButton size="sm" variant="ghost" leftIcon={<Pencil className="w-3.5 h-3.5" />} label="Editar" className="h-7 text-xs" />
+          </Link>
+          <DefaultButton
+            size="sm"
+            variant="ghost"
+            leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+            label="Excluir"
+            className="h-7 text-xs text-danger hover:text-danger hover:bg-danger/10"
+            onClick={() => setDeleteTarget({ id: r.id, nome: r.nome })}
+          />
+        </div>
+      ),
+    },
+  ]
 
   const filtered = (tecnicos as any).filter((t: any) =>
     (!filtros.nome || t.nome.toLowerCase().includes(filtros.nome.toLowerCase())) &&
@@ -107,6 +131,15 @@ function TecnicosPage() {
         data={filtered.slice((page - 1) * 10, page * 10)}
         emptyMessage="Nenhum técnico encontrado"
         pagination={{ currentPage: page, totalPages: Math.ceil(filtered.length / 10), totalItems: filtered.length, onPageChange: setPage, itemsPerPage: 10 }}
+      />
+
+      <DeleteConfirmationModal
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        title="Excluir Técnico"
+        description={`Tem certeza que deseja excluir o técnico "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}
       />
     </div>
   )
