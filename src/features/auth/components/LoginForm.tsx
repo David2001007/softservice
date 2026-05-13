@@ -38,7 +38,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         id: response.id, 
         nome: response.nome, 
         username: response.username, 
-        role: response.role as any 
+        role: response.role as any,
+        type: response.type
       })
 
       toast.success('Login realizado com sucesso!')

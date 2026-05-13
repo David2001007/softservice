@@ -18,3 +18,14 @@ export const userSchema = z.object({
 })
 
 export type UserInput = z.input<typeof userSchema>
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Senha atual obrigatória'),
+  newPassword: z.string().min(6, 'Nova senha deve ter ao menos 6 caracteres'),
+  confirmPassword: z.string().min(1, 'Confirmação obrigatória'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
+})
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
