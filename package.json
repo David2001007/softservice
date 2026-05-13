@@ -18,7 +18,7 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
-    "db:setup": "pnpm db:generate && pnpm db:push"
+    "db:setup": "pnpm db:generate && pnpm db:migrate"
   },
   "dependencies": {
     "@faker-js/faker": "^10.3.0",
@@ -34,7 +34,9 @@
     "@tanstack/react-start": "latest",
     "@tanstack/react-table": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "@types/bcryptjs": "^3.0.0",
     "@types/three": "^0.184.0",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

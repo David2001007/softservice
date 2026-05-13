@@ -80,7 +80,12 @@ function NovoAtendentePage() {
               </select>
             </Field>
             <Field label="Senha" required error={errors.password?.message}>
-              <input {...register('password')} type="password" placeholder="Mínimo 6 caracteres" className={inputCls} />
+              <input 
+                {...register('password', { required: 'Senha é obrigatória para novos cadastros' })} 
+                type="password" 
+                placeholder="Mínimo 6 caracteres" 
+                className={inputCls} 
+              />
             </Field>
           </div>
         </div>

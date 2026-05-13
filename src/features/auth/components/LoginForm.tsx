@@ -18,6 +18,8 @@ interface LoginFormProps {
   onSuccess?: () => void
 }
 
+import { login } from '@/features/auth/server'
+
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const { setUser } = useAuthStore()
   const router = useRouter()
@@ -25,23 +27,29 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { identifier: '', password: '' },
   })
 
   const onSubmit = async (data: LoginInput) => {
     try {
-      if (data.email === 'admin@admin.com' && data.password === 'admin123') {
-        setUser({ id: 1, nome: 'Administrador', username: 'admin', role: 'admin' })
-        toast.success('Login realizado com sucesso!')
-        if (onSuccess) {
-          onSuccess()
-        }
-        await router.navigate({ to: '/dashboard' })
-      } else {
-        toast.error('E-mail ou senha inválidos')
+      const response = await login({ data })
+      
+      setUser({ 
+        id: response.id, 
+        nome: response.nome, 
+        username: response.username, 
+        role: response.role as any 
+      })
+
+      toast.success('Login realizado com sucesso!')
+      
+      if (onSuccess) {
+        onSuccess()
       }
-    } catch {
-      toast.error('Erro ao realizar login')
+      
+      await router.navigate({ to: '/dashboard' })
+    } catch (error: any) {
+      toast.error(error.message || 'E-mail/Usuário ou senha inválidos')
     }
   }
 
@@ -78,20 +86,20 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
           {/* Form */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Email */}
+            {/* Identifier (Email/User) */}
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">E-mail</Label>
+              <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">E-mail ou Usuário</Label>
               <div className="relative group">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
                 <Input
-                  {...form.register('email')}
-                  type="email"
-                  placeholder="seu@email.com"
+                  {...form.register('identifier')}
+                  type="text"
+                  placeholder="seu@email.com ou usuário"
                   className="h-14 pl-12 rounded-2xl bg-background/50 border-white/5 text-text placeholder:text-text-muted/50 focus:border-primary/50 focus:ring-primary/10 transition-all"
                 />
               </div>
-              {form.formState.errors.email && (
-                <p className="text-xs text-danger ml-1">{form.formState.errors.email.message}</p>
+              {form.formState.errors.identifier && (
+                <p className="text-xs text-danger ml-1">{form.formState.errors.identifier.message}</p>
               )}
             </div>
 

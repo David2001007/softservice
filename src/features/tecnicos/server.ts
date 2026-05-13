@@ -16,9 +16,25 @@ export const getTecnico = createServerFn({ method: 'GET' })
     return tecnico
   })
 
+import bcrypt from 'bcryptjs'
+import { or } from 'drizzle-orm'
+
 export const createTecnico = createServerFn({ method: 'POST' })
   .inputValidator(tecnicoSchema)
   .handler(async ({ data }) => {
+    // Validação de unicidade
+    const existing = await db
+      .select()
+      .from(tecnicos)
+      .where(or(eq(tecnicos.email, data.email), eq(tecnicos.username, data.username)))
+      .then((res) => res[0])
+
+    if (existing) {
+      throw new Error('E-mail ou Usuário já cadastrado')
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10)
+
     const [novo] = await db
       .insert(tecnicos)
       .values({
@@ -28,12 +44,12 @@ export const createTecnico = createServerFn({ method: 'POST' })
         empresa: data.empresa,
         cnpj: data.cnpj,
         telefone: data.telefone,
-        email: data.email || null,
+        email: data.email,
         regiao: data.regiao,
         especialidade: data.especialidade,
         perfil: data.perfil,
         username: data.username,
-        passwordHash: data.password || 'default', // Em um cenário real, faça hash!
+        passwordHash: hashedPassword,
         ativo: data.ativo,
       })
       .returning()
@@ -43,21 +59,43 @@ export const createTecnico = createServerFn({ method: 'POST' })
 export const updateTecnico = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.number(), data: tecnicoSchema }))
   .handler(async ({ data }) => {
+    // Validação de unicidade (excluindo o próprio registro)
+    const existing = await db
+      .select()
+      .from(tecnicos)
+      .where(
+        or(
+          eq(tecnicos.email, data.data.email),
+          eq(tecnicos.username, data.data.username)
+        )
+      )
+      .then((res) => res.filter((t) => t.id !== data.id)[0])
+
+    if (existing) {
+      throw new Error('E-mail ou Usuário já cadastrado por outro técnico')
+    }
+
+    const setValues: any = {
+      nome: data.data.nome,
+      tipo: data.data.tipo,
+      empresa: data.data.empresa,
+      cnpj: data.data.cnpj,
+      telefone: data.data.telefone,
+      email: data.data.email,
+      regiao: data.data.regiao,
+      especialidade: data.data.especialidade,
+      perfil: data.data.perfil,
+      username: data.data.username,
+      ativo: data.data.ativo,
+    }
+
+    if (data.data.password) {
+      setValues.passwordHash = await bcrypt.hash(data.data.password, 10)
+    }
+
     const [atualizado] = await db
       .update(tecnicos)
-      .set({
-        nome: data.data.nome,
-        tipo: data.data.tipo,
-        empresa: data.data.empresa,
-        cnpj: data.data.cnpj,
-        telefone: data.data.telefone,
-        email: data.data.email || null,
-        regiao: data.data.regiao,
-        especialidade: data.data.especialidade,
-        perfil: data.data.perfil,
-        username: data.data.username,
-        ativo: data.data.ativo,
-      })
+      .set(setValues)
       .where(eq(tecnicos.id, data.id))
       .returning()
     return atualizado

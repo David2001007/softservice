@@ -92,7 +92,7 @@ export const tecnicos = pgTable('tecnicos', {
   empresa: text('empresa'),
   cnpj: text('cnpj'),
   telefone: text('telefone').notNull(),
-  email: text('email'),
+  email: text('email').notNull().unique(),
   regiao: text('regiao'),
   especialidade: text('especialidade'),
   perfil: tecnicoPerfilEnum('perfil').notNull().default('tecnico'),

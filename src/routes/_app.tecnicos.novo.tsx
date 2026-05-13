@@ -87,7 +87,7 @@ function NovoTecnicoPage() {
             <Field label="Telefone" required error={errors.telefone?.message}>
               <input {...register('telefone')} placeholder="(44) 99999-0000" className={inputCls} />
             </Field>
-            <Field label="E-mail" error={errors.email?.message}>
+            <Field label="E-mail" required error={errors.email?.message}>
               <input {...register('email')} type="email" placeholder="email@exemplo.com" className={inputCls} />
             </Field>
             <Field label="Região de Atendimento">
@@ -117,7 +117,12 @@ function NovoTecnicoPage() {
               <input {...register('username')} placeholder="usuario.login" className={inputCls} />
             </Field>
             <Field label="Senha" required error={errors.password?.message}>
-              <input {...register('password')} type="password" placeholder="Mínimo 6 caracteres" className={inputCls} />
+              <input 
+                {...register('password', { required: 'Senha é obrigatória para novos cadastros' })} 
+                type="password" 
+                placeholder="Mínimo 6 caracteres" 
+                className={inputCls} 
+              />
             </Field>
           </div>
         </FormSection>
