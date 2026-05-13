@@ -199,3 +199,12 @@ export const osHistoricoRelations = relations(osHistorico, ({ one }) => ({
   os: one(ordensServico, { fields: [osHistorico.osId], references: [ordensServico.id] }),
   usuario: one(users, { fields: [osHistorico.usuarioId], references: [users.id] }),
 }))
+
+export const passwordResetCodes = pgTable('password_reset_codes', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull(),
+  code: text('code').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  used: boolean('used').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+})

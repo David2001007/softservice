@@ -122,12 +122,13 @@ function LandingPage() {
                 <LoginForm onSuccess={() => setIsLoginOpen(false)} />
                 <button
                   onClick={() => setIsLoginOpen(false)}
-                  className="absolute right-4 top-4 z-[60] flex h-10 w-10 items-center justify-center
-                             rounded-full border border-white/10 bg-white/5 text-white/50
-                             transition-all hover:bg-white/10 hover:text-white"
+                  className="absolute right-6 top-6 z-[60] flex h-10 w-10 items-center justify-center
+                             rounded-2xl border border-white/10 bg-surface/50 text-white/40 backdrop-blur-md
+                             transition-all hover:bg-primary/20 hover:text-white hover:border-primary/30
+                             shadow-xl group/close"
                   aria-label="Fechar"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5 transition-transform group-hover/close:rotate-90" />
                 </button>
               </div>
             </DialogContent>
