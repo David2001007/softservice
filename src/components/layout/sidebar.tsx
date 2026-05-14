@@ -42,13 +42,12 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-border min-h-[72px]">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/30">
-          <Zap className="w-4 h-4 text-white" />
+        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 shadow-lg border border-white/10 overflow-hidden">
+          <img src="/logo.webp" alt="Unite Logo" className="w-full h-full object-cover" />
         </div>
         {!sidebarCollapsed && (
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-text leading-tight">SoftService</p>
-            <p className="text-[10px] text-text-muted leading-tight">Gestão de OS</p>
+            <p className="text-sm font-bold text-text leading-tight">Unite</p>
           </div>
         )}
       </div>

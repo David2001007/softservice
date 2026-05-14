@@ -5,7 +5,7 @@ export const Route = createFileRoute('/_app')({
   beforeLoad: () => {
     if (typeof window === 'undefined') return
 
-    const raw = localStorage.getItem('softservice-auth')
+    const raw = localStorage.getItem('unite-auth')
     if (raw) {
       try {
         const state = JSON.parse(raw)

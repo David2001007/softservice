@@ -100,18 +100,18 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           <div className="flex flex-col items-center text-center mb-10">
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-primary/30 blur-[20px] rounded-full animate-pulse" />
-              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-xl border border-white/10">
-                <Zap className="w-8 h-8 text-white" />
+              <div className="relative w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-xl border border-white/10 overflow-hidden">
+                <img src="/logo.webp" alt="Unite Logo" className="w-full h-full object-cover" />
               </div>
             </div>
             
             <div className="space-y-1.5">
               <h1 className="text-3xl font-black text-white tracking-[0.1em] uppercase">
-                Pulse<span className="text-primary">Net</span>
+                Unite
               </h1>
               <div className="flex items-center gap-2 justify-center">
                 <Separator className="w-6 bg-gold/50" />
-                <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em]">Gestão de OS</p>
+                <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em]">Conectando equipes</p>
                 <Separator className="w-6 bg-gold/50" />
               </div>
             </div>

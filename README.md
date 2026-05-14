@@ -1,6 +1,6 @@
-# SoftService 🛠️
+# Unite 🛠️
 
-SoftService é uma plataforma moderna para gestão de ordens de serviço, atendentes, técnicos e materiais. Construída com as tecnologias mais recentes do ecossistema React e TanStack, focada em performance, tipagem forte e uma experiência de usuário premium.
+Unite é uma plataforma moderna para gestão de ordens de serviço, atendentes, técnicos e materiais. Construída com as tecnologias mais recentes do ecossistema React e TanStack, focada em performance, tipagem forte e uma experiência de usuário premium.
 
 ## 🚀 Como Iniciar o Projeto
 
@@ -15,7 +15,7 @@ SoftService é uma plataforma moderna para gestão de ordens de serviço, atende
 1. **Clonar o repositório:**
    ```bash
    git clone <url-do-repositorio>
-   cd softservice
+   cd unite
    ```
 
 2. **Instalar dependências:**
@@ -26,7 +26,7 @@ SoftService é uma plataforma moderna para gestão de ordens de serviço, atende
 3. **Configurar variáveis de ambiente:**
    Crie um arquivo `.env.local` na raiz do projeto e adicione a URL do seu banco de dados:
    ```env
-   DATABASE_URL="postgres://usuario:senha@localhost:5432/softservice"
+   DATABASE_URL="postgres://usuario:senha@localhost:5432/unite"
    ```
 
 4. **Preparar o Banco de Dados:**

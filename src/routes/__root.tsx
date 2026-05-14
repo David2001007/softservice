@@ -17,8 +17,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'SoftService – Gestão de Ordens de Serviço' },
-      { name: 'description', content: 'Sistema de gestão de ordens de serviço para provedores de internet' },
+      { title: 'Unite – Conectando equipes. Impulsionando resultados.' },
+      { name: 'description', content: 'Conectando equipes. Impulsionando resultados.' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

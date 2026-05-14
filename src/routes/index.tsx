@@ -12,7 +12,7 @@ export const Route = createFileRoute('/')({
   beforeLoad: () => {
     if (typeof window === 'undefined') return
     try {
-      const raw = localStorage.getItem('softservice-auth')
+      const raw = localStorage.getItem('unite-auth')
       if (!raw) return
       const state = JSON.parse(raw)
       if (state?.state?.isAuthenticated) throw redirect({ to: '/dashboard' })
@@ -66,37 +66,33 @@ function LandingPage() {
       {/* ── Gradient overlay ── */}
       <div className="fixed inset-0 z-[1] pointer-events-none bg-gradient-to-b from-background/30 via-background/55 to-background" />
 
+      {/* ── Navbar ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-8 sm:px-12">
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-primary/20 blur-[15px] rounded-xl group-hover:bg-primary/40 transition-all" />
+            <div className="relative w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden shadow-2xl">
+              <img src="/logo.webp" alt="Unite Logo" className="w-full h-full object-cover" />
+            </div>
+          </div>
+          <span className="text-2xl font-black tracking-tighter text-secondary uppercase">
+            Unite
+          </span>
+        </div>
+      </nav>
+
       {/* ── Main content ── */}
       <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8 md:px-12 lg:px-16">
 
-        {/* Logo */}
-        {/* <div className="mb-10 flex flex-col items-center animate-float sm:mb-14">
-          <div className="relative mb-5">
-            <div className="absolute inset-0 animate-pulse rounded-full bg-primary/30 blur-[28px]" />
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-primary to-primary-hover shadow-2xl sm:h-20 sm:w-20">
-              <Zap className="h-8 w-8 text-white sm:h-10 sm:w-10" />
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-black uppercase tracking-[0.2em] text-white sm:text-4xl md:text-5xl lg:text-6xl">
-            Pulse<span className="text-primary">Net</span>
-          </h1>
-
-          <div className="mt-2 flex items-center gap-3">
-            <div className="h-px w-6 bg-gold/50 sm:w-8" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold sm:text-xs">Gestão de OS</p>
-            <div className="h-px w-6 bg-gold/50 sm:w-8" />
-          </div>
-        </div> */}
 
         {/* Hero */}
         <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">
           <h2 className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
                          sm:text-6xl md:text-7xl lg:text-8xl">
             <span className="block text-text/60">Conectando</span>
-            <span className="block text-primary">Pessoas.</span>
+            <span className="block text-primary">equipes.</span>
             <span className="block text-text/60">Impulsionando</span>
-            <span className="block text-gold">Soluções.</span>
+            <span className="block text-gold">resultados.</span>
           </h2>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-text-muted sm:text-base md:text-lg lg:max-w-lg">
             A plataforma definitiva para agilizar, organizar e escalar sua gestão de serviços em tempo real.
@@ -165,7 +161,7 @@ function LandingPage() {
 
         {/* Footer */}
         <footer className="mt-16 text-[10px] uppercase tracking-[0.4em] text-text-muted/40 sm:absolute sm:bottom-8 sm:mt-0">
-          PulseNet © 2026 – Advanced Management System
+          Unite © 2026 – Advanced Management System
         </footer>
       </main>
     </div>
