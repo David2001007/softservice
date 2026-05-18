@@ -1,15 +1,15 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { Zap, Loader2, Eye, EyeOff, User, Lock, LogIn, Mail, Key, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { Loader2, Eye, EyeOff, User, Lock, LogIn, Mail, Key, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { 
-  loginSchema, 
-  forgotPasswordSchema, 
-  resetPasswordSchema, 
-  type LoginInput, 
-  type ForgotPasswordInput, 
-  type ResetPasswordInput 
+import {
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  type LoginInput,
+  type ForgotPasswordInput,
+  type ResetPasswordInput
 } from '@/features/auth/schema'
 import { useAuthStore } from '@/stores/auth.store'
 import { useRouter } from '@tanstack/react-router'
@@ -53,10 +53,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const onLoginSubmit = async (data: LoginInput) => {
     try {
       const response = await login({ data })
-      setUser({ 
-        id: response.id, 
-        nome: response.nome, 
-        username: response.username, 
+      setUser({
+        id: response.id,
+        nome: response.nome,
+        username: response.username,
         role: response.role as any,
         type: response.type
       })
@@ -95,7 +95,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     <div className="w-full max-w-[440px] mx-auto fade-in">
       <Card className="bg-surface/80 backdrop-blur-xl border-white/10 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] overflow-hidden">
         <CardContent className="p-6 sm:p-8 xl:p-12">
-          
+
           {/* Header / Logo */}
           <div className="flex flex-col items-center text-center mb-10">
             <div className="relative mb-6">
@@ -104,7 +104,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                 <img src="/logo.webp" alt="Unite Logo" className="w-full h-full object-cover" />
               </div>
             </div>
-            
+
             <div className="space-y-1.5">
               <h1 className="text-3xl font-black text-white tracking-[0.1em] uppercase">
                 Unite
@@ -152,9 +152,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-1">
                   <Label className="text-xs font-bold text-text-muted uppercase tracking-wider">Senha</Label>
-                  <Button 
-                    variant="link" 
-                    type="button" 
+                  <Button
+                    variant="link"
+                    type="button"
                     onClick={() => setMode('forgot')}
                     className="h-auto p-0 text-xs font-bold text-gold hover:text-gold-hover"
                   >

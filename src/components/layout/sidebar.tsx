@@ -9,7 +9,6 @@ import {
   UserCheck,
   ChevronLeft,
   ChevronRight,
-  Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/ui.store'
