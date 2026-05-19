@@ -19,8 +19,8 @@ const navItems = [
   { to: '/tecnicos', label: 'Técnicos', icon: Wrench },
   { to: '/ordens-servico', label: 'Ordens de Serviço', icon: ClipboardList },
   { to: '/agenda', label: 'Agenda', icon: CalendarDays },
-  { to: '/materiais', label: 'Materiais', icon: Package },
-  { to: '/atendentes', label: 'Atendentes', icon: UserCheck },
+  { to: '/materiais', label: 'Estoque', icon: Package },
+  { to: '/atendentes', label: 'Usuários', icon: UserCheck },
 ]
 
 export function Sidebar() {

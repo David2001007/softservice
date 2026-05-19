@@ -52,6 +52,9 @@ function NovoMaterialPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Código" required error={errors.codigo?.message}>
+              <input {...register('codigo')} placeholder="Ex: MAT-001" className={inputCls} />
+            </Field>
             <div className="sm:col-span-2">
               <Field label="Descrição" required error={errors.descricao?.message}>
                 <input {...register('descricao')} placeholder="Ex: Cabo de fibra óptica SC/UPC" className={inputCls} />
