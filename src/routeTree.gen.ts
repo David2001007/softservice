@@ -25,6 +25,7 @@ import { Route as AppMateriaisNovoRouteImport } from './routes/_app.materiais.no
 import { Route as AppClientesNovoRouteImport } from './routes/_app.clientes.novo'
 import { Route as AppAtendentesNovoRouteImport } from './routes/_app.atendentes.novo'
 import { Route as AppTecnicosIdIndexRouteImport } from './routes/_app.tecnicos.$id.index'
+import { Route as AppOrdensServicoIdIndexRouteImport } from './routes/_app.ordens-servico.$id.index'
 import { Route as AppMateriaisIdIndexRouteImport } from './routes/_app.materiais.$id.index'
 import { Route as AppClientesIdIndexRouteImport } from './routes/_app.clientes.$id.index'
 import { Route as AppAtendentesIdIndexRouteImport } from './routes/_app.atendentes.$id.index'
@@ -114,6 +115,11 @@ const AppTecnicosIdIndexRoute = AppTecnicosIdIndexRouteImport.update({
   path: '/tecnicos/$id/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppOrdensServicoIdIndexRoute = AppOrdensServicoIdIndexRouteImport.update({
+  id: '/ordens-servico/$id/',
+  path: '/ordens-servico/$id/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMateriaisIdIndexRoute = AppMateriaisIdIndexRouteImport.update({
   id: '/materiais/$id/',
   path: '/materiais/$id/',
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/atendentes/$id/': typeof AppAtendentesIdIndexRoute
   '/clientes/$id/': typeof AppClientesIdIndexRoute
   '/materiais/$id/': typeof AppMateriaisIdIndexRoute
+  '/ordens-servico/$id/': typeof AppOrdensServicoIdIndexRoute
   '/tecnicos/$id/': typeof AppTecnicosIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/atendentes/$id': typeof AppAtendentesIdIndexRoute
   '/clientes/$id': typeof AppClientesIdIndexRoute
   '/materiais/$id': typeof AppMateriaisIdIndexRoute
+  '/ordens-servico/$id': typeof AppOrdensServicoIdIndexRoute
   '/tecnicos/$id': typeof AppTecnicosIdIndexRoute
 }
 export interface FileRoutesById {
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/_app/atendentes/$id/': typeof AppAtendentesIdIndexRoute
   '/_app/clientes/$id/': typeof AppClientesIdIndexRoute
   '/_app/materiais/$id/': typeof AppMateriaisIdIndexRoute
+  '/_app/ordens-servico/$id/': typeof AppOrdensServicoIdIndexRoute
   '/_app/tecnicos/$id/': typeof AppTecnicosIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/atendentes/$id/'
     | '/clientes/$id/'
     | '/materiais/$id/'
+    | '/ordens-servico/$id/'
     | '/tecnicos/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/atendentes/$id'
     | '/clientes/$id'
     | '/materiais/$id'
+    | '/ordens-servico/$id'
     | '/tecnicos/$id'
   id:
     | '__root__'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/_app/atendentes/$id/'
     | '/_app/clientes/$id/'
     | '/_app/materiais/$id/'
+    | '/_app/ordens-servico/$id/'
     | '/_app/tecnicos/$id/'
   fileRoutesById: FileRoutesById
 }
@@ -444,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTecnicosIdIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ordens-servico/$id/': {
+      id: '/_app/ordens-servico/$id/'
+      path: '/ordens-servico/$id'
+      fullPath: '/ordens-servico/$id/'
+      preLoaderRoute: typeof AppOrdensServicoIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/materiais/$id/': {
       id: '/_app/materiais/$id/'
       path: '/materiais/$id'
@@ -532,6 +551,7 @@ interface AppRouteChildren {
   AppAtendentesIdIndexRoute: typeof AppAtendentesIdIndexRoute
   AppClientesIdIndexRoute: typeof AppClientesIdIndexRoute
   AppMateriaisIdIndexRoute: typeof AppMateriaisIdIndexRoute
+  AppOrdensServicoIdIndexRoute: typeof AppOrdensServicoIdIndexRoute
   AppTecnicosIdIndexRoute: typeof AppTecnicosIdIndexRoute
 }
 
@@ -557,6 +577,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAtendentesIdIndexRoute: AppAtendentesIdIndexRoute,
   AppClientesIdIndexRoute: AppClientesIdIndexRoute,
   AppMateriaisIdIndexRoute: AppMateriaisIdIndexRoute,
+  AppOrdensServicoIdIndexRoute: AppOrdensServicoIdIndexRoute,
   AppTecnicosIdIndexRoute: AppTecnicosIdIndexRoute,
 }
 

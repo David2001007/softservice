@@ -45,7 +45,7 @@ export const createOrdemServico = createServerFn({ method: 'POST' })
         dataAgendada: data.dataAgendada ? new Date(data.dataAgendada) : null,
         tecnicoId: data.tecnicoId,
         valor: data.valor || null,
-        status: data.status || 'aberta',
+        status: data.status,
       })
       .returning()
       
@@ -78,12 +78,17 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
         .returning()
 
       // 2. Registrar Materiais Utilizados e Dar Baixa no Estoque
-      if (data.data.materiais && data.data.materiais.length > 0) {
+      if (data.data.materiais.length > 0) {
         for (const mat of data.data.materiais) {
+          const quantidade = Number(mat.quantidade)
+          if (!Number.isFinite(quantidade) || quantidade <= 0) {
+            throw new Error('Quantidade de material inválida')
+          }
+
           await tx.insert(osMateriais).values({
             osId: data.id,
             materialId: mat.materialId,
-            quantidade: mat.quantidade,
+            quantidade: String(quantidade),
             tipoUso: mat.tipoUso,
             localSaida: mat.localSaida,
           })
@@ -91,7 +96,7 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
           // Baixa de estoque
           await tx
             .update(materiais)
-            .set({ quantidade: sql`${materiais.quantidade} - ${mat.quantidade}` })
+            .set({ quantidade: sql`${materiais.quantidade} - ${quantidade}` })
             .where(eq(materiais.id, mat.materialId))
         }
       }
@@ -186,4 +191,27 @@ export const deleteOrdemServico = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     await db.delete(ordensServico).where(eq(ordensServico.id, data))
     return { success: true }
+  })
+
+export const iniciarAtendimento = createServerFn({ method: 'POST' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    return await db.transaction(async (tx) => {
+      const [osAtualizada] = await tx
+        .update(ordensServico)
+        .set({
+          status: 'em_execucao',
+        })
+        .where(eq(ordensServico.id, data))
+        .returning()
+
+      await tx.insert(osHistorico).values({
+        osId: data,
+        acao: 'atualizacao',
+        statusNovo: 'em_execucao',
+        detalhes: 'Atendimento iniciado',
+      })
+
+      return osAtualizada
+    })
   })

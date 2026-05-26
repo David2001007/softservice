@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getOrdemServico } from '@/features/ordens-servico/server'
-import { EditarOrdemServicoPage } from '@/features/ordens-servico/editar'
+import { VerOrdemServicoPage } from '@/features/ordens-servico/ver'
 
-export const Route = createFileRoute('/_app/ordens-servico/$id/editar')({
+export const Route = createFileRoute('/_app/ordens-servico/$id/')({
   component: RouteComponent,
   loader: ({ params }) => getOrdemServico({ data: Number(params.id) }),
 })
@@ -10,5 +10,5 @@ export const Route = createFileRoute('/_app/ordens-servico/$id/editar')({
 function RouteComponent() {
   const os = Route.useLoaderData()
   const { id } = Route.useParams()
-  return <EditarOrdemServicoPage os={os} id={id} />
+  return <VerOrdemServicoPage os={os} id={id} />
 }
