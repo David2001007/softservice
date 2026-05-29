@@ -13,24 +13,28 @@ Unite é uma plataforma moderna para gestão de ordens de serviço, atendentes, 
 ### Passo a Passo
 
 1. **Clonar o repositório:**
+
    ```bash
    git clone <url-do-repositorio>
    cd unite
    ```
 
 2. **Instalar dependências:**
+
    ```bash
    pnpm install
    ```
 
 3. **Configurar variáveis de ambiente:**
    Crie um arquivo `.env.local` na raiz do projeto e adicione a URL do seu banco de dados:
+
    ```env
    DATABASE_URL="postgres://usuario:senha@localhost:5432/unite"
    ```
 
 4. **Preparar o Banco de Dados:**
    Execute o comando para gerar as migrações e sincronizar o schema:
+
    ```bash
    pnpm db:setup
    ```

@@ -3,10 +3,9 @@ import { useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Save, Trash2, Settings2, X } from 'lucide-react'
+import { ArrowLeft, Save, X } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
-import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -19,10 +18,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { osSchema  } from '@/features/ordens-servico/schema'
 import type {OsInput} from '@/features/ordens-servico/schema';
-import {
-  updateOrdemServico,
-  deleteOrdemServico,
-} from '@/features/ordens-servico/server'
+import { createOrdemServico } from '@/features/ordens-servico/server'
 import { getClientes } from '@/features/clientes/server'
 import { getTecnicos } from '@/features/tecnicos/server'
 import { cn } from '@/lib/utils'
@@ -44,21 +40,17 @@ function FormSection({
   )
 }
 
-export function EditarOrdemServicoPage({
-  os,
-  id,
-  clientes,
-  tecnicos,
-}: {
-  os: any
-  id: string
+interface NovaOrdemServicoPageProps {
   clientes: any[]
   tecnicos: any[]
-}) {
+}
+
+export function NovaOrdemServicoPage({
+  clientes,
+  tecnicos,
+}: NovaOrdemServicoPageProps) {
   const navigate = useNavigate()
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [searchCliente, setSearchCliente] = useState(os?.cliente?.nome ?? '')
+  const [searchCliente, setSearchCliente] = useState('')
   const [openClienteList, setOpenClienteList] = useState(false)
   const clienteInputRef = useRef<HTMLDivElement>(null)
 
@@ -70,21 +62,7 @@ export function EditarOrdemServicoPage({
     formState: { errors, isSubmitting },
   } = useForm<OsInput>({
     resolver: zodResolver(osSchema),
-    values: os
-      ? {
-          clienteId: os.clienteId,
-          tipoServico: os.tipoServico,
-          prioridade: os.prioridade,
-          descricaoProblema: os.descricaoProblema || '',
-          observacoes: os.observacoes || '',
-          status: os.status,
-          dataAgendada: os.dataAgendada
-            ? new Date(os.dataAgendada).toISOString().slice(0, 16)
-            : '',
-          tecnicoId: os.tecnicoId || undefined,
-          valor: os.valor || '',
-        }
-      : undefined,
+    defaultValues: { prioridade: 'normal', status: 'aberta' },
   })
 
   const clienteId = watch('clienteId')
@@ -98,6 +76,12 @@ export function EditarOrdemServicoPage({
       c.nome.toLowerCase().includes(searchCliente.toLowerCase()) ||
       (c.telefone && c.telefone.includes(searchCliente)),
   )
+
+  const numeroOs = `OS${new Date().getFullYear()}${Math.floor(
+    Math.random() * 10000,
+  )
+    .toString()
+    .padStart(4, '0')}`
 
   const handleSelectCliente = (cliente: any) => {
     setValue('clienteId', cliente.id)
@@ -128,58 +112,51 @@ export function EditarOrdemServicoPage({
 
   const onSubmit = async (data: OsInput) => {
     try {
-      await updateOrdemServico({ data: { id: Number(id), data } })
-      toast.success('Ordem de Serviço atualizada com sucesso!')
+      await createOrdemServico({ data })
+      toast.success('Ordem de Serviço criada com sucesso!')
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
-      toast.error('Erro ao atualizar Ordem de Serviço')
+      toast.error('Erro ao criar Ordem de Serviço')
     }
   }
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      await deleteOrdemServico({ data: Number(id) })
-      toast.success('Ordem de Serviço excluída com sucesso!')
-      navigate({ to: '/ordens-servico' })
-    } catch {
-      toast.error('Erro ao excluir OS')
-    } finally {
-      setIsDeleting(false)
-      setShowDeleteModal(false)
-    }
-  }
-
-  if (!os) return null
 
   return (
     <div className="max-w-4xl mx-auto space-y-5 fade-in">
       <PageHeader
-        title={`Editar OS ${os?.numero}`}
+        title="Cadastro de Ordem de Serviço"
         action={
-          <div className="flex gap-2">
-            <DefaultButton
-              variant="ghost"
-              leftIcon={<ArrowLeft className="w-4 h-4" />}
-              label="Voltar"
-              onClick={() => navigate({ to: '/ordens-servico' })}
-            />
-            <DefaultButton
-              label="Gerenciador"
-              variant="outline"
-              leftIcon={<Settings2 className="w-4 h-4" />}
-              onClick={() =>
-                navigate({
-                  to: '/ordens-servico/$id/gerenciar',
-                  params: { id },
-                })
-              }
-            />
-          </div>
+          <DefaultButton
+            variant="ghost"
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+            label="Voltar"
+            onClick={() => navigate({ to: '/ordens-servico' })}
+          />
         }
       />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Identificação */}
+        <FormSection title="Identificação">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Número da OS</Label>
+              <Input value={numeroOs} readOnly disabled className="font-mono" />
+            </div>
+            <div className="space-y-2">
+              <Label>Data de Abertura</Label>
+              <Input
+                value={new Date().toLocaleDateString('pt-BR')}
+                readOnly
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Criado por</Label>
+              <Input value="Administrador" readOnly disabled />
+            </div>
+          </div>
+        </FormSection>
+
         {/* Cliente */}
         <FormSection title="Cliente">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -249,25 +226,38 @@ export function EditarOrdemServicoPage({
                 value={clienteSelecionado?.telefone ?? ''}
                 readOnly
                 disabled
+                placeholder="Selecione um cliente"
+              />
+            </div>
+            <div className="sm:col-span-2 space-y-2">
+              <Label>Endereço</Label>
+              <Input
+                value={
+                  clienteSelecionado
+                    ? `${clienteSelecionado.logradouro} — ${clienteSelecionado.cidade}`
+                    : ''
+                }
+                readOnly
+                disabled
+                placeholder="Preenchido ao selecionar o cliente"
               />
             </div>
           </div>
         </FormSection>
 
-        {/* Detalhes do Serviço */}
+        {/* Serviço */}
         <FormSection title="Detalhes do Serviço">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="tipoServico">Tipo de Serviço *</Label>
               <Select
                 onValueChange={(value) => setValue('tipoServico', value as any)}
-                defaultValue={os?.tipoServico}
               >
                 <SelectTrigger
                   id="tipoServico"
                   aria-invalid={!!errors.tipoServico}
                 >
-                  <SelectValue />
+                  <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="instalacao">Instalação</SelectItem>
@@ -286,30 +276,10 @@ export function EditarOrdemServicoPage({
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                onValueChange={(value) => setValue('status', value as any)}
-                defaultValue={os?.status}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aberta">Aberta</SelectItem>
-                  <SelectItem value="agendada">Agendada</SelectItem>
-                  <SelectItem value="em_execucao">Em Execução</SelectItem>
-                  <SelectItem value="concluida">Concluída</SelectItem>
-                  <SelectItem value="cancelada">Cancelada</SelectItem>
-                  <SelectItem value="reagendada">Reagendada</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="prioridade">Prioridade</Label>
               <Select
+                defaultValue="normal"
                 onValueChange={(value) => setValue('prioridade', value as any)}
-                defaultValue={os?.prioridade}
               >
                 <SelectTrigger id="prioridade">
                   <SelectValue />
@@ -321,16 +291,6 @@ export function EditarOrdemServicoPage({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="valor">Valor (R$)</Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                placeholder="0,00"
-                {...register('valor')}
-              />
-            </div>
             <div className="sm:col-span-2 space-y-2">
               <Label htmlFor="descricao">
                 Descrição do Problema / Solicitação
@@ -338,12 +298,12 @@ export function EditarOrdemServicoPage({
               <Textarea
                 id="descricao"
                 {...register('descricaoProblema')}
-                placeholder="Descreva o problema..."
+                placeholder="Descreva o problema ou a solicitação do cliente..."
                 rows={3}
               />
             </div>
             <div className="sm:col-span-2 space-y-2">
-              <Label htmlFor="observacoes">Observações</Label>
+              <Label htmlFor="observacoes">Observações Gerais</Label>
               <Textarea
                 id="observacoes"
                 {...register('observacoes')}
@@ -356,7 +316,7 @@ export function EditarOrdemServicoPage({
 
         {/* Agendamento */}
         <FormSection title="Agendamento">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dataAgendada">Data / Hora Agendada</Label>
               <Input
@@ -371,7 +331,6 @@ export function EditarOrdemServicoPage({
                 onValueChange={(value) =>
                   setValue('tecnicoId', value ? Number(value) : undefined)
                 }
-                defaultValue={os?.tecnicoId ? String(os.tecnicoId) : ''}
               >
                 <SelectTrigger id="tecnico">
                   <SelectValue placeholder="Selecione o técnico" />
@@ -385,43 +344,34 @@ export function EditarOrdemServicoPage({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="valor">Valor (R$)</Label>
+              <Input
+                id="valor"
+                type="number"
+                step="0.01"
+                placeholder="0,00"
+                {...register('valor')}
+              />
+            </div>
           </div>
         </FormSection>
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center justify-end gap-3 pt-2">
           <DefaultButton
-            type="button"
-            variant="outline"
-            leftIcon={<Trash2 className="w-4 h-4" />}
-            label="Excluir OS"
-            className="text-destructive border-destructive/20 hover:bg-destructive/10"
-            onClick={() => setShowDeleteModal(true)}
+            variant="ghost"
+            label="Cancelar"
+            onClick={() => navigate({ to: '/ordens-servico' })}
           />
-          <div className="flex items-center gap-3">
-            <DefaultButton
-              variant="ghost"
-              label="Cancelar"
-              onClick={() => navigate({ to: '/ordens-servico' })}
-            />
-            <DefaultButton
-              type="submit"
-              isLoading={isSubmitting}
-              leftIcon={<Save className="w-4 h-4" />}
-              label="Salvar Alterações"
-              className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
-            />
-          </div>
+          <DefaultButton
+            type="submit"
+            isLoading={isSubmitting}
+            leftIcon={<Save className="w-4 h-4" />}
+            label="Criar Ordem de Serviço"
+            className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
+          />
         </div>
       </form>
-
-      <DeleteConfirmationModal
-        open={showDeleteModal}
-        onOpenChange={setShowDeleteModal}
-        onConfirm={handleDelete}
-        isLoading={isDeleting}
-        title="Excluir Ordem de Serviço"
-        description={`Tem certeza que deseja excluir a OS "${os?.numero}"? Esta ação não pode ser desfeita.`}
-      />
     </div>
   )
 }

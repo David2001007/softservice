@@ -10,7 +10,9 @@ export const Route = createFileRoute('/_app')({
       try {
         const state = JSON.parse(raw)
         if (state?.state?.isAuthenticated) return
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     throw redirect({ to: '/' })
   },

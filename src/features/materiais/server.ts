@@ -5,14 +5,19 @@ import { eq } from 'drizzle-orm'
 import { materialSchema } from './schema'
 import { z } from 'zod'
 
-export const getMateriais = createServerFn({ method: 'GET' }).handler(async () => {
-  return await db.select().from(materiais)
-})
+export const getMateriais = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return await db.select().from(materiais)
+  },
+)
 
 export const getMaterial = createServerFn({ method: 'GET' })
   .inputValidator(z.number())
   .handler(async ({ data }) => {
-    const [material] = await db.select().from(materiais).where(eq(materiais.id, data))
+    const [material] = await db
+      .select()
+      .from(materiais)
+      .where(eq(materiais.id, data))
     return material
   })
 

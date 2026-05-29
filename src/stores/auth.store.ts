@@ -5,7 +5,7 @@ export interface AuthUser {
   id: number
   nome: string
   username: string
-  role: 'admin' | 'atendente' | 'tecnico'
+  role: 'admin' | 'atendente' | 'supervisor' | 'tecnico'
   type: 'user' | 'tecnico'
 }
 
@@ -24,6 +24,6 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user, isAuthenticated: true }),
       clearUser: () => set({ user: null, isAuthenticated: false }),
     }),
-    { name: 'unite-auth' }
-  )
+    { name: 'unite-auth' },
+  ),
 )

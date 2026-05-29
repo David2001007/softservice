@@ -1,6 +1,6 @@
 {
-  "id": "ed4ac021-cfd4-4313-8006-c4978e154322",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "10b77ad4-f97d-49d9-b710-59baef294620",
+  "prevId": "ed4ac021-cfd4-4313-8006-c4978e154322",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -346,6 +346,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "speed_test_ping": {
+          "name": "speed_test_ping",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "speed_test_download": {
+          "name": "speed_test_download",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "speed_test_upload": {
+          "name": "speed_test_upload",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "speed_test_data_hora": {
+          "name": "speed_test_data_hora",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "motivo_reagendamento": {
           "name": "motivo_reagendamento",
           "type": "text",
@@ -611,6 +635,57 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.password_reset_codes": {
+      "name": "password_reset_codes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "used": {
+          "name": "used",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.tecnicos": {
       "name": "tecnicos",
       "schema": "",
@@ -663,7 +738,7 @@
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "regiao": {
           "name": "regiao",
@@ -727,6 +802,11 @@
           "name": "tecnicos_codigo_unique",
           "nullsNotDistinct": false,
           "columns": ["codigo"]
+        },
+        "tecnicos_email_unique": {
+          "name": "tecnicos_email_unique",
+          "nullsNotDistinct": false,
+          "columns": ["email"]
         },
         "tecnicos_username_unique": {
           "name": "tecnicos_username_unique",
@@ -925,7 +1005,7 @@
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": ["admin", "atendente"]
+      "values": ["admin", "atendente", "supervisor"]
     }
   },
   "schemas": {},

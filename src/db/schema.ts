@@ -11,14 +11,34 @@ import {
 import { relations } from 'drizzle-orm'
 
 /* ── Enums ── */
-export const userRoleEnum = pgEnum('user_role', ['admin', 'atendente'])
+export const userRoleEnum = pgEnum('user_role', [
+  'admin',
+  'atendente',
+  'supervisor',
+])
 export const tecnicoTipoEnum = pgEnum('tecnico_tipo', ['interno', 'terceiro'])
-export const tecnicoPerfilEnum = pgEnum('tecnico_perfil', ['tecnico', 'supervisor'])
+export const tecnicoPerfilEnum = pgEnum('tecnico_perfil', [
+  'tecnico',
+  'supervisor',
+])
 export const clienteStatusEnum = pgEnum('cliente_status', ['ativo', 'inativo'])
-export const contratoSituacaoEnum = pgEnum('contrato_situacao', ['assinado', 'nao_assinado'])
-export const materialStatusEnum = pgEnum('material_status', ['ativo', 'inativo'])
-export const tipoUsoMaterialEnum = pgEnum('tipo_uso_material', ['comodato', 'venda', 'uso_interno'])
-export const localSaidaEnum = pgEnum('local_saida', ['estoque_principal', 'estoque_tecnico'])
+export const contratoSituacaoEnum = pgEnum('contrato_situacao', [
+  'assinado',
+  'nao_assinado',
+])
+export const materialStatusEnum = pgEnum('material_status', [
+  'ativo',
+  'inativo',
+])
+export const tipoUsoMaterialEnum = pgEnum('tipo_uso_material', [
+  'comodato',
+  'venda',
+  'uso_interno',
+])
+export const localSaidaEnum = pgEnum('local_saida', [
+  'estoque_principal',
+  'estoque_tecnico',
+])
 export const osStatusEnum = pgEnum('os_status', [
   'aberta',
   'agendada',
@@ -28,7 +48,11 @@ export const osStatusEnum = pgEnum('os_status', [
   'reagendada',
   'pendente',
 ])
-export const osPrioridadeEnum = pgEnum('os_prioridade', ['baixa', 'normal', 'alta'])
+export const osPrioridadeEnum = pgEnum('os_prioridade', [
+  'baixa',
+  'normal',
+  'alta',
+])
 export const osTipoServicoEnum = pgEnum('os_tipo_servico', [
   'instalacao',
   'manutencao',
@@ -77,7 +101,8 @@ export const clientes = pgTable('clientes', {
   uf: text('uf'),
   referencia: text('referencia'),
   plano: text('plano'),
-  situacaoContrato: contratoSituacaoEnum('situacao_contrato').default('nao_assinado'),
+  situacaoContrato:
+    contratoSituacaoEnum('situacao_contrato').default('nao_assinado'),
   status: clienteStatusEnum('status').notNull().default('ativo'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -110,8 +135,12 @@ export const materiais = pgTable('materiais', {
   descricao: text('descricao').notNull(),
   categoria: text('categoria').notNull(),
   unidade: text('unidade').notNull(),
-  quantidade: numeric('quantidade', { precision: 12, scale: 3 }).notNull().default('0'),
-  estoqueMinimo: numeric('estoque_minimo', { precision: 12, scale: 3 }).notNull().default('0'),
+  quantidade: numeric('quantidade', { precision: 12, scale: 3 })
+    .notNull()
+    .default('0'),
+  estoqueMinimo: numeric('estoque_minimo', { precision: 12, scale: 3 })
+    .notNull()
+    .default('0'),
   comodato: boolean('comodato').notNull().default(false),
   status: materialStatusEnum('status').notNull().default('ativo'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -124,7 +153,9 @@ export const ordensServico = pgTable('ordens_servico', {
   numero: text('numero').notNull().unique(),
   dataAbertura: timestamp('data_abertura').defaultNow().notNull(),
   criadoPorId: integer('criado_por_id').references(() => users.id),
-  clienteId: integer('cliente_id').notNull().references(() => clientes.id),
+  clienteId: integer('cliente_id')
+    .notNull()
+    .references(() => clientes.id),
   tipoServico: osTipoServicoEnum('tipo_servico').notNull(),
   descricaoProblema: text('descricao_problema'),
   observacoes: text('observacoes'),
@@ -138,12 +169,22 @@ export const ordensServico = pgTable('ordens_servico', {
   dataTerminoEfetivo: timestamp('data_termino_efetivo'),
   resultadoServico: boolean('resultado_servico'),
   observacoesFinais: text('observacoes_finais'),
+  // Speed Test
+  speedTestPing: numeric('speed_test_ping', { precision: 10, scale: 2 }),
+  speedTestDownload: numeric('speed_test_download', {
+    precision: 10,
+    scale: 2,
+  }),
+  speedTestUpload: numeric('speed_test_upload', { precision: 10, scale: 2 }),
+  speedTestDataHora: timestamp('speed_test_data_hora'),
   // Reagendamento
   motivoReagendamento: text('motivo_reagendamento'),
   novaDataAgendada: timestamp('nova_data_agendada'),
   // Cancelamento
   motivoCancelamento: text('motivo_cancelamento'),
-  responsavelCancelamentoId: integer('responsavel_cancelamento_id').references(() => users.id),
+  responsavelCancelamentoId: integer('responsavel_cancelamento_id').references(
+    () => users.id,
+  ),
   dataCancelamento: timestamp('data_cancelamento'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -152,18 +193,26 @@ export const ordensServico = pgTable('ordens_servico', {
 /* ── Materiais utilizados na OS ── */
 export const osMateriais = pgTable('os_materiais', {
   id: serial('id').primaryKey(),
-  osId: integer('os_id').notNull().references(() => ordensServico.id, { onDelete: 'cascade' }),
-  materialId: integer('material_id').notNull().references(() => materiais.id),
+  osId: integer('os_id')
+    .notNull()
+    .references(() => ordensServico.id, { onDelete: 'cascade' }),
+  materialId: integer('material_id')
+    .notNull()
+    .references(() => materiais.id),
   quantidade: numeric('quantidade', { precision: 12, scale: 3 }).notNull(),
   tipoUso: tipoUsoMaterialEnum('tipo_uso').notNull().default('uso_interno'),
-  localSaida: localSaidaEnum('local_saida').notNull().default('estoque_principal'),
+  localSaida: localSaidaEnum('local_saida')
+    .notNull()
+    .default('estoque_principal'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
 /* ── Histórico / Auditoria da OS ── */
 export const osHistorico = pgTable('os_historico', {
   id: serial('id').primaryKey(),
-  osId: integer('os_id').notNull().references(() => ordensServico.id, { onDelete: 'cascade' }),
+  osId: integer('os_id')
+    .notNull()
+    .references(() => ordensServico.id, { onDelete: 'cascade' }),
   dataHora: timestamp('data_hora').defaultNow().notNull(),
   usuarioId: integer('usuario_id').references(() => users.id),
   acao: osAcaoHistoricoEnum('acao').notNull(),
@@ -182,22 +231,46 @@ export const tecnicosRelations = relations(tecnicos, ({ many }) => ({
   ordensServico: many(ordensServico),
 }))
 
-export const ordensServicoRelations = relations(ordensServico, ({ one, many }) => ({
-  cliente: one(clientes, { fields: [ordensServico.clienteId], references: [clientes.id] }),
-  tecnico: one(tecnicos, { fields: [ordensServico.tecnicoId], references: [tecnicos.id] }),
-  criadoPor: one(users, { fields: [ordensServico.criadoPorId], references: [users.id] }),
-  materiais: many(osMateriais),
-  historico: many(osHistorico),
-}))
+export const ordensServicoRelations = relations(
+  ordensServico,
+  ({ one, many }) => ({
+    cliente: one(clientes, {
+      fields: [ordensServico.clienteId],
+      references: [clientes.id],
+    }),
+    tecnico: one(tecnicos, {
+      fields: [ordensServico.tecnicoId],
+      references: [tecnicos.id],
+    }),
+    criadoPor: one(users, {
+      fields: [ordensServico.criadoPorId],
+      references: [users.id],
+    }),
+    materiais: many(osMateriais),
+    historico: many(osHistorico),
+  }),
+)
 
 export const osMateriaisRelations = relations(osMateriais, ({ one }) => ({
-  os: one(ordensServico, { fields: [osMateriais.osId], references: [ordensServico.id] }),
-  material: one(materiais, { fields: [osMateriais.materialId], references: [materiais.id] }),
+  os: one(ordensServico, {
+    fields: [osMateriais.osId],
+    references: [ordensServico.id],
+  }),
+  material: one(materiais, {
+    fields: [osMateriais.materialId],
+    references: [materiais.id],
+  }),
 }))
 
 export const osHistoricoRelations = relations(osHistorico, ({ one }) => ({
-  os: one(ordensServico, { fields: [osHistorico.osId], references: [ordensServico.id] }),
-  usuario: one(users, { fields: [osHistorico.usuarioId], references: [users.id] }),
+  os: one(ordensServico, {
+    fields: [osHistorico.osId],
+    references: [ordensServico.id],
+  }),
+  usuario: one(users, {
+    fields: [osHistorico.usuarioId],
+    references: [users.id],
+  }),
 }))
 
 export const passwordResetCodes = pgTable('password_reset_codes', {

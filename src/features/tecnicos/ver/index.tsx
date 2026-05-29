@@ -30,18 +30,18 @@ export function VerTecnicoPage({ tecnico, id }: { tecnico: any; id: string }) {
   }
 
   const details = {
-    'Código': tecnico.codigo,
-    'Nome': tecnico.nome,
-    'Tipo': tecnico.tipo === 'interno' ? 'Interno' : 'Terceiro',
-    'Empresa': tecnico.empresa,
-    'CNPJ': tecnico.cnpj,
-    'Telefone': formatPhone(tecnico.telefone),
+    Código: tecnico.codigo,
+    Nome: tecnico.nome,
+    Tipo: tecnico.tipo === 'interno' ? 'Interno' : 'Terceiro',
+    Empresa: tecnico.empresa,
+    CNPJ: tecnico.cnpj,
+    Telefone: formatPhone(tecnico.telefone),
     'E-mail': tecnico.email,
-    'Região': tecnico.regiao,
-    'Especialidade': tecnico.especialidade,
-    'Perfil': tecnico.perfil,
-    'Usuário': tecnico.username,
-    'Status': tecnico.ativo ? 'Ativo' : 'Inativo',
+    Região: tecnico.regiao,
+    Especialidade: tecnico.especialidade,
+    Perfil: tecnico.perfil,
+    Usuário: tecnico.username,
+    Status: tecnico.ativo ? 'Ativo' : 'Inativo',
   }
 
   return (
@@ -50,7 +50,12 @@ export function VerTecnicoPage({ tecnico, id }: { tecnico: any; id: string }) {
         title={`Técnico #${id}`}
         action={
           <div className="flex gap-2">
-            <DefaultButton variant="ghost" leftIcon={<ArrowLeft className="w-4 h-4" />} label="Voltar" onClick={() => navigate({ to: '/tecnicos' })} />
+            <DefaultButton
+              variant="ghost"
+              leftIcon={<ArrowLeft className="w-4 h-4" />}
+              label="Voltar"
+              onClick={() => navigate({ to: '/tecnicos' })}
+            />
             <DefaultButton
               variant="outline"
               leftIcon={<Trash2 className="w-4 h-4" />}
@@ -71,7 +76,9 @@ export function VerTecnicoPage({ tecnico, id }: { tecnico: any; id: string }) {
       <div className="bg-surface border border-border rounded-xl p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
         {Object.entries(details).map(([k, v]) => (
           <div key={k}>
-            <p className="text-xs text-text-muted font-medium uppercase tracking-wider">{k}</p>
+            <p className="text-xs text-text-muted font-medium uppercase tracking-wider">
+              {k}
+            </p>
             <p className="text-sm text-text mt-0.5">{v || '-'}</p>
           </div>
         ))}

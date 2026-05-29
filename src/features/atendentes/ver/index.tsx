@@ -7,7 +7,13 @@ import { DefaultButton } from '@/components/default-button'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { deleteAtendente } from '@/features/atendentes/server'
 
-export function VerAtendentePage({ atendente, id }: { atendente: any; id: string }) {
+export function VerAtendentePage({
+  atendente,
+  id,
+}: {
+  atendente: any
+  id: string
+}) {
   const navigate = useNavigate()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -29,13 +35,13 @@ export function VerAtendentePage({ atendente, id }: { atendente: any; id: string
   }
 
   const details = {
-    'Código': atendente.codigo,
-    'Nome': atendente.nome,
-    'CPF': atendente.cpf,
+    Código: atendente.codigo,
+    Nome: atendente.nome,
+    CPF: atendente.cpf,
     'E-mail': atendente.email,
-    'Usuário': atendente.username,
-    'Perfil': atendente.role === 'admin' ? 'Administrador' : 'Atendente',
-    'Status': atendente.ativo ? 'Ativo' : 'Inativo',
+    Usuário: atendente.username,
+    Perfil: atendente.role === 'admin' ? 'Administrador' : 'Atendente',
+    Status: atendente.ativo ? 'Ativo' : 'Inativo',
   }
 
   return (
@@ -44,7 +50,12 @@ export function VerAtendentePage({ atendente, id }: { atendente: any; id: string
         title={`Atendente #${id}`}
         action={
           <div className="flex gap-2">
-            <DefaultButton variant="ghost" leftIcon={<ArrowLeft className="w-4 h-4" />} label="Voltar" onClick={() => navigate({ to: '/atendentes' })} />
+            <DefaultButton
+              variant="ghost"
+              leftIcon={<ArrowLeft className="w-4 h-4" />}
+              label="Voltar"
+              onClick={() => navigate({ to: '/atendentes' })}
+            />
             <DefaultButton
               variant="outline"
               leftIcon={<Trash2 className="w-4 h-4" />}
@@ -65,7 +76,9 @@ export function VerAtendentePage({ atendente, id }: { atendente: any; id: string
       <div className="bg-surface border border-border rounded-xl p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
         {Object.entries(details).map(([k, v]) => (
           <div key={k}>
-            <p className="text-xs text-text-muted font-medium uppercase tracking-wider">{k}</p>
+            <p className="text-xs text-text-muted font-medium uppercase tracking-wider">
+              {k}
+            </p>
             <p className="text-sm text-text mt-0.5">{v || '-'}</p>
           </div>
         ))}

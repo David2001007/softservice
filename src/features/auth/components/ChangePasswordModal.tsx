@@ -2,7 +2,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Lock, Loader2, Save } from 'lucide-react'
-import { changePasswordSchema, type ChangePasswordInput } from '@/features/auth/schema'
+import {
+  changePasswordSchema
+  
+} from '@/features/auth/schema'
+import type {ChangePasswordInput} from '@/features/auth/schema';
 import { changePassword } from '@/features/auth/server'
 import { useAuthStore } from '@/stores/auth.store'
 import { DefaultModal } from '@/components/default-modal'
@@ -15,16 +19,24 @@ interface ChangePasswordModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
+export function ChangePasswordModal({
+  open,
+  onOpenChange,
+}: ChangePasswordModalProps) {
   const { user } = useAuthStore()
-  
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ChangePasswordInput>({
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangePasswordInput>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
-    }
+    },
   })
 
   const onSubmit = async (data: ChangePasswordInput) => {
@@ -34,9 +46,9 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
       await changePassword({
         data: {
           userId: user.id,
-          userType: user.type as any,
-          data
-        }
+          userType: user.type,
+          data,
+        },
       })
       toast.success('Senha alterada com sucesso!')
       reset()
@@ -57,7 +69,9 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Senha Atual</Label>
+          <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+            Senha Atual
+          </Label>
           <div className="relative group">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
             <Input
@@ -68,12 +82,16 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
             />
           </div>
           {errors.currentPassword && (
-            <p className="text-xs text-danger ml-1">{errors.currentPassword.message}</p>
+            <p className="text-xs text-danger ml-1">
+              {errors.currentPassword.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Nova Senha</Label>
+          <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+            Nova Senha
+          </Label>
           <div className="relative group">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
             <Input
@@ -84,12 +102,16 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
             />
           </div>
           {errors.newPassword && (
-            <p className="text-xs text-danger ml-1">{errors.newPassword.message}</p>
+            <p className="text-xs text-danger ml-1">
+              {errors.newPassword.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Confirmar Nova Senha</Label>
+          <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+            Confirmar Nova Senha
+          </Label>
           <div className="relative group">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
             <Input
@@ -100,14 +122,16 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
             />
           </div>
           {errors.confirmPassword && (
-            <p className="text-xs text-danger ml-1">{errors.confirmPassword.message}</p>
+            <p className="text-xs text-danger ml-1">
+              {errors.confirmPassword.message}
+            </p>
           )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
-          <Button 
-            type="button" 
-            variant="ghost" 
+          <Button
+            type="button"
+            variant="ghost"
             onClick={() => onOpenChange(false)}
             className="rounded-2xl h-12 px-6 font-bold text-text-muted hover:text-text"
           >

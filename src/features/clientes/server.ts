@@ -5,15 +5,19 @@ import { eq } from 'drizzle-orm'
 import { clienteSchema } from './schema'
 import { z } from 'zod'
 
-
-export const getClientes = createServerFn({ method: 'GET' }).handler(async () => {
-  return await db.select().from(clientes)
-})
+export const getClientes = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return await db.select().from(clientes)
+  },
+)
 
 export const getCliente = createServerFn({ method: 'GET' })
   .inputValidator(z.number())
   .handler(async ({ data }) => {
-    const [cliente] = await db.select().from(clientes).where(eq(clientes.id, data))
+    const [cliente] = await db
+      .select()
+      .from(clientes)
+      .where(eq(clientes.id, data))
     return cliente
   })
 
@@ -23,7 +27,9 @@ export const createCliente = createServerFn({ method: 'POST' })
     const [novoCliente] = await db
       .insert(clientes)
       .values({
-        codigo: `CLI-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+        codigo: `CLI-${Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, '0')}`,
         nome: data.nome,
         cpfCnpj: data.cpfCnpj,
         telefone: data.telefone,

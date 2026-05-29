@@ -1,23 +1,27 @@
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db'
 import { tecnicos } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, or  } from 'drizzle-orm'
 import { tecnicoSchema } from './schema'
 import { z } from 'zod'
 
-export const getTecnicos = createServerFn({ method: 'GET' }).handler(async () => {
-  return await db.select().from(tecnicos)
-})
+import bcrypt from 'bcryptjs'
+
+export const getTecnicos = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return await db.select().from(tecnicos)
+  },
+)
 
 export const getTecnico = createServerFn({ method: 'GET' })
   .inputValidator(z.number())
   .handler(async ({ data }) => {
-    const [tecnico] = await db.select().from(tecnicos).where(eq(tecnicos.id, data))
+    const [tecnico] = await db
+      .select()
+      .from(tecnicos)
+      .where(eq(tecnicos.id, data))
     return tecnico
   })
-
-import bcrypt from 'bcryptjs'
-import { or } from 'drizzle-orm'
 
 export const createTecnico = createServerFn({ method: 'POST' })
   .inputValidator(tecnicoSchema)
@@ -26,7 +30,12 @@ export const createTecnico = createServerFn({ method: 'POST' })
     const existing = await db
       .select()
       .from(tecnicos)
-      .where(or(eq(tecnicos.email, data.email), eq(tecnicos.username, data.username)))
+      .where(
+        or(
+          eq(tecnicos.email, data.email),
+          eq(tecnicos.username, data.username),
+        ),
+      )
       .then((res) => res[0])
 
     if (existing) {
@@ -38,7 +47,9 @@ export const createTecnico = createServerFn({ method: 'POST' })
     const [novo] = await db
       .insert(tecnicos)
       .values({
-        codigo: `TEC-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+        codigo: `TEC-${Math.floor(Math.random() * 1000)
+          .toString()
+          .padStart(3, '0')}`,
         nome: data.nome,
         tipo: data.tipo,
         empresa: data.empresa,
@@ -66,8 +77,8 @@ export const updateTecnico = createServerFn({ method: 'POST' })
       .where(
         or(
           eq(tecnicos.email, data.data.email),
-          eq(tecnicos.username, data.data.username)
-        )
+          eq(tecnicos.username, data.data.username),
+        ),
       )
       .then((res) => res.filter((t) => t.id !== data.id)[0])
 

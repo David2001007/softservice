@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 
 // Lazy-load the heavy WebGL component – page content renders immediately
-const FloatingLines = lazy(() => import('@/components/animations/FloatingLines'))
+const FloatingLines = lazy(
+  () => import('@/components/animations/FloatingLines'),
+)
 
 export const Route = createFileRoute('/')({
   beforeLoad: () => {
@@ -24,12 +26,31 @@ export const Route = createFileRoute('/')({
 })
 
 // Defined outside component – never recreated
-const GRADIENT = ['#2A0A5E', '#7D12FF', '#9333FF', '#C7A6FF', '#7D12FF', '#2A0A5E']
+const GRADIENT = [
+  '#2A0A5E',
+  '#7D12FF',
+  '#9333FF',
+  '#C7A6FF',
+  '#7D12FF',
+  '#2A0A5E',
+]
 
 const FEATURES = [
-  { icon: Zap, title: 'Agilidade', sub: 'Fluxos otimizados para execução rápida.' },
-  { icon: Shield, title: 'Segurança', sub: 'Dados protegidos com criptografia de ponta.' },
-  { icon: BarChart3, title: 'Inteligência', sub: 'Relatórios dinâmicos para decisões precisas.' },
+  {
+    icon: Zap,
+    title: 'Agilidade',
+    sub: 'Fluxos otimizados para execução rápida.',
+  },
+  {
+    icon: Shield,
+    title: 'Segurança',
+    sub: 'Dados protegidos com criptografia de ponta.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Inteligência',
+    sub: 'Relatórios dinâmicos para decisões precisas.',
+  },
 ]
 
 function LandingPage() {
@@ -72,7 +93,11 @@ function LandingPage() {
           <div className="relative group">
             <div className="absolute inset-0 bg-primary/20 blur-[15px] rounded-xl group-hover:bg-primary/40 transition-all" />
             <div className="relative w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden shadow-2xl">
-              <img src="/logo.webp" alt="Unite Logo" className="w-full h-full object-cover" />
+              <img
+                src="/logo.webp"
+                alt="Unite Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
           <span className="text-2xl font-black tracking-tighter text-secondary uppercase">
@@ -83,19 +108,20 @@ function LandingPage() {
 
       {/* ── Main content ── */}
       <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8 md:px-12 lg:px-16">
-
-
         {/* Hero */}
         <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">
-          <h2 className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
-                         sm:text-6xl md:text-7xl lg:text-8xl">
+          <h2
+            className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
+                         sm:text-6xl md:text-7xl lg:text-8xl"
+          >
             <span className="block text-text/60">Conectando</span>
             <span className="block text-primary">equipes.</span>
             <span className="block text-text/60">Impulsionando</span>
             <span className="block text-gold">resultados.</span>
           </h2>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-text-muted sm:text-base md:text-lg lg:max-w-lg">
-            A plataforma definitiva para agilizar, organizar e escalar sua gestão de serviços em tempo real.
+            A plataforma definitiva para agilizar, organizar e escalar sua
+            gestão de serviços em tempo real.
           </p>
         </div>
 
@@ -145,15 +171,24 @@ function LandingPage() {
         {/* Feature cards */}
         <div className="mt-20 grid w-full max-w-3xl grid-cols-1 gap-8 sm:mt-24 sm:grid-cols-3 sm:gap-10">
           {FEATURES.map(({ icon: Icon, title, sub }) => (
-            <div key={title} className="group flex flex-col items-center space-y-3 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10
+            <div
+              key={title}
+              className="group flex flex-col items-center space-y-3 text-center"
+            >
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10
                               bg-white/5 text-text-muted transition-all
-                              group-hover:border-primary/50 group-hover:text-primary">
+                              group-hover:border-primary/50 group-hover:text-primary"
+              >
                 <Icon className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-white">{title}</h3>
-                <p className="mt-1 px-2 text-[11px] leading-relaxed text-text-muted">{sub}</p>
+                <h3 className="text-xs font-black uppercase tracking-widest text-white">
+                  {title}
+                </h3>
+                <p className="mt-1 px-2 text-[11px] leading-relaxed text-text-muted">
+                  {sub}
+                </p>
               </div>
             </div>
           ))}

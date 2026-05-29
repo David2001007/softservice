@@ -1,21 +1,21 @@
-import { DefaultModal } from "./default-modal";
-import { DefaultButton } from "./default-button";
-import { AlertTriangle } from "lucide-react";
+import { DefaultModal } from './default-modal'
+import { DefaultButton } from './default-button'
+import { AlertTriangle } from 'lucide-react'
 
 interface DeleteConfirmationModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
-  title?: string;
-  description: string;
-  isLoading?: boolean;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+  title?: string
+  description: string
+  isLoading?: boolean
 }
 
 export function DeleteConfirmationModal({
   open,
   onOpenChange,
   onConfirm,
-  title = "Deletar?",
+  title = 'Deletar?',
   description,
   isLoading = false,
 }: DeleteConfirmationModalProps) {
@@ -55,5 +55,5 @@ export function DeleteConfirmationModal({
         </div>
       </div>
     </DefaultModal>
-  );
+  )
 }

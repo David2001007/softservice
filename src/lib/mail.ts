@@ -10,7 +10,15 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-export async function sendMail({ to, subject, html }: { to: string; subject: string; html: string }) {
+export async function sendMail({
+  to,
+  subject,
+  html,
+}: {
+  to: string
+  subject: string
+  html: string
+}) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log('--- EMAIL SIMULATION ---')
     console.log(`To: ${to}`)

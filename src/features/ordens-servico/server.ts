@@ -2,18 +2,25 @@ import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db'
 import { ordensServico, osHistorico, osMateriais, materiais } from '@/db/schema'
 import { eq, sql } from 'drizzle-orm'
-import { osSchema, osConclusaoSchema, osReagendamentoSchema, osCancelamentoSchema } from './schema'
+import {
+  osSchema,
+  osConclusaoSchema,
+  osReagendamentoSchema,
+  osCancelamentoSchema,
+} from './schema'
 import { z } from 'zod'
 
-export const getOrdensServico = createServerFn({ method: 'GET' }).handler(async () => {
-  return await db.query.ordensServico.findMany({
-    with: {
-      cliente: true,
-      tecnico: true,
-    },
-    orderBy: (os, { desc }) => [desc(os.createdAt)],
-  })
-})
+export const getOrdensServico = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return await db.query.ordensServico.findMany({
+      with: {
+        cliente: true,
+        tecnico: true,
+      },
+      orderBy: (os, { desc }) => [desc(os.createdAt)],
+    })
+  },
+)
 
 export const getOrdemServico = createServerFn({ method: 'GET' })
   .inputValidator(z.number())
@@ -24,7 +31,10 @@ export const getOrdemServico = createServerFn({ method: 'GET' })
         cliente: true,
         tecnico: true,
         materiais: { with: { material: true } },
-        historico: { with: { usuario: true }, orderBy: (h, { desc }) => [desc(h.dataHora)] },
+        historico: {
+          with: { usuario: true },
+          orderBy: (h, { desc }) => [desc(h.dataHora)],
+        },
       },
     })
     return os
@@ -36,7 +46,11 @@ export const createOrdemServico = createServerFn({ method: 'POST' })
     const [novaOs] = await db
       .insert(ordensServico)
       .values({
-        numero: `OS${new Date().getFullYear()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+        numero: `OS${new Date().getFullYear()}${Math.floor(
+          Math.random() * 10000,
+        )
+          .toString()
+          .padStart(4, '0')}`,
         clienteId: data.clienteId,
         tipoServico: data.tipoServico,
         descricaoProblema: data.descricaoProblema,
@@ -48,7 +62,7 @@ export const createOrdemServico = createServerFn({ method: 'POST' })
         status: data.status,
       })
       .returning()
-      
+
     // Registrar no histórico
     await db.insert(osHistorico).values({
       osId: novaOs.id,
@@ -64,15 +78,48 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.number(), data: osConclusaoSchema }))
   .handler(async ({ data }) => {
     return await db.transaction(async (tx) => {
+      // Verificar status atual da OS
+      const osAtual = await tx
+        .select()
+        .from(ordensServico)
+        .where(eq(ordensServico.id, data.id))
+        .then((res) => res[0])
+
+      if (!osAtual) {
+        throw new Error('Ordem de Serviço não encontrada')
+      }
+
+      if (osAtual.status === 'cancelada' || osAtual.status === 'concluida') {
+        throw new Error('Não é possível editar uma OS cancelada ou concluída')
+      }
+
       // 1. Atualizar a OS
       const [osAtualizada] = await tx
         .update(ordensServico)
         .set({
           status: 'concluida',
-          dataInicioEfetivo: data.data.dataInicioEfetivo ? new Date(data.data.dataInicioEfetivo) : null,
-          dataTerminoEfetivo: data.data.dataTerminoEfetivo ? new Date(data.data.dataTerminoEfetivo) : null,
-          resultadoServico: data.data.resultadoServico,
+          dataInicioEfetivo: data.data.dataInicioEfetivo
+            ? new Date(data.data.dataInicioEfetivo)
+            : null,
+          dataTerminoEfetivo: data.data.dataTerminoEfetivo
+            ? new Date(data.data.dataTerminoEfetivo)
+            : null,
           observacoesFinais: data.data.observacoesFinais,
+          speedTestPing:
+            data.data.speedTestPing != null
+              ? String(data.data.speedTestPing)
+              : null,
+          speedTestDownload:
+            data.data.speedTestDownload != null
+              ? String(data.data.speedTestDownload)
+              : null,
+          speedTestUpload:
+            data.data.speedTestUpload != null
+              ? String(data.data.speedTestUpload)
+              : null,
+          speedTestDataHora: data.data.speedTestDataHora
+            ? new Date(data.data.speedTestDataHora)
+            : null,
         })
         .where(eq(ordensServico.id, data.id))
         .returning()
@@ -92,7 +139,7 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
             tipoUso: mat.tipoUso,
             localSaida: mat.localSaida,
           })
-          
+
           // Baixa de estoque
           await tx
             .update(materiais)
@@ -117,6 +164,23 @@ export const reagendarOrdemServico = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.number(), data: osReagendamentoSchema }))
   .handler(async ({ data }) => {
     return await db.transaction(async (tx) => {
+      // Verificar status atual da OS
+      const osAtual = await tx
+        .select()
+        .from(ordensServico)
+        .where(eq(ordensServico.id, data.id))
+        .then((res) => res[0])
+
+      if (!osAtual) {
+        throw new Error('Ordem de Serviço não encontrada')
+      }
+
+      if (osAtual.status === 'cancelada' || osAtual.status === 'concluida') {
+        throw new Error(
+          'Não é possível reagendar uma OS cancelada ou concluída',
+        )
+      }
+
       const [osAtualizada] = await tx
         .update(ordensServico)
         .set({
@@ -143,6 +207,21 @@ export const cancelarOrdemServico = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.number(), data: osCancelamentoSchema }))
   .handler(async ({ data }) => {
     return await db.transaction(async (tx) => {
+      // Verificar status atual da OS
+      const osAtual = await tx
+        .select()
+        .from(ordensServico)
+        .where(eq(ordensServico.id, data.id))
+        .then((res) => res[0])
+
+      if (!osAtual) {
+        throw new Error('Ordem de Serviço não encontrada')
+      }
+
+      if (osAtual.status === 'concluida') {
+        throw new Error('Não é possível cancelar uma OS concluída')
+      }
+
       const [osAtualizada] = await tx
         .update(ordensServico)
         .set({
@@ -176,7 +255,9 @@ export const updateOrdemServico = createServerFn({ method: 'POST' })
         descricaoProblema: data.data.descricaoProblema,
         observacoes: data.data.observacoes,
         prioridade: data.data.prioridade,
-        dataAgendada: data.data.dataAgendada ? new Date(data.data.dataAgendada) : null,
+        dataAgendada: data.data.dataAgendada
+          ? new Date(data.data.dataAgendada)
+          : null,
         tecnicoId: data.data.tecnicoId,
         valor: data.data.valor || null,
         status: data.data.status,
@@ -214,4 +295,25 @@ export const iniciarAtendimento = createServerFn({ method: 'POST' })
 
       return osAtualizada
     })
+  })
+
+/* ── Speed Test Endpoints ── */
+
+export const speedTestPing = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return { ok: true }
+  },
+)
+
+export const speedTestDownload = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    // Returns exactly 10MB of string data
+    return { data: '0'.repeat(10 * 1024 * 1024) }
+  },
+)
+
+export const speedTestUpload = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ payload: z.string() }))
+  .handler(async () => {
+    return { ok: true }
   })

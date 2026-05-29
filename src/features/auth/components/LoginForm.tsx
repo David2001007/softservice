@@ -1,19 +1,35 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { Loader2, Eye, EyeOff, User, Lock, LogIn, Mail, Key, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  User,
+  Lock,
+  LogIn,
+  Mail,
+  Key,
+  ArrowLeft,
+  CheckCircle2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import {
   loginSchema,
   forgotPasswordSchema,
-  resetPasswordSchema,
-  type LoginInput,
-  type ForgotPasswordInput,
-  type ResetPasswordInput
+  resetPasswordSchema
+  
+  
+  
 } from '@/features/auth/schema'
+import type {LoginInput, ForgotPasswordInput, ResetPasswordInput} from '@/features/auth/schema';
 import { useAuthStore } from '@/stores/auth.store'
 import { useRouter } from '@tanstack/react-router'
-import { login, sendResetCode, verifyResetCodeAndSetPassword } from '@/features/auth/server'
+import {
+  login,
+  sendResetCode,
+  verifyResetCodeAndSetPassword,
+} from '@/features/auth/server'
 
 // Shadcn UI Components
 import { Button } from '@/components/ui/button'
@@ -46,7 +62,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   const resetForm = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { email: '', code: '', newPassword: '', confirmPassword: '' },
+    defaultValues: {
+      email: '',
+      code: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
   })
 
   // ── HANDLERS ──
@@ -57,8 +78,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         id: response.id,
         nome: response.nome,
         username: response.username,
-        role: response.role as any,
-        type: response.type
+        role: response.role,
+        type: response.type,
       })
       toast.success('Login realizado com sucesso!')
       if (onSuccess) onSuccess()
@@ -95,13 +116,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     <div className="w-full max-w-[440px] mx-auto fade-in">
       <Card className="bg-surface/80 backdrop-blur-xl border-white/10 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] overflow-hidden">
         <CardContent className="p-6 sm:p-8 xl:p-12">
-
           {/* Header / Logo */}
           <div className="flex flex-col items-center text-center mb-10">
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-primary/30 blur-[20px] rounded-full animate-pulse" />
               <div className="relative w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-xl border border-white/10 overflow-hidden">
-                <img src="/logo.webp" alt="Unite Logo" className="w-full h-full object-cover" />
+                <img
+                  src="/logo.webp"
+                  alt="Unite Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 
@@ -111,7 +135,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               </h1>
               <div className="flex items-center gap-2 justify-center">
                 <Separator className="w-6 bg-gold/50" />
-                <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em]">Conectando equipes</p>
+                <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em]">
+                  Conectando equipes
+                </p>
                 <Separator className="w-6 bg-gold/50" />
               </div>
             </div>
@@ -125,16 +151,22 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               <p className="text-sm text-text-muted">
                 {mode === 'login' && 'Faça login para acessar sua conta'}
                 {mode === 'forgot' && 'Enviaremos um código para o seu e-mail'}
-                {mode === 'reset' && `Digite o código enviado para ${resetEmail}`}
+                {mode === 'reset' &&
+                  `Digite o código enviado para ${resetEmail}`}
               </p>
             </div>
           </div>
 
           {/* ── LOGIN MODE ── */}
           {mode === 'login' && (
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
+            <form
+              onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+              className="space-y-6"
+            >
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">E-mail ou Usuário</Label>
+                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+                  E-mail ou Usuário
+                </Label>
                 <div className="relative group">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
                   <Input
@@ -145,13 +177,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   />
                 </div>
                 {loginForm.formState.errors.identifier && (
-                  <p className="text-xs text-danger ml-1">{loginForm.formState.errors.identifier.message}</p>
+                  <p className="text-xs text-danger ml-1">
+                    {loginForm.formState.errors.identifier.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-1">
-                  <Label className="text-xs font-bold text-text-muted uppercase tracking-wider">Senha</Label>
+                  <Label className="text-xs font-bold text-text-muted uppercase tracking-wider">
+                    Senha
+                  </Label>
                   <Button
                     variant="link"
                     type="button"
@@ -174,11 +210,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors z-10"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
                 {loginForm.formState.errors.password && (
-                  <p className="text-xs text-danger ml-1">{loginForm.formState.errors.password.message}</p>
+                  <p className="text-xs text-danger ml-1">
+                    {loginForm.formState.errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -201,9 +243,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
           {/* ── FORGOT MODE ── */}
           {mode === 'forgot' && (
-            <form onSubmit={forgotForm.handleSubmit(onForgotSubmit)} className="space-y-6">
+            <form
+              onSubmit={forgotForm.handleSubmit(onForgotSubmit)}
+              className="space-y-6"
+            >
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Seu E-mail</Label>
+                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+                  Seu E-mail
+                </Label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
                   <Input
@@ -214,7 +261,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   />
                 </div>
                 {forgotForm.formState.errors.email && (
-                  <p className="text-xs text-danger ml-1">{forgotForm.formState.errors.email.message}</p>
+                  <p className="text-xs text-danger ml-1">
+                    {forgotForm.formState.errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -242,9 +291,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
           {/* ── RESET MODE ── */}
           {mode === 'reset' && (
-            <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-6">
+            <form
+              onSubmit={resetForm.handleSubmit(onResetSubmit)}
+              className="space-y-6"
+            >
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Código de 6 dígitos</Label>
+                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+                  Código de 6 dígitos
+                </Label>
                 <div className="relative group">
                   <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
                   <Input
@@ -256,12 +310,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   />
                 </div>
                 {resetForm.formState.errors.code && (
-                  <p className="text-xs text-danger ml-1">{resetForm.formState.errors.code.message}</p>
+                  <p className="text-xs text-danger ml-1">
+                    {resetForm.formState.errors.code.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Nova Senha</Label>
+                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+                  Nova Senha
+                </Label>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
                   <Input
@@ -272,12 +330,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   />
                 </div>
                 {resetForm.formState.errors.newPassword && (
-                  <p className="text-xs text-danger ml-1">{resetForm.formState.errors.newPassword.message}</p>
+                  <p className="text-xs text-danger ml-1">
+                    {resetForm.formState.errors.newPassword.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Confirmar Senha</Label>
+                <Label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">
+                  Confirmar Senha
+                </Label>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors z-10" />
                   <Input
@@ -288,7 +350,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   />
                 </div>
                 {resetForm.formState.errors.confirmPassword && (
-                  <p className="text-xs text-danger ml-1">{resetForm.formState.errors.confirmPassword.message}</p>
+                  <p className="text-xs text-danger ml-1">
+                    {resetForm.formState.errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
@@ -316,7 +380,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               </button>
             </form>
           )}
-
         </CardContent>
       </Card>
     </div>

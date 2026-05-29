@@ -1,13 +1,17 @@
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db'
 import { users } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, or  } from 'drizzle-orm'
 import { atendenteSchema } from './schema'
 import { z } from 'zod'
 
-export const getAtendentes = createServerFn({ method: 'GET' }).handler(async () => {
-  return await db.select().from(users)
-})
+import bcrypt from 'bcryptjs'
+
+export const getAtendentes = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return await db.select().from(users)
+  },
+)
 
 export const getAtendente = createServerFn({ method: 'GET' })
   .inputValidator(z.number())
@@ -15,9 +19,6 @@ export const getAtendente = createServerFn({ method: 'GET' })
     const [atendente] = await db.select().from(users).where(eq(users.id, data))
     return atendente
   })
-
-import bcrypt from 'bcryptjs'
-import { or } from 'drizzle-orm'
 
 export const createAtendente = createServerFn({ method: 'POST' })
   .inputValidator(atendenteSchema)
@@ -38,7 +39,9 @@ export const createAtendente = createServerFn({ method: 'POST' })
     const [novo] = await db
       .insert(users)
       .values({
-        codigo: `ATD-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+        codigo: `ATD-${Math.floor(Math.random() * 1000)
+          .toString()
+          .padStart(3, '0')}`,
         nome: data.nome,
         cpf: data.cpf,
         email: data.email,
@@ -61,8 +64,8 @@ export const updateAtendente = createServerFn({ method: 'POST' })
       .where(
         or(
           eq(users.email, data.data.email),
-          eq(users.username, data.data.username)
-        )
+          eq(users.username, data.data.username),
+        ),
       )
       .then((res) => res.filter((u) => u.id !== data.id)[0])
 

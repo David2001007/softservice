@@ -7,47 +7,84 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
-import { materialSchema, type MaterialInput } from '@/features/materiais/schema'
+import { materialSchema  } from '@/features/materiais/schema'
+import type {MaterialInput} from '@/features/materiais/schema';
 import { updateMaterial, deleteMaterial } from '@/features/materiais/server'
 
-const inputCls = 'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
+const inputCls =
+  'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
 const selectCls = `${inputCls} cursor-pointer`
 
-function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string
+  required?: boolean
+  error?: string
+  children: React.ReactNode
+}) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-text">{label}{required && <span className="text-danger ml-1">*</span>}</label>
+      <label className="block text-sm font-medium text-text">
+        {label}
+        {required && <span className="text-danger ml-1">*</span>}
+      </label>
       {children}
       {error && <p className="text-xs text-danger mt-1">{error}</p>}
     </div>
   )
 }
 
-function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+function FormSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
   return (
     <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
-      {title && <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider border-b border-border pb-2">{title}</h3>}
+      {title && (
+        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider border-b border-border pb-2">
+          {title}
+        </h3>
+      )}
       {children}
     </div>
   )
 }
 
-export function EditarMaterialPage({ material, id }: { material: any; id: string }) {
+export function EditarMaterialPage({
+  material,
+  id,
+}: {
+  material: any
+  id: string
+}) {
   const navigate = useNavigate()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<MaterialInput>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<MaterialInput>({
     resolver: zodResolver(materialSchema),
-    values: material ? {
-      descricao: material.descricao,
-      categoria: material.categoria,
-      unidade: material.unidade as any,
-      quantidade: String(material.quantidade),
-      estoqueMinimo: String(material.estoqueMinimo),
-      comodato: material.comodato,
-      status: material.status as any,
-    } : undefined,
+    values: material
+      ? {
+          descricao: material.descricao,
+          categoria: material.categoria,
+          unidade: material.unidade,
+          quantidade: String(material.quantidade),
+          estoqueMinimo: String(material.estoqueMinimo),
+          comodato: material.comodato,
+          status: material.status,
+        }
+      : undefined,
   })
 
   const onSubmit = async (data: MaterialInput) => {
@@ -80,21 +117,44 @@ export function EditarMaterialPage({ material, id }: { material: any; id: string
     <div className="max-w-2xl mx-auto space-y-5 fade-in">
       <PageHeader
         title={`Editar Material #${id}`}
-        action={<DefaultButton variant="ghost" leftIcon={<ArrowLeft className="w-4 h-4" />} label="Voltar" onClick={() => navigate({ to: '/materiais' })} />}
+        action={
+          <DefaultButton
+            variant="ghost"
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+            label="Voltar"
+            onClick={() => navigate({ to: '/materiais' })}
+          />
+        }
       />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <FormSection title="">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <Field label="Descrição" required error={errors.descricao?.message}>
-                <input {...register('descricao')} placeholder="Ex: Cabo de fibra óptica SC/UPC" className={inputCls} />
+              <Field
+                label="Descrição"
+                required
+                error={errors.descricao?.message}
+              >
+                <input
+                  {...register('descricao')}
+                  placeholder="Ex: Cabo de fibra óptica SC/UPC"
+                  className={inputCls}
+                />
               </Field>
             </div>
             <Field label="Categoria" required error={errors.categoria?.message}>
-              <input {...register('categoria')} placeholder="Fibra, Equipamento..." className={inputCls} />
+              <input
+                {...register('categoria')}
+                placeholder="Fibra, Equipamento..."
+                className={inputCls}
+              />
             </Field>
-            <Field label="Unidade de Medida" required error={errors.unidade?.message}>
+            <Field
+              label="Unidade de Medida"
+              required
+              error={errors.unidade?.message}
+            >
               <select {...register('unidade')} className={selectCls}>
                 <option value="unidade">Unidade</option>
                 <option value="metro">Metro</option>
@@ -105,17 +165,39 @@ export function EditarMaterialPage({ material, id }: { material: any; id: string
               </select>
             </Field>
             <Field label="Quantidade Atual">
-              <input {...register('quantidade')} type="number" step="0.001" className={inputCls} />
+              <input
+                {...register('quantidade')}
+                type="number"
+                step="0.001"
+                className={inputCls}
+              />
             </Field>
             <Field label="Estoque Mínimo">
-              <input {...register('estoqueMinimo')} type="number" step="0.001" className={inputCls} />
+              <input
+                {...register('estoqueMinimo')}
+                type="number"
+                step="0.001"
+                className={inputCls}
+              />
             </Field>
 
             <div className="sm:col-span-2 flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
-              <input {...register('comodato')} id="comodato-edit" type="checkbox" className="w-4 h-4 accent-primary cursor-pointer" />
+              <input
+                {...register('comodato')}
+                id="comodato-edit"
+                type="checkbox"
+                className="w-4 h-4 accent-primary cursor-pointer"
+              />
               <div>
-                <label htmlFor="comodato-edit" className="text-sm font-medium text-text cursor-pointer">Material de comodato</label>
-                <p className="text-xs text-text-muted">Equipamento fornecido em comodato ao cliente</p>
+                <label
+                  htmlFor="comodato-edit"
+                  className="text-sm font-medium text-text cursor-pointer"
+                >
+                  Material de comodato
+                </label>
+                <p className="text-xs text-text-muted">
+                  Equipamento fornecido em comodato ao cliente
+                </p>
               </div>
             </div>
 
@@ -137,7 +219,11 @@ export function EditarMaterialPage({ material, id }: { material: any; id: string
             onClick={() => setShowDeleteModal(true)}
           />
           <div className="flex items-center gap-3">
-            <DefaultButton variant="ghost" label="Cancelar" onClick={() => navigate({ to: '/materiais' })} />
+            <DefaultButton
+              variant="ghost"
+              label="Cancelar"
+              onClick={() => navigate({ to: '/materiais' })}
+            />
             <DefaultButton
               type="submit"
               isLoading={isSubmitting}

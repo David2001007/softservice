@@ -2,27 +2,50 @@ import { z } from 'zod'
 
 export const osSchema = z.object({
   clienteId: z.number(),
-  tipoServico: z.enum(['instalacao', 'manutencao', 'troca_equipamento', 'infra', 'outro']),
+  tipoServico: z.enum([
+    'instalacao',
+    'manutencao',
+    'troca_equipamento',
+    'infra',
+    'outro',
+  ]),
   descricaoProblema: z.string().optional(),
   observacoes: z.string().optional(),
   prioridade: z.enum(['baixa', 'normal', 'alta']).default('normal'),
   dataAgendada: z.string().optional(),
   tecnicoId: z.number().optional(),
   valor: z.string().optional(),
-  status: z.enum(['aberta', 'agendada', 'em_execucao', 'concluida', 'cancelada', 'reagendada', 'pendente']).default('aberta'),
+  status: z
+    .enum([
+      'aberta',
+      'agendada',
+      'em_execucao',
+      'concluida',
+      'cancelada',
+      'reagendada',
+      'pendente',
+    ])
+    .default('aberta'),
 })
 
 export const osConclusaoSchema = z.object({
-  dataInicioEfetivo: z.string().optional(),
-  dataTerminoEfetivo: z.string().optional(),
-  resultadoServico: z.boolean(),
+  dataInicioEfetivo: z.string().min(1, 'Data/hora de início obrigatória'),
+  dataTerminoEfetivo: z.string().min(1, 'Data/hora de término obrigatória'),
   observacoesFinais: z.string().optional(),
-  materiais: z.array(z.object({
-    materialId: z.number(),
-    quantidade: z.string(),
-    tipoUso: z.enum(['comodato', 'venda', 'uso_interno']),
-    localSaida: z.enum(['estoque_principal', 'estoque_tecnico']),
-  })).default([]),
+  materiais: z
+    .array(
+      z.object({
+        materialId: z.number(),
+        quantidade: z.string(),
+        tipoUso: z.enum(['comodato', 'venda', 'uso_interno']),
+        localSaida: z.enum(['estoque_principal', 'estoque_tecnico']),
+      }),
+    )
+    .default([]),
+  speedTestPing: z.number().optional(),
+  speedTestDownload: z.number().optional(),
+  speedTestUpload: z.number().optional(),
+  speedTestDataHora: z.string().optional(),
 })
 
 export const osReagendamentoSchema = z.object({
@@ -40,3 +63,7 @@ export type OsInput = z.input<typeof osSchema>
 export type OsConclusaoInput = z.input<typeof osConclusaoSchema>
 export type OsReagendamentoInput = z.input<typeof osReagendamentoSchema>
 export type OsCancelamentoInput = z.input<typeof osCancelamentoSchema>
+export type OsSchema = z.infer<typeof osSchema>
+export type OsConclusao = z.infer<typeof osConclusaoSchema>
+export type OsReagendamento = z.infer<typeof osReagendamentoSchema>
+export type OsCancelamento = z.infer<typeof osCancelamentoSchema>

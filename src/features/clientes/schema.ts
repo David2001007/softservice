@@ -13,7 +13,9 @@ export const clienteSchema = z.object({
   uf: z.string().max(2).optional(),
   referencia: z.string().optional(),
   plano: z.string().optional(),
-  situacaoContrato: z.enum(['assinado', 'nao_assinado']).default('nao_assinado'),
+  situacaoContrato: z
+    .enum(['assinado', 'nao_assinado'])
+    .default('nao_assinado'),
   status: z.enum(['ativo', 'inativo']).default('ativo'),
 })
 

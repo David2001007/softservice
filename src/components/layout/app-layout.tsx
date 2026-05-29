@@ -23,7 +23,7 @@ export function AppLayout() {
       <main
         className={cn(
           'pt-[72px] min-h-screen transition-all duration-300',
-          sidebarCollapsed ? 'pl-16' : 'pl-64'
+          sidebarCollapsed ? 'pl-16' : 'pl-64',
         )}
       >
         <div className="p-6">

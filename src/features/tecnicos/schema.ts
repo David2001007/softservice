@@ -11,7 +11,11 @@ export const tecnicoSchema = z.object({
   especialidade: z.string().optional(),
   perfil: z.enum(['tecnico', 'supervisor']).default('tecnico'),
   username: z.string().min(3, 'Usuário deve ter ao menos 3 caracteres'),
-  password: z.string().min(6, 'Senha deve ter ao menos 6 caracteres').optional().or(z.literal('')),
+  password: z
+    .string()
+    .min(6, 'Senha deve ter ao menos 6 caracteres')
+    .optional()
+    .or(z.literal('')),
   ativo: z.boolean().default(true),
 })
 
