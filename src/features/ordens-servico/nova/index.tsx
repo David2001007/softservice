@@ -55,7 +55,12 @@ function FormSection({
   )
 }
 
-export function NovaOrdemServicoPage() {
+export function NovaOrdemServicoPage({
+  tecnicos,
+}: {
+  clientes: any[]
+  tecnicos: any[]
+}) {
   const navigate = useNavigate()
   const {
     register,
@@ -173,6 +178,19 @@ export function NovaOrdemServicoPage() {
                     type="datetime-local"
                     className={inputCls}
                   />
+                </Field>
+                <Field label="Técnico Responsável">
+                  <select
+                    {...register('tecnicoId', { valueAsNumber: true })}
+                    className={selectCls}
+                  >
+                    <option value="">Selecione um técnico...</option>
+                    {tecnicos.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.nome}
+                      </option>
+                    ))}
+                  </select>
                 </Field>
               </div>
             </FormSection>

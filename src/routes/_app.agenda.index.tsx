@@ -26,6 +26,7 @@ export const Route = createFileRoute('/_app/agenda/')({
 })
 
 const statusColors: Record<string, string> = {
+  aberta: 'bg-info/20 border-info/40 text-info',
   agendada: 'bg-primary/20 border-primary/40 text-primary',
   em_execucao: 'bg-warning/20 border-warning/40 text-warning',
   concluida: 'bg-success/20 border-success/40 text-success',
@@ -117,6 +118,7 @@ function AgendaPage() {
               className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm focus:outline-none focus:border-primary transition-colors cursor-pointer"
             >
               <option value="">Todos</option>
+              <option value="aberta">Aberta</option>
               <option value="agendada">Agendada</option>
               <option value="em_execucao">Em Execução</option>
               <option value="concluida">Concluída</option>

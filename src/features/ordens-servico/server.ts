@@ -43,6 +43,8 @@ export const getOrdemServico = createServerFn({ method: 'GET' })
 export const createOrdemServico = createServerFn({ method: 'POST' })
   .inputValidator(osSchema)
   .handler(async ({ data }) => {
+    const status = data.dataAgendada ? 'agendada' : (data.status || 'aberta')
+
     const [novaOs] = await db
       .insert(ordensServico)
       .values({
@@ -59,7 +61,7 @@ export const createOrdemServico = createServerFn({ method: 'POST' })
         dataAgendada: data.dataAgendada ? new Date(data.dataAgendada) : null,
         tecnicoId: data.tecnicoId,
         valor: data.valor || null,
-        status: data.status,
+        status: status,
       })
       .returning()
 
@@ -247,6 +249,8 @@ export const cancelarOrdemServico = createServerFn({ method: 'POST' })
 export const updateOrdemServico = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.number(), data: osSchema }))
   .handler(async ({ data }) => {
+    const status = data.data.dataAgendada ? 'agendada' : data.data.status
+
     const [atualizada] = await db
       .update(ordensServico)
       .set({
@@ -260,7 +264,7 @@ export const updateOrdemServico = createServerFn({ method: 'POST' })
           : null,
         tecnicoId: data.data.tecnicoId,
         valor: data.data.valor || null,
-        status: data.data.status,
+        status: status,
       })
       .where(eq(ordensServico.id, data.id))
       .returning()
