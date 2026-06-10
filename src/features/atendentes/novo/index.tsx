@@ -55,8 +55,9 @@ export function NovoAtendentePage() {
       await createAtendente({ data })
       toast.success('Atendente cadastrado com sucesso!')
       await navigate({ to: '/atendentes' })
-    } catch (e) {
-      toast.error('Erro ao cadastrar atendente')
+    } catch (e: any) {
+      console.error(e)
+      toast.error(e.message || 'Erro ao cadastrar atendente')
     }
   }
 

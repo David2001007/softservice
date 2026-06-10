@@ -16,6 +16,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { osSchema  } from '@/features/ordens-servico/schema'
 import type {OsInput} from '@/features/ordens-servico/schema';
 import { createOrdemServico } from '@/features/ordens-servico/server'
@@ -52,6 +60,9 @@ export function NovaOrdemServicoPage({
   const navigate = useNavigate()
   const [searchCliente, setSearchCliente] = useState('')
   const [openClienteList, setOpenClienteList] = useState(false)
+  const [showRetroactiveModal, setShowRetroactiveModal] = useState(false)
+  const [pendingOsData, setPendingOsData] = useState<OsInput | null>(null)
+  const [isConfirming, setIsConfirming] = useState(false)
   const clienteInputRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -110,14 +121,30 @@ export function NovaOrdemServicoPage({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const onSubmit = async (data: OsInput) => {
+  const processSubmit = async (data: OsInput) => {
+    setIsConfirming(true)
     try {
       await createOrdemServico({ data })
       toast.success('Ordem de Serviço criada com sucesso!')
+      setShowRetroactiveModal(false)
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
       toast.error('Erro ao criar Ordem de Serviço')
+      setIsConfirming(false)
     }
+  }
+
+  const onSubmit = async (data: OsInput) => {
+    if (data.dataAgendada) {
+      const dataAgendadaDate = new Date(data.dataAgendada)
+      const now = new Date()
+      if (dataAgendadaDate < now) {
+        setPendingOsData(data)
+        setShowRetroactiveModal(true)
+        return
+      }
+    }
+    await processSubmit(data)
   }
 
   return (
@@ -372,6 +399,33 @@ export function NovaOrdemServicoPage({
           />
         </div>
       </form>
+
+      <Dialog open={showRetroactiveModal} onOpenChange={setShowRetroactiveModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aviso: Data Retroativa</DialogTitle>
+            <DialogDescription>
+              Essa OS está com data retroativa, deseja confirmar?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <DefaultButton
+              variant="ghost"
+              label="Não"
+              onClick={() => setShowRetroactiveModal(false)}
+              disabled={isConfirming}
+            />
+            <DefaultButton
+              label="Sim"
+              onClick={() => {
+                if (pendingOsData) processSubmit(pendingOsData)
+              }}
+              isLoading={isConfirming}
+              className="bg-primary hover:bg-primary-hover text-white"
+            />
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
