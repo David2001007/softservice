@@ -8,17 +8,41 @@ import {
 } from 'lucide-react'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth.store'
 
 import { getOrdensServico } from '@/features/ordens-servico/server'
+import { getMateriais } from '@/features/materiais/server'
+import { TecnicoDashboard } from '@/features/tecnicos/components/TecnicoDashboard'
 
 export const Route = createFileRoute('/_app/dashboard')({
-  loader: async () => await getOrdensServico(),
+  loader: async () => {
+    const [ordens, materiais] = await Promise.all([
+      getOrdensServico(),
+      getMateriais(),
+    ])
+    return { ordens, materiais }
+  },
   component: Dashboard,
 })
 
 function Dashboard() {
-  const ordens = Route.useLoaderData()
+  const { ordens, materiais } = Route.useLoaderData()
+  const { user } = useAuthStore()
 
+  if (user?.type === 'tecnico') {
+    return (
+      <TecnicoDashboard
+        ordens={ordens}
+        materiais={materiais}
+        tecnicoId={user.id}
+      />
+    )
+  }
+
+  return <AdminDashboard ordens={ordens} />
+}
+
+function AdminDashboard({ ordens }: { ordens: any[] }) {
   const abertas = ordens.filter((o) => o.status === 'aberta').length
   const emExecucao = ordens.filter((o) => o.status === 'em_execucao').length
   const concluidasMes = ordens.filter(

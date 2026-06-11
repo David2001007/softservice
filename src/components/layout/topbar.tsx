@@ -35,11 +35,21 @@ export function Topbar({ onLogout }: TopbarProps) {
       <header
         className={cn(
           'fixed top-0 right-0 z-30 h-[72px] bg-surface border-b border-border flex items-center justify-between px-6 transition-all duration-300',
-          sidebarCollapsed ? 'left-16' : 'left-64',
+          user?.type === 'tecnico' ? 'left-0' : (sidebarCollapsed ? 'left-16' : 'left-64'),
         )}
       >
         {/* Left: breadcrumb / title */}
-        <div />
+        <div className="flex items-center gap-3">
+          {user?.type === 'tecnico' && (
+            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 shadow-lg border border-white/10 overflow-hidden">
+              <img
+                src="/logo.webp"
+                alt="Unite Logo"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
 
         {/* Right: actions */}
         <div className="flex items-center gap-3">
