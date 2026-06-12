@@ -24,8 +24,8 @@ import { deleteOrdemServico } from '@/features/ordens-servico/server'
 const tipoServicoLabel: Record<string, string> = {
   instalacao: 'Instalação',
   manutencao: 'Manutenção',
-  troca_equipamento: 'Troca de Equip.',
-  infra: 'Infra',
+  troca_equipamento: 'Troca de Equipamento',
+  infra: 'Infraestrutura',
   outro: 'Outro',
 }
 
@@ -101,7 +101,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
       className: 'text-muted-foreground text-sm',
     },
     {
-      header: 'Agendada',
+      header: 'Data/Hora Agendada',
       cell: (r) => (
         <span className="text-sm text-muted-foreground whitespace-nowrap">
           {r.dataAgendada
@@ -256,7 +256,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
                 <SelectItem value="troca_equipamento">
                   Troca de Equipamento
                 </SelectItem>
-                <SelectItem value="infra">Infra</SelectItem>
+                <SelectItem value="infra">Infraestrutura</SelectItem>
                 <SelectItem value="outro">Outro</SelectItem>
               </SelectContent>
             </Select>

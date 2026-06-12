@@ -23,7 +23,6 @@ import {
   
 } from '@/features/ordens-servico/schema'
 import type {OsConclusaoInput} from '@/features/ordens-servico/schema';
-import { cn } from '@/lib/utils'
 import { SpeedTest  } from './speed-test'
 import type {SpeedTestResults} from './speed-test';
 

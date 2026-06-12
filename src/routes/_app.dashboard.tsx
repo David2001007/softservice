@@ -90,6 +90,14 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       bg: 'bg-danger/10',
       border: 'border-danger/20',
     },
+    {
+      label: 'OS Agendadas',
+      value: ordens.filter((o) => o.status === 'agendada' && new Date(o.dataAgendada) >= new Date()).length,
+      icon: CalendarClock,
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+      border: 'border-primary/20',
+    },
   ]
 
   const hojeStr = new Date().toISOString().split('T')[0]
@@ -124,20 +132,18 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4 overflow-x-auto">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`bg-surface border ${card.border} rounded-xl p-5 flex items-center gap-4 shadow-soft hover:border-opacity-50 transition-all`}
+            className={`bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all`}
           >
-            <div
-              className={`w-12 h-12 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}
-            >
-              <card.icon className={`w-6 h-6 ${card.color}`} />
+            <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}>
+              <card.icon className={`w-5 h-5 ${card.color}`} />
             </div>
             <div>
-              <p className="text-3xl font-bold text-text">{card.value}</p>
-              <p className="text-xs text-text-muted mt-0.5">{card.label}</p>
+              <p className="text-2xl font-bold text-text">{card.value}</p>
+              <p className="text-xs text-text-muted mt-1">{card.label}</p>
             </div>
           </div>
         ))}

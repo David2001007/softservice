@@ -1,4 +1,4 @@
-import { LogOut, Bell, ChevronDown, User, Key } from 'lucide-react'
+import { LogOut, Bell, ChevronDown, Key } from 'lucide-react'
 import { useUiStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { cn } from '@/lib/utils'

@@ -76,6 +76,7 @@ export function EditarMaterialPage({
     resolver: zodResolver(materialSchema),
     values: material
       ? {
+          codigo: material.codigo,
           descricao: material.descricao,
           categoria: material.categoria,
           unidade: material.unidade,
@@ -130,6 +131,19 @@ export function EditarMaterialPage({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <FormSection title="">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <Field
+                label="Código"
+                required
+                error={errors.codigo?.message}
+              >
+                <input
+                  {...register('codigo')}
+                  placeholder="Ex: FIB-001"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
             <div className="sm:col-span-2">
               <Field
                 label="Descrição"

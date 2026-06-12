@@ -34,7 +34,7 @@ export const createAtendente = createServerFn({ method: 'POST' })
       throw new Error('E-mail ou Usuário já cadastrado')
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10)
+    const hashedPassword = await bcrypt.hash(data.password ?? '', 10)
 
     const [novo] = await db
       .insert(users)

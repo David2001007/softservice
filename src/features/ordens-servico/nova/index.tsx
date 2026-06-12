@@ -65,6 +65,7 @@ export function NovaOrdemServicoPage({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<OsInput>({
     resolver: zodResolver(osSchema),
@@ -93,17 +94,14 @@ export function NovaOrdemServicoPage({
       endereco: 'Rua das Flores, 123 - Centro',
       plano: '300 Mbps',
     })
+    setValue('clienteId', 1, { shouldValidate: true })
     toast.success('Cliente encontrado!')
   }
 
   const onSubmit = async (data: OsInput) => {
-    if (!clienteSelecionado) {
-      toast.error('Selecione um cliente antes de abrir a OS')
-      return
-    }
     try {
       await createOrdemServico({
-        data: { ...data, clienteId: clienteSelecionado.id },
+        data,
       })
       toast.success('Ordem de serviço aberta com sucesso!')
       await navigate({ to: '/ordens-servico' })
@@ -135,13 +133,11 @@ export function NovaOrdemServicoPage({
           >
             <FormSection title="Dados da Solicitação">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Tipo de Serviço" required>
+                <Field label="Tipo de Serviço" required error={errors.tipoServico?.message}>
                   <select {...register('tipoServico')} className={selectCls}>
                     <option value="instalacao">Instalação</option>
                     <option value="manutencao">Manutenção</option>
-                    <option value="troca_equipamento">
-                      Troca de Equipamento
-                    </option>
+                    <option value="troca_equipamento">Troca de Equipamento</option>
                     <option value="infra">Infraestrutura</option>
                     <option value="outro">Outro</option>
                   </select>
@@ -153,6 +149,7 @@ export function NovaOrdemServicoPage({
                     <option value="alta">Alta</option>
                   </select>
                 </Field>
+                <input type="hidden" {...register('clienteId')} />
                 <div className="sm:col-span-2">
                   <Field
                     label="Descrição do Problema / Solicitação"
@@ -210,7 +207,12 @@ export function NovaOrdemServicoPage({
                     onChange={(e) => setBuscaCliente(e.target.value)}
                     placeholder="Nome, CPF ou CNPJ..."
                     className={inputCls}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearchClient()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleSearchClient()
+                      }
+                    }}
                   />
                   <DefaultButton
                     variant="outline"
@@ -219,6 +221,9 @@ export function NovaOrdemServicoPage({
                     className="px-3"
                   />
                 </div>
+                {errors.clienteId && (
+                  <p className="text-xs text-danger">{errors.clienteId.message}</p>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -238,7 +243,10 @@ export function NovaOrdemServicoPage({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setClienteSelecionado(null)}
+                    onClick={() => {
+                      setClienteSelecionado(null)
+                      setValue('clienteId', undefined as any, { shouldValidate: true })
+                    }}
                     className="text-xs text-primary hover:underline"
                   >
                     Trocar
