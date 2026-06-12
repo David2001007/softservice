@@ -66,15 +66,19 @@ O projeto segue uma estrutura baseada em funcionalidades (**Features**), localiz
 src/
 ├── components/     # Componentes globais e UI (shadcn)
 ├── db/             # Configuração do banco e exportação do schema global
-├── features/       # Funcionalidades de negócio
-│   ├── atendentes/
-│   │   ├── components/ # Componentes específicos da feature
+├── features/       # Funcionalidades de negócio (auth, clientes, materiais, etc.)
+│   ├── [feature]/
+│   │   ├── index.tsx   # Página/Componente principal da feature
+│   │   ├── novo/       # Sub-rota de criação (opcional)
+│   │   ├── editar/     # Sub-rota de edição (opcional)
+│   │   ├── ver/        # Sub-rota de visualização (opcional)
+│   │   ├── components/ # Componentes específicos da feature (opcional)
 │   │   ├── schema.ts   # Definição Drizzle da tabela
-│   │   ├── types.ts    # Tipos TypeScript
-│   │   └── queries.ts  # Funções de servidor e queries
-├── hooks/          # Hooks globais
+│   │   └── server.ts   # Funções de servidor (Server Functions)
+├── integrations/   # Integrações com bibliotecas externas (ex: TanStack Query)
+├── lib/            # Utilitários e configurações compartilhadas
 ├── routes/         # Roteamento baseado em arquivos (TanStack Router)
-└── lib/            # Utilitários e instâncias de bibliotecas
+└── stores/         # Gerenciamento de estado global (Zustand)
 ```
 
 ### Convenções de Código
