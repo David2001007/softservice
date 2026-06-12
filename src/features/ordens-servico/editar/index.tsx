@@ -23,8 +23,6 @@ import {
   updateOrdemServico,
   deleteOrdemServico,
 } from '@/features/ordens-servico/server'
-import { getClientes } from '@/features/clientes/server'
-import { getTecnicos } from '@/features/tecnicos/server'
 import { cn } from '@/lib/utils'
 
 function FormSection({
@@ -78,9 +76,9 @@ export function EditarOrdemServicoPage({
           descricaoProblema: os.descricaoProblema || '',
           observacoes: os.observacoes || '',
           status: os.status,
-          dataAgendada: os.dataAgendada
-            ? new Date(os.dataAgendada).toISOString().slice(0, 16)
-            : '',
+          dataAgendada: os.dataAgendada,
+          dataAgendadaDate: os.dataAgendada ? new Date(os.dataAgendada).toISOString().slice(0,10) : '',
+          dataAgendadaTime: os.dataAgendada ? new Date(os.dataAgendada).toISOString().slice(11,16) : '',
           tecnicoId: os.tecnicoId || undefined,
           valor: os.valor || '',
         }
@@ -106,7 +104,7 @@ export function EditarOrdemServicoPage({
   }
 
   const handleClearCliente = () => {
-    setValue('clienteId', undefined)
+    setValue('clienteId', undefined as any)
     setSearchCliente('')
     setOpenClienteList(false)
   }
@@ -123,8 +121,16 @@ export function EditarOrdemServicoPage({
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  // Sync separate date and time fields into combined datetime
+  const date = watch('dataAgendadaDate');
+  const time = watch('dataAgendadaTime');
+  useEffect(() => {
+    if (date && time) {
+      setValue('dataAgendada', `${date}T${time}`);
+    }
+  }, [date, time, setValue]);
 
   const onSubmit = async (data: OsInput) => {
     try {
@@ -242,6 +248,7 @@ export function EditarOrdemServicoPage({
                   {errors.clienteId.message}
                 </p>
               )}
+              <input type="hidden" {...register('clienteId')} />
             </div>
             <div className="space-y-2">
               <Label>Telefone de Contato</Label>
@@ -275,7 +282,7 @@ export function EditarOrdemServicoPage({
                   <SelectItem value="troca_equipamento">
                     Troca de Equipamento
                   </SelectItem>
-                  <SelectItem value="infra">Infra</SelectItem>
+                  <SelectItem value="infra">Infraestrutura</SelectItem>
                   <SelectItem value="outro">Outro</SelectItem>
                 </SelectContent>
               </Select>
@@ -284,6 +291,7 @@ export function EditarOrdemServicoPage({
                   {errors.tipoServico.message}
                 </p>
               )}
+              <input type="hidden" {...register('tipoServico')} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
@@ -320,6 +328,7 @@ export function EditarOrdemServicoPage({
                   <SelectItem value="alta">Alta</SelectItem>
                 </SelectContent>
               </Select>
+              <input type="hidden" {...register('prioridade')} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="valor">Valor (R$)</Label>
@@ -358,13 +367,23 @@ export function EditarOrdemServicoPage({
         <FormSection title="Agendamento">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dataAgendada">Data / Hora Agendada</Label>
+              <Label htmlFor="dataAgendadaDate">Data</Label>
               <Input
-                id="dataAgendada"
-                type="datetime-local"
-                {...register('dataAgendada')}
+                id="dataAgendadaDate"
+                type="date"
+                {...register('dataAgendadaDate')}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="dataAgendadaTime">Hora</Label>
+              <Input
+                id="dataAgendadaTime"
+                type="time"
+                {...register('dataAgendadaTime')}
+              />
+            </div>
+            {/* hidden combined datetime field */}
+            <input type="hidden" {...register('dataAgendada')} />
             <div className="space-y-2">
               <Label htmlFor="tecnico">Técnico Responsável</Label>
               <Select
@@ -384,6 +403,7 @@ export function EditarOrdemServicoPage({
                   ))}
                 </SelectContent>
               </Select>
+              <input type="hidden" {...register('tecnicoId')} />
             </div>
           </div>
         </FormSection>

@@ -1,31 +1,33 @@
 import { z } from 'zod'
 
 export const osSchema = z.object({
-  clienteId: z.number(),
+  clienteId: z.coerce.number().min(1, 'O cliente é obrigatório.'),
   tipoServico: z.enum([
     'instalacao',
     'manutencao',
     'troca_equipamento',
     'infra',
     'outro',
-  ]),
+  ], {
+    message: 'Selecione um tipo de serviço válido.'
+  }),
   descricaoProblema: z.string().optional(),
   observacoes: z.string().optional(),
   prioridade: z.enum(['baixa', 'normal', 'alta']).default('normal'),
   dataAgendada: z.string().optional(),
-  tecnicoId: z.number().optional(),
+  dataAgendadaDate: z.string().optional(),
+  dataAgendadaTime: z.string().optional(),
+  tecnicoId: z.coerce.number().optional().transform(v => v === 0 ? undefined : v),
   valor: z.string().optional(),
-  status: z
-    .enum([
-      'aberta',
-      'agendada',
-      'em_execucao',
-      'concluida',
-      'cancelada',
-      'reagendada',
-      'pendente',
-    ])
-    .default('aberta'),
+  status: z.enum([
+    'aberta',
+    'agendada',
+    'em_execucao',
+    'concluida',
+    'cancelada',
+    'reagendada',
+    'pendente',
+  ]).default('aberta'),
 })
 
 export const osConclusaoSchema = z.object({

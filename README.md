@@ -16,7 +16,7 @@ Unite é uma plataforma moderna para gestão de ordens de serviço, atendentes, 
 
    ```bash
    git clone <url-do-repositorio>
-   cd unite
+   cd softservice
    ```
 
 2. **Instalar dependências:**

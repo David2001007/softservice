@@ -24,8 +24,8 @@ import { deleteOrdemServico } from '@/features/ordens-servico/server'
 const tipoServicoLabel: Record<string, string> = {
   instalacao: 'Instalação',
   manutencao: 'Manutenção',
-  troca_equipamento: 'Troca de Equip.',
-  infra: 'Infra',
+  troca_equipamento: 'Troca de Equipamento',
+  infra: 'Infraestrutura',
   outro: 'Outro',
 }
 
@@ -101,7 +101,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
       className: 'text-muted-foreground text-sm',
     },
     {
-      header: 'Agendada',
+      header: 'Data/Hora Agendada',
       cell: (r) => (
         <span className="text-sm text-muted-foreground whitespace-nowrap">
           {r.dataAgendada
@@ -218,16 +218,16 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
           <div className="space-y-2">
             <Label className="text-xs">Status</Label>
             <Select
-              value={filtros.status}
+              value={filtros.status || 'todos'}
               onValueChange={(value) =>
-                setFiltros((f) => ({ ...f, status: value }))
+                setFiltros((f) => ({ ...f, status: value === 'todos' ? '' : value }))
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="aberta">Aberta</SelectItem>
                 <SelectItem value="agendada">Agendada</SelectItem>
                 <SelectItem value="em_execucao">Em Execução</SelectItem>
@@ -241,22 +241,22 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
           <div className="space-y-2">
             <Label className="text-xs">Tipo de Serviço</Label>
             <Select
-              value={filtros.tipoServico}
+              value={filtros.tipoServico || 'todos'}
               onValueChange={(value) =>
-                setFiltros((f) => ({ ...f, tipoServico: value }))
+                setFiltros((f) => ({ ...f, tipoServico: value === 'todos' ? '' : value }))
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="instalacao">Instalação</SelectItem>
                 <SelectItem value="manutencao">Manutenção</SelectItem>
                 <SelectItem value="troca_equipamento">
                   Troca de Equipamento
                 </SelectItem>
-                <SelectItem value="infra">Infra</SelectItem>
+                <SelectItem value="infra">Infraestrutura</SelectItem>
                 <SelectItem value="outro">Outro</SelectItem>
               </SelectContent>
             </Select>

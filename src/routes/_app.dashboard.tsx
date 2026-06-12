@@ -8,17 +8,41 @@ import {
 } from 'lucide-react'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth.store'
 
 import { getOrdensServico } from '@/features/ordens-servico/server'
+import { getMateriais } from '@/features/materiais/server'
+import { TecnicoDashboard } from '@/features/tecnicos/components/TecnicoDashboard'
 
 export const Route = createFileRoute('/_app/dashboard')({
-  loader: async () => await getOrdensServico(),
+  loader: async () => {
+    const [ordens, materiais] = await Promise.all([
+      getOrdensServico(),
+      getMateriais(),
+    ])
+    return { ordens, materiais }
+  },
   component: Dashboard,
 })
 
 function Dashboard() {
-  const ordens = Route.useLoaderData()
+  const { ordens, materiais } = Route.useLoaderData()
+  const { user } = useAuthStore()
 
+  if (user?.type === 'tecnico') {
+    return (
+      <TecnicoDashboard
+        ordens={ordens}
+        materiais={materiais}
+        tecnicoId={user.id}
+      />
+    )
+  }
+
+  return <AdminDashboard ordens={ordens} />
+}
+
+function AdminDashboard({ ordens }: { ordens: any[] }) {
   const abertas = ordens.filter((o) => o.status === 'aberta').length
   const emExecucao = ordens.filter((o) => o.status === 'em_execucao').length
   const concluidasMes = ordens.filter(
@@ -66,6 +90,14 @@ function Dashboard() {
       bg: 'bg-danger/10',
       border: 'border-danger/20',
     },
+    {
+      label: 'OS Agendadas',
+      value: ordens.filter((o) => o.status === 'agendada' && new Date(o.dataAgendada) >= new Date()).length,
+      icon: CalendarClock,
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+      border: 'border-primary/20',
+    },
   ]
 
   const hojeStr = new Date().toISOString().split('T')[0]
@@ -100,20 +132,18 @@ function Dashboard() {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4 overflow-x-auto">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`bg-surface border ${card.border} rounded-xl p-5 flex items-center gap-4 shadow-soft hover:border-opacity-50 transition-all`}
+            className={`bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all`}
           >
-            <div
-              className={`w-12 h-12 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}
-            >
-              <card.icon className={`w-6 h-6 ${card.color}`} />
+            <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}>
+              <card.icon className={`w-5 h-5 ${card.color}`} />
             </div>
             <div>
-              <p className="text-3xl font-bold text-text">{card.value}</p>
-              <p className="text-xs text-text-muted mt-0.5">{card.label}</p>
+              <p className="text-2xl font-bold text-text">{card.value}</p>
+              <p className="text-xs text-text-muted mt-1">{card.label}</p>
             </div>
           </div>
         ))}

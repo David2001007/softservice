@@ -14,7 +14,9 @@ export function formatDate(
   const d = typeof date === 'string' ? new Date(date) : date
   if (isNaN(d.getTime())) return '—'
   if (opts?.time) {
-    return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+    const dateStr = d.toLocaleDateString('pt-BR')
+    const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    return `${dateStr}:${timeStr}`
   }
   return d.toLocaleDateString('pt-BR')
 }
