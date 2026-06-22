@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useRouter } from '@tanstack/react-router'
-import { Plus, Settings2, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Settings2, Pencil, Trash2, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
@@ -68,9 +68,17 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     {
       header: 'Nº OS',
       cell: (r) => (
-        <span className="font-mono text-yellow-600 text-xs font-semibold">
-          {r.numero}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-yellow-600 text-xs font-semibold">
+            {r.numero}
+          </span>
+          {(r.arquivos || []).length > 0 && (
+            <div className="flex items-center gap-1 text-blue-500" title={`${(r.arquivos || []).length} arquivo(s) anexado(s)`}>
+              <FileText className="w-3 h-3" />
+              <span className="text-xs">{(r.arquivos || []).length}</span>
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -168,7 +176,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
   )
 
   return (
-    <div className="space-y-5 fade-in">
+    <div className="px-4 sm:px-0 space-y-5 fade-in">
       <PageHeader
         title="Lista de Ordens de Serviço"
         subtitle="Gerenciamento de todas as OS"
@@ -177,7 +185,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
             <DefaultButton
               label="Nova OS"
               leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
+              className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 w-full sm:w-auto"
             />
           </Link>
         }

@@ -248,6 +248,7 @@ export const ordensServicoRelations = relations(
     }),
     materiais: many(osMateriais),
     historico: many(osHistorico),
+    arquivos: many(osArquivos),
   }),
 )
 
@@ -270,6 +271,26 @@ export const osHistoricoRelations = relations(osHistorico, ({ one }) => ({
   usuario: one(users, {
     fields: [osHistorico.usuarioId],
     references: [users.id],
+  }),
+}))
+
+/* ── Arquivos da OS ── */
+export const osArquivos = pgTable('os_arquivos', {
+  id: serial('id').primaryKey(),
+  osId: integer('os_id')
+    .notNull()
+    .references(() => ordensServico.id, { onDelete: 'cascade' }),
+  nome: text('nome').notNull(),
+  tipoArquivo: text('tipo_arquivo').notNull(), // imagem, documento, etc.
+  arquivoPath: text('arquivo_path').notNull(), // Path to the file in storage
+  arquivoUrl: text('arquivo_url'), // Public URL to access the file
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const osArquivosRelations = relations(osArquivos, ({ one }) => ({
+  os: one(ordensServico, {
+    fields: [osArquivos.osId],
+    references: [ordensServico.id],
   }),
 }))
 

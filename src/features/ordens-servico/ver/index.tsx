@@ -1,8 +1,9 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Settings } from 'lucide-react'
+import { ArrowLeft, Settings, FileText } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
+import { ArquivoList } from '../components/ArquivoList'
 
 export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
   const navigate = useNavigate()
@@ -35,22 +36,23 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5 fade-in">
+    <div className="max-w-3xl mx-auto px-4 sm:px-0 space-y-5 fade-in">
       <PageHeader
         title={`Ordem de Serviço #${os.numero}`}
         action={
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
             <DefaultButton
               variant="ghost"
               leftIcon={<ArrowLeft className="w-4 h-4" />}
               label="Voltar"
               onClick={() => navigate({ to: '/ordens-servico' })}
+              className="w-full sm:w-auto"
             />
             <Link to="/ordens-servico/$id/gerenciar" params={{ id }}>
               <DefaultButton
                 label="Gerenciar OS"
                 leftIcon={<Settings className="w-4 h-4" />}
-                className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
+                className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 w-full sm:w-auto"
               />
             </Link>
           </div>
@@ -61,7 +63,7 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
         <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3 border-b border-border pb-2">
           Descrição do Problema
         </h3>
-        <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">
+        <p className="text-sm text-text leading-relaxed whitespace-pre-wrap break-words">
           {os.descricaoProblema}
         </p>
       </div>
@@ -72,9 +74,23 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
             <p className="text-xs text-text-muted font-medium uppercase tracking-wider">
               {k}
             </p>
-            <div className="text-sm text-text mt-0.5">{v || '-'}</div>
+            <div className="text-sm text-text mt-0.5 break-words">{v || '-'}</div>
           </div>
         ))}
+      </div>
+
+      {/* Arquivos */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <FileText className="w-5 h-5 text-gray-500" />
+          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+            Arquivos Anexados ({(os.arquivos || []).length}/5)
+          </h3>
+        </div>
+        <ArquivoList
+          arquivos={os.arquivos || []}
+          showDelete={false}
+        />
       </div>
     </div>
   )

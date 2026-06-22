@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db'
-import { ordensServico, osHistorico, osMateriais, materiais } from '@/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { ordensServico, osHistorico, osMateriais, materiais, osArquivos } from '@/db/schema'
+import { eq, sql, and, count } from 'drizzle-orm'
 import {
   osSchema,
   osConclusaoSchema,
@@ -9,6 +9,7 @@ import {
   osCancelamentoSchema,
 } from './schema'
 import { z } from 'zod'
+import { uploadFileToStorage, deleteFileFromStorage } from '@/lib/supabase-storage'
 
 export const getOrdensServico = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -16,6 +17,7 @@ export const getOrdensServico = createServerFn({ method: 'GET' }).handler(
       with: {
         cliente: true,
         tecnico: true,
+        arquivos: true,
       },
       orderBy: (os, { desc }) => [desc(os.createdAt)],
     })
@@ -35,9 +37,104 @@ export const getOrdemServico = createServerFn({ method: 'GET' })
           with: { usuario: true },
           orderBy: (h, { desc }) => [desc(h.dataHora)],
         },
+        arquivos: {
+          orderBy: (a, { desc }) => [desc(a.createdAt)],
+        },
       },
     })
     return os
+  })
+
+export const getOsArquivos = createServerFn({ method: 'GET' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    return await db.query.osArquivos.findMany({
+      where: eq(osArquivos.osId, data),
+      orderBy: (a, { desc }) => [desc(a.createdAt)],
+    })
+  })
+
+export const uploadOsArquivo = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      osId: z.number(),
+      arquivos: z.array(
+        z.object({
+          nome: z.string(),
+          arquivoBase64: z.string(),
+          mimeType: z.string(),
+        })
+      ),
+    }),
+  )
+  .handler(async ({ data }) => {
+    // Check if OS already has 5 files
+    const [fileCount] = await db
+      .select({ count: count() })
+      .from(osArquivos)
+      .where(eq(osArquivos.osId, data.osId))
+    
+    if (fileCount.count + data.arquivos.length > 5) {
+      throw new Error('Limite de 5 arquivos por OS atingido')
+    }
+
+    const novosArquivos = []
+    for (const arquivo of data.arquivos) {
+      // Convert base64 to buffer
+      const buffer = Buffer.from(arquivo.arquivoBase64, 'base64')
+
+      // Upload to Supabase Storage
+      const storageResult = await uploadFileToStorage(
+        arquivo.nome,
+        buffer,
+        arquivo.mimeType,
+        data.osId,
+      )
+
+      // Save to database
+      const [novoArquivo] = await db
+        .insert(osArquivos)
+        .values({
+          osId: data.osId,
+          nome: arquivo.nome,
+          tipoArquivo: arquivo.mimeType.startsWith('image/') ? 'imagem' : 'documento',
+          arquivoPath: storageResult.fileId,
+          arquivoUrl: storageResult.publicUrl,
+        })
+        .returning()
+      
+      novosArquivos.push(novoArquivo)
+    }
+
+    // Return all arquivos for this OS
+    return await db.query.osArquivos.findMany({
+      where: eq(osArquivos.osId, data.osId),
+      orderBy: (a, { desc }) => [desc(a.createdAt)],
+    })
+  })
+
+export const deleteOsArquivo = createServerFn({ method: 'POST' })
+  .inputValidator(z.number())
+  .handler(async ({ data }) => {
+    // Get the file first to get the file path
+    const arquivo = await db.query.osArquivos.findFirst({
+      where: eq(osArquivos.id, data),
+    })
+    if (!arquivo) {
+      throw new Error('Arquivo não encontrado')
+    }
+
+    // Delete from Supabase Storage
+    try {
+      await deleteFileFromStorage(arquivo.arquivoPath)
+    } catch (e) {
+      console.error('Erro ao deletar arquivo do Supabase Storage:', e)
+    }
+
+    // Delete from database
+    await db.delete(osArquivos).where(eq(osArquivos.id, data))
+
+    return { success: true }
   })
 
 export const createOrdemServico = createServerFn({ method: 'POST' })

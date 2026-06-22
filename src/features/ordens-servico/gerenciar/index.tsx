@@ -7,6 +7,8 @@ import {
   XCircle,
   History,
   Lock,
+  Upload,
+  FileText,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
@@ -24,6 +26,8 @@ import { ConclusaoForm } from './conclusao'
 import { ReagendamentoForm } from './reagendamento'
 import { CancelamentoForm } from './cancelamento'
 import { Historico } from './historico'
+import { ArquivoUploadModal } from '../components/ArquivoUploadModal'
+import { ArquivoList } from '../components/ArquivoList'
 
 type Tab = 'conclusao' | 'reagendamento' | 'cancelamento' | 'historico'
 
@@ -49,6 +53,8 @@ export function GerenciarOSPage({
   const user = useAuthStore((state) => state.user)
   const [activeTab, setActiveTab] = useState<Tab>('conclusao')
   const [isLoading, setIsLoading] = useState(false)
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [arquivos, setArquivos] = useState(os.arquivos || [])
 
   if (!os) return null
 
@@ -103,7 +109,7 @@ export function GerenciarOSPage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 fade-in">
+    <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-5 fade-in">
       <PageHeader
         title="Gerenciador de Ordem de Serviço"
         action={
@@ -149,10 +155,38 @@ export function GerenciarOSPage({
               <p className="text-xs text-muted-foreground font-medium">
                 {label}
               </p>
-              <p className="text-sm mt-0.5">{value}</p>
+              <p className="text-sm mt-0.5 break-words">{value}</p>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Arquivos */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-gray-500" />
+            <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+              Arquivos Anexados ({arquivos.length}/5)
+            </h3>
+          </div>
+          {canEdit && arquivos.length < 5 && (
+            <DefaultButton
+              label="Adicionar Arquivo"
+              leftIcon={<Upload className="w-4 h-4" />}
+              onClick={() => setUploadModalOpen(true)}
+              className="bg-primary hover:bg-primary-hover text-white w-full sm:w-auto"
+            />
+          )}
+        </div>
+        <ArquivoList
+          arquivos={arquivos}
+          showDelete={canEdit}
+          onArquivoDeleted={(deletedId) => {
+            // Refresh files
+            setArquivos(arquivos.filter((a: any) => a.id !== deletedId))
+          }}
+        />
       </div>
 
       {/* Aviso de OS Bloqueada */}
@@ -236,6 +270,15 @@ export function GerenciarOSPage({
           )}
         </div>
       </div>
+
+      <ArquivoUploadModal
+        open={uploadModalOpen}
+        onOpenChange={setUploadModalOpen}
+        osId={Number(os.id)}
+        onUploadSuccess={(arquivosAtualizados) => {
+          setArquivos(arquivosAtualizados)
+        }}
+      />
     </div>
   )
 }
