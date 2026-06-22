@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -16,7 +16,7 @@ import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth.store'
-import type {OsConclusaoInput, OsReagendamentoInput, OsCancelamentoInput} from '@/features/ordens-servico/schema';
+import type {OsConclusaoInput, OsReagendamentoInput, OsCancelamentoInput, OsSchema} from '@/features/ordens-servico/schema';
 import {
   concluirOrdemServico,
   reagendarOrdemServico,
@@ -32,9 +32,17 @@ import { ArquivoList } from '../components/ArquivoList'
 type Tab = 'conclusao' | 'reagendamento' | 'cancelamento' | 'historico'
 
 interface GerenciarOSPageProps {
-  os: any
-  materiais: any[]
-  tecnicos: any[]
+  os: OsSchema & { 
+    id: number | string
+    numero?: string
+    cliente?: { nome?: string; logradouro?: string; cidade?: string }
+    tecnico?: { nome?: string }
+    dataAbertura: string
+    historico?: any[]
+    arquivos?: any[]
+  }
+  materiais: Array<{ id: number; codigo: string; descricao: string }>
+  tecnicos: Array<{ id: number; nome: string }>
 }
 
 const TABS = [
@@ -43,6 +51,16 @@ const TABS = [
   { id: 'cancelamento' as const, label: 'Cancelamento', icon: XCircle },
   { id: 'historico' as const, label: 'Histórico', icon: History },
 ]
+
+// Clear cache for the given OS id
+function clearCache(osId: number | string) {
+  const keysToRemove = [
+    `os-gerenciar-conclusao-${osId}`,
+    `os-gerenciar-reagendamento-${osId}`,
+    `os-gerenciar-cancelamento-${osId}`,
+  ]
+  keysToRemove.forEach((key) => localStorage.removeItem(key))
+}
 
 export function GerenciarOSPage({
   os,
@@ -55,6 +73,13 @@ export function GerenciarOSPage({
   const [isLoading, setIsLoading] = useState(false)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [arquivos, setArquivos] = useState(os.arquivos || [])
+
+  // Clear cache when component unmounts (leaving the page)
+  useEffect(() => {
+    return () => {
+      clearCache(os.id)
+    }
+  }, [os.id])
 
   if (!os) return null
 
@@ -245,6 +270,7 @@ export function GerenciarOSPage({
 
           {activeTab === 'conclusao' && canEdit && (
             <ConclusaoForm
+              osId={os.id}
               onSubmit={handleConcluir}
               isLoading={isLoading}
               materiaisCatalogo={materiais}
@@ -253,6 +279,7 @@ export function GerenciarOSPage({
 
           {activeTab === 'reagendamento' && canEdit && (
             <ReagendamentoForm
+              osId={os.id}
               onSubmit={handleReagendar}
               isLoading={isLoading}
               dataAgendadaAtual={os.dataAgendada}
@@ -262,7 +289,11 @@ export function GerenciarOSPage({
           )}
 
           {activeTab === 'cancelamento' && canEdit && (
-            <CancelamentoForm onSubmit={handleCancelar} isLoading={isLoading} />
+            <CancelamentoForm 
+              osId={os.id}
+              onSubmit={handleCancelar} 
+              isLoading={isLoading} 
+            />
           )}
 
           {activeTab === 'historico' && (

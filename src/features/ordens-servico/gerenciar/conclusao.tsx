@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus, Trash2, CheckCircle2, Wifi } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -35,27 +35,80 @@ interface MaterialLinha {
 }
 
 interface ConclusaoFormProps {
+  osId: number | string
   onSubmit: (data: OsConclusaoInput) => Promise<void>
   isLoading: boolean
   materiaisCatalogo: Array<{ id: number; codigo: string; descricao: string }>
 }
 
+interface ConclusaoCache {
+  formData: Partial<OsConclusaoInput>
+  materiais: Array<Omit<MaterialLinha, 'id'>>
+  speedTestResults: SpeedTestResults | null
+}
+
+const CACHE_KEY_PREFIX = 'os-gerenciar-conclusao-'
+
 export function ConclusaoForm({
+  osId,
   onSubmit,
   isLoading,
   materiaisCatalogo,
 }: ConclusaoFormProps) {
-  const [materiais, setMateriais] = useState<MaterialLinha[]>([])
+  const cacheKey = `${CACHE_KEY_PREFIX}${osId}`
   const [searchMaterial, setSearchMaterial] = useState('')
   const [openMaterialId, setOpenMaterialId] = useState<string | null>(null)
   const [showSpeedTest, setShowSpeedTest] = useState(false)
-  const [speedTestResults, setSpeedTestResults] =
-    useState<SpeedTestResults | null>(null)
+
+  // Load from cache on mount
+  const initialData = useMemo(() => {
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      return JSON.parse(cached) as ConclusaoCache
+    }
+    return null
+  }, [cacheKey])
+
+  const [materiais, setMateriais] = useState<MaterialLinha[]>(() => {
+    if (initialData?.materiais) {
+      return initialData.materiais.map((mat) => ({
+        ...mat,
+        id: `mat-${Date.now()}-${Math.random()}`,
+      }))
+    }
+    return []
+  })
+  const [speedTestResults, setSpeedTestResults] = useState<SpeedTestResults | null>(initialData?.speedTestResults || null)
 
   const form = useForm<OsConclusaoInput>({
     resolver: zodResolver(osConclusaoSchema),
-    defaultValues: { materiais: [] },
+    defaultValues: initialData?.formData || { materiais: [] },
   })
+
+  // Save to cache whenever data changes
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      const { materiais: _, ...formDataWithoutMateriais } = data
+      const cacheData: ConclusaoCache = {
+        formData: formDataWithoutMateriais as Partial<OsConclusaoInput>,
+        materiais: materiais.filter(m => m.materialId > 0).map(({ id, ...rest }) => rest),
+        speedTestResults,
+      }
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+    })
+    return () => subscription.unsubscribe()
+  }, [form, cacheKey, materiais, speedTestResults])
+
+  // Update cache when materiais or speedTestResults change
+  useEffect(() => {
+    const { materiais: _, ...formDataWithoutMateriais } = form.getValues()
+    const cacheData: ConclusaoCache = {
+      formData: formDataWithoutMateriais as Partial<OsConclusaoInput>,
+      materiais: materiais.filter(m => m.materialId > 0).map(({ id, ...rest }) => rest),
+      speedTestResults,
+    }
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+  }, [materiais, speedTestResults, form, cacheKey])
 
   const filteredMateriais = useMemo(() => {
     if (!searchMaterial) return materiaisCatalogo
@@ -337,12 +390,11 @@ export function ConclusaoForm({
         ) : null}
         <DefaultButton
           type="button"
-          variant="ghost"
           label={speedTestResults ? 'Refazer Teste' : 'Testar Conexão'}
           leftIcon={<Wifi className="w-4 h-4" />}
           onClick={() => setShowSpeedTest(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         />
-        <DefaultButton type="button" variant="ghost" label="Salvar Rascunho" />
         <DefaultButton
           type="submit"
           isLoading={isLoading}
