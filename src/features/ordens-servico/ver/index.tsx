@@ -79,6 +79,27 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
         ))}
       </div>
 
+      {/* Materiais Utilizados */}
+      {os.materiais && os.materiais.length > 0 && (
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-4">
+            Materiais Utilizados
+          </h3>
+          <div className="space-y-2">
+            {os.materiais.map((mat: any) => (
+              <div key={mat.id} className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border">
+                <div>
+                  <p className="text-sm font-medium">{mat.material?.descricao} ({mat.material?.codigo})</p>
+                  <p className="text-xs text-muted-foreground">
+                    Qtd: {mat.quantidade} | Tipo: {mat.tipoUso} | Local: {mat.localSaida}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Arquivos */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">

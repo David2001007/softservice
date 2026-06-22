@@ -269,13 +269,14 @@ export function GerenciarOSPage({
           )}
 
           {activeTab === 'conclusao' && canEdit && (
-            <ConclusaoForm
-              osId={os.id}
-              onSubmit={handleConcluir}
-              isLoading={isLoading}
-              materiaisCatalogo={materiais}
-            />
-          )}
+          <ConclusaoForm
+            osId={os.id}
+            onSubmit={handleConcluir}
+            isLoading={isLoading}
+            materiaisCatalogo={materiais}
+            materiaisExistentes={os.materiais}
+          />
+        )}
 
           {activeTab === 'reagendamento' && canEdit && (
             <ReagendamentoForm

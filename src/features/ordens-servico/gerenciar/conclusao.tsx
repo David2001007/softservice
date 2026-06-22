@@ -39,6 +39,13 @@ interface ConclusaoFormProps {
   onSubmit: (data: OsConclusaoInput) => Promise<void>
   isLoading: boolean
   materiaisCatalogo: Array<{ id: number; codigo: string; descricao: string }>
+  materiaisExistentes?: Array<{
+    id: number
+    materialId: number
+    quantidade: string
+    tipoUso: 'comodato' | 'venda' | 'uso_interno'
+    localSaida: 'estoque_principal' | 'estoque_tecnico'
+  }>
 }
 
 interface ConclusaoCache {
@@ -54,6 +61,7 @@ export function ConclusaoForm({
   onSubmit,
   isLoading,
   materiaisCatalogo,
+  materiaisExistentes,
 }: ConclusaoFormProps) {
   const cacheKey = `${CACHE_KEY_PREFIX}${osId}`
   const [searchMaterial, setSearchMaterial] = useState('')
@@ -70,10 +78,19 @@ export function ConclusaoForm({
   }, [cacheKey])
 
   const [materiais, setMateriais] = useState<MaterialLinha[]>(() => {
-    if (initialData?.materiais) {
+    if (initialData?.materiais && initialData.materiais.length > 0) {
       return initialData.materiais.map((mat) => ({
         ...mat,
         id: `mat-${Date.now()}-${Math.random()}`,
+      }))
+    }
+    if (materiaisExistentes && materiaisExistentes.length > 0) {
+      return materiaisExistentes.map((mat) => ({
+        id: `mat-${mat.id}-${Date.now()}`,
+        materialId: mat.materialId,
+        quantidade: mat.quantidade,
+        tipoUso: mat.tipoUso,
+        localSaida: mat.localSaida,
       }))
     }
     return []
