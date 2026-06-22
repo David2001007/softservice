@@ -4,8 +4,8 @@ import { Plus, Eye, Pencil, AlertTriangle, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
-import { DefaultTable  } from '@/components/default-table'
-import type {Column} from '@/components/default-table';
+import { DefaultTable } from '@/components/default-table'
+import type { Column } from '@/components/default-table'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
@@ -13,27 +13,53 @@ import { deleteMaterial } from '@/features/materiais/server'
 
 export function MateriaisPage({ materiais }: { materiais: any[] }) {
   const router = useRouter()
+
   const [filtros, setFiltros] = useState({
     codigo: '',
     descricao: '',
     categoria: '',
     status: '',
   })
+
   const [page, setPage] = useState(1)
+
   const [deleteTarget, setDeleteTarget] = useState<{
     id: number
     descricao: string
   } | null>(null)
+
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const formatarNumero = (valor: number | string) =>
+    new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Number(valor))
+
+  const capitalize = (texto?: string) => {
+  if (!texto) return ''
+
+  return texto
+    .toLowerCase()
+    .split(' ')
+    .map(
+      (palavra) =>
+        palavra.charAt(0).toUpperCase() + palavra.slice(1),
+    )
+    .join(' ')
+  }
   const handleDelete = async () => {
     if (!deleteTarget) return
+
     setIsDeleting(true)
+
     try {
       await deleteMaterial({ data: deleteTarget.id })
+
       toast.success(
         `Material "${deleteTarget.descricao}" excluído com sucesso!`,
       )
+
       setDeleteTarget(null)
       router.invalidate()
     } catch {
@@ -49,14 +75,18 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
       accessorKey: 'codigo',
       className: 'font-mono text-gold text-xs',
     },
-    { header: 'Descrição', accessorKey: 'descricao' },
+    {
+      header: 'Descrição',
+      accessorKey: 'descricao',
+    },
     {
       header: 'Categoria',
       accessorKey: 'categoria',
       className: 'text-text-muted text-sm',
     },
     {
-      header: 'Unidade',
+      header: 'Unidade de Medida',
+      cell: (r) => capitalize(r.unidade),
       accessorKey: 'unidade',
       className: 'text-text-muted text-sm',
     },
@@ -64,10 +94,15 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
       header: 'Qtd. Estoque',
       cell: (r) => (
         <span
-          className={`font-semibold ${r.quantidade <= r.estoqueMinimo ? 'text-danger' : 'text-text'}`}
+          className={`font-semibold ${
+            Number(r.quantidade) <= Number(r.estoqueMinimo)
+              ? 'text-danger'
+              : 'text-text'
+          }`}
         >
-          {r.quantidade}
-          {r.quantidade <= r.estoqueMinimo && (
+          {formatarNumero(r.quantidade)}
+
+          {Number(r.quantidade) <= Number(r.estoqueMinimo) && (
             <AlertTriangle className="inline w-3.5 h-3.5 ml-1 text-warning" />
           )}
         </span>
@@ -75,7 +110,7 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
     },
     {
       header: 'Est. Mínimo',
-      accessorKey: 'estoqueMinimo',
+      cell: (r) => formatarNumero(r.estoqueMinimo),
       className: 'text-text-muted text-sm',
     },
     {
@@ -95,6 +130,7 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
               className="h-7 text-xs"
             />
           </Link>
+
           <Link to="/materiais/$id/editar" params={{ id: String(r.id) }}>
             <DefaultButton
               size="sm"
@@ -104,6 +140,7 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
               className="h-7 text-xs"
             />
           </Link>
+
           <DefaultButton
             size="sm"
             variant="ghost"
@@ -111,7 +148,10 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
             label="Excluir"
             className="h-7 text-xs text-danger hover:text-danger hover:bg-danger/10"
             onClick={() =>
-              setDeleteTarget({ id: r.id, descricao: r.descricao })
+              setDeleteTarget({
+                id: r.id,
+                descricao: r.descricao,
+              })
             }
           />
         </div>
@@ -146,7 +186,6 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
         }
       />
 
-      {/* Alert estoque baixo */}
       {materiais.some(
         (m) => Number(m.quantidade) <= Number(m.estoqueMinimo),
       ) && (
@@ -171,24 +210,33 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
               <label className="text-xs font-medium text-text-muted">
                 {label}
               </label>
+
               <input
                 value={filtros[key as keyof typeof filtros]}
                 onChange={(e) =>
-                  setFiltros((f) => ({ ...f, [key]: e.target.value }))
+                  setFiltros((f) => ({
+                    ...f,
+                    [key]: e.target.value,
+                  }))
                 }
                 placeholder={placeholder}
                 className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
               />
             </div>
           ))}
+
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-text-muted">
               Status
             </label>
+
             <select
               value={filtros.status}
               onChange={(e) =>
-                setFiltros((f) => ({ ...f, status: e.target.value }))
+                setFiltros((f) => ({
+                  ...f,
+                  status: e.target.value,
+                }))
               }
               className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm focus:outline-none focus:border-primary transition-colors"
             >
@@ -215,7 +263,9 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
       <DeleteConfirmationModal
         open={!!deleteTarget}
         onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null)
+          if (!open) {
+            setDeleteTarget(null)
+          }
         }}
         onConfirm={handleDelete}
         isLoading={isDeleting}
