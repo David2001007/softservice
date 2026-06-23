@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { Zap, Shield, BarChart3, LogIn, ArrowRight, X } from 'lucide-react'
+import { Zap, Shield, BarChart3, LogIn, ArrowRight, X, Users, Code, CheckCircle2, MonitorSmartphone, Server, Database, Globe } from 'lucide-react'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
@@ -35,22 +35,43 @@ const GRADIENT = [
   '#2A0A5E',
 ]
 
-const FEATURES = [
+const TEAM = [
   {
-    icon: Zap,
-    title: 'Agilidade',
-    sub: 'Fluxos otimizados para execução rápida.',
+    name: 'David Lucas Machado',
+    role: 'Desenvolvedor',
   },
   {
-    icon: Shield,
-    title: 'Segurança',
-    sub: 'Dados protegidos com criptografia de ponta.',
+    name: 'Fabricio Milioransa Dalanhol',
+    role: 'Testes/Desenvolvedor',
   },
   {
-    icon: BarChart3,
-    title: 'Inteligência',
-    sub: 'Relatórios dinâmicos para decisões precisas.',
+    name: 'Felipe de Lima Rodrigues',
+    role: 'Analista/Desenvolvedor',
   },
+]
+
+const SYSTEM_FEATURES = [
+  {
+    title: 'Gestão de Ordens de Serviço',
+    description: 'Controle completo de todas as etapas do atendimento, do agendamento à conclusão.',
+  },
+  {
+    title: 'Equipe Multidisciplinar',
+    description: 'Atendentes, técnicos e clientes integrados em uma única plataforma.',
+  },
+  {
+    title: 'Relatórios e Análises',
+    description: 'Dados em tempo real para tomar decisões estratégicas.',
+  },
+]
+
+const TECHNOLOGIES = [
+  { name: 'React', icon: Code },
+  { name: 'TypeScript', icon: Code },
+  { name: 'Tailwind CSS', icon: MonitorSmartphone },
+  { name: 'Node.js', icon: Server },
+  { name: 'Supabase', icon: Database },
+  { name: 'TanStack', icon: Globe },
 ]
 
 function LandingPage() {
@@ -76,8 +97,15 @@ function LandingPage() {
     [],
   )
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
-    <div className="relative min-h-screen w-screen overflow-x-hidden bg-background font-sans">
+    <div className="relative min-h-screen w-screen bg-background font-sans">
       <div className="fixed inset-0 z-0" aria-hidden="true">
         <Suspense fallback={null}>
           <FloatingLines {...floatingLinesProps} />
@@ -106,96 +134,224 @@ function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Main content ── */}
-      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8 md:px-12 lg:px-16">
+      {/* ── Main content with snap scrolling ── */}
+      <main className="relative z-10 flex flex-col items-center text-center h-screen overflow-y-scroll snap-y snap-mandatory">
         {/* Hero */}
-        <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">
-          <h2
-            className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
-                         sm:text-6xl md:text-7xl lg:text-8xl"
-          >
-            <span className="block text-text/60">Conectando</span>
-            <span className="block text-primary">equipes.</span>
-            <span className="block text-text/60">Impulsionando</span>
-            <span className="block text-gold">resultados.</span>
-          </h2>
-          <p className="mx-auto max-w-md text-sm leading-relaxed text-text-muted sm:text-base md:text-lg lg:max-w-lg">
-            A plataforma definitiva para agilizar, organizar e escalar sua
-            gestão de serviços em tempo real.
-          </p>
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
-          <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-            <DialogTrigger asChild>
-              <Button
-                size="lg"
-                className="group h-14 w-full rounded-2xl bg-gradient-to-r from-primary to-primary-hover px-8
-                           font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-5px_rgba(125,18,255,0.5)]
-                           transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:h-16"
-              >
-                <LogIn className="mr-2 h-5 w-5 transition-transform group-hover:rotate-12" />
-                Acessar Sistema
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[480px] p-0 bg-transparent border-none shadow-none outline-none [&>button]:hidden">
-              <div className="relative">
-                <LoginForm onSuccess={() => setIsLoginOpen(false)} />
-                <button
-                  onClick={() => setIsLoginOpen(false)}
-                  className="absolute right-6 top-6 z-[60] flex h-10 w-10 items-center justify-center
-                             rounded-2xl border border-white/10 bg-surface/50 text-white/40 backdrop-blur-md
-                             transition-all hover:bg-primary/20 hover:text-white hover:border-primary/30
-                             shadow-xl group/close"
-                  aria-label="Fechar"
-                >
-                  <X className="h-5 w-5 transition-transform group-hover/close:rotate-90" />
-                </button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <Button
-            variant="outline"
-            size="lg"
-            className="group h-14 w-full rounded-2xl border-white/10 bg-white/5 px-8 font-black
-                       uppercase tracking-widest text-white transition-all hover:bg-white/10
-                       sm:w-auto sm:px-12 sm:h-16"
-          >
-            Saiba Mais
-            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </div>
-
-        {/* Feature cards */}
-        <div className="mt-20 grid w-full max-w-3xl grid-cols-1 gap-8 sm:mt-24 sm:grid-cols-3 sm:gap-10">
-          {FEATURES.map(({ icon: Icon, title, sub }) => (
-            <div
-              key={title}
-              className="group flex flex-col items-center space-y-3 text-center"
+        <section id="hero" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+          <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">
+            <h2
+              className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
+                           sm:text-6xl md:text-7xl lg:text-8xl"
             >
-              <div
-                className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10
-                              bg-white/5 text-text-muted transition-all
-                              group-hover:border-primary/50 group-hover:text-primary"
-              >
-                <Icon className="h-6 w-6" />
+              <span className="block text-text/60">Conectando</span>
+              <span className="block text-primary">equipes.</span>
+              <span className="block text-text/60">Impulsionando</span>
+              <span className="block text-gold">resultados.</span>
+            </h2>
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-text-muted sm:text-base md:text-lg lg:max-w-lg">
+              A plataforma definitiva para agilizar, organizar e escalar sua
+              gestão de serviços em tempo real.
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
+            <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="group h-14 w-full rounded-2xl bg-gradient-to-r from-primary to-primary-hover px-8
+                             font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-5px_rgba(125,18,255,0.5)]
+                             transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:h-16"
+                >
+                  <LogIn className="mr-2 h-5 w-5 transition-transform group-hover:rotate-12" />
+                  Acessar Sistema
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[480px] p-0 bg-transparent border-none shadow-none outline-none [&>button]:hidden">
+                <div className="relative">
+                  <LoginForm onSuccess={() => setIsLoginOpen(false)} />
+                  <button
+                    onClick={() => setIsLoginOpen(false)}
+                    className="absolute right-6 top-6 z-[60] flex h-10 w-10 items-center justify-center
+                               rounded-2xl border border-white/10 bg-surface/50 text-white/40 backdrop-blur-md
+                               transition-all hover:bg-primary/20 hover:text-white hover:border-primary/30
+                               shadow-xl group/close"
+                    aria-label="Fechar"
+                  >
+                    <X className="h-5 w-5 transition-transform group-hover/close:rotate-90" />
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => scrollToSection('equipe')}
+              className="group h-14 w-full rounded-2xl border-white/10 bg-white/5 px-8 font-black
+                         uppercase tracking-widest text-white transition-all hover:bg-white/10
+                         sm:w-auto sm:px-12 sm:h-16"
+            >
+              Saiba Mais
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </div>
+         
+        </section>
+
+        {/* Nossa Equipe */}
+        <section id="equipe" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+          <div className="w-full max-w-5xl">
+            <div className="mb-12">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Users className="h-6 w-6 text-primary" />
+                <h2 className="text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+                  Nossa Equipe
+                </h2>
               </div>
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-white">
-                  {title}
-                </h3>
-                <p className="mt-1 px-2 text-[11px] leading-relaxed text-text-muted">
-                  {sub}
+              <p className="text-text-muted max-w-2xl mx-auto">
+                Os especialistas que transformam ideias em soluções concretas.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10">
+              {TEAM.map((member, index) => (
+                <div
+                  key={index}
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:border-primary/40 hover:bg-white/10"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div className="relative">
+                    {/* Avatar placeholder */}
+                    <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-4xl font-black text-primary">
+                      {member.name.charAt(0)}
+                    </div>
+                    <h3 className="text-xl font-black uppercase tracking-wider text-white">
+                      {member.name}
+                    </h3>
+                    <p className="mt-2 text-sm font-medium text-primary">
+                      {member.role}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Sobre a Unite */}
+        <section id="sobre" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+          <div className="w-full max-w-5xl">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-10 sm:p-16">
+              <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+                O que é a <span className="text-primary">Unite</span>?
+              </h2>
+              <div className="space-y-6 text-left text-text-muted">
+                <p className="text-lg leading-relaxed">
+                  A <span className="text-white font-semibold">Unite</span> é um sistema de gestão de serviços
+                  completo, desenvolvido para otimizar processos, centralizar informações e conectar equipes
+                  de atendimento, técnicos e clientes em uma única plataforma intuitiva e moderna.
                 </p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-primary" />
+                    <div>
+                      <h4 className="font-semibold text-white">O que atende?</h4>
+                      <p className="text-sm">Gestão de ordens de serviço, clientes, técnicos, materiais e relatórios.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-primary" />
+                    <div>
+                      <h4 className="font-semibold text-white">Diferenciais</h4>
+                      <p className="text-sm">Interface moderna, relatórios em tempo real, segurança de dados e integração total.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        </section>
+
+        {/* Funcionalidades */}
+        <section id="funcionalidades" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+          <div className="w-full max-w-5xl">
+            <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+              Funcionalidades e Diferenciais
+            </h2>
+
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10">
+              {SYSTEM_FEATURES.map((feature, index) => (
+                <div
+                  key={index}
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 transition-all hover:border-primary/40 hover:bg-white/10"
+                >
+                  <div className="mb-4 h-40 w-full rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-text-muted/50">
+                    [Print da funcionalidade]
+                  </div>
+                  <h3 className="text-lg font-black uppercase tracking-wider text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-text-muted">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Tecnologias */}
+        <section id="tecnologias" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+          <div className="w-full max-w-5xl">
+            <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+              Tecnologias Utilizadas
+            </h2>
+
+            <div className="flex flex-wrap justify-center gap-4">
+              {TECHNOLOGIES.map((tech, index) => (
+                <div
+                  key={index}
+                  className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-6 py-4 transition-all hover:border-primary/40 hover:bg-white/10"
+                >
+                  <tech.icon className="h-5 w-5 text-primary" />
+                  <span className="font-semibold text-white">{tech.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Final */}
+        <section id="cta" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+          <div className="w-full max-w-3xl">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-10 sm:p-16">
+              <h2 className="mb-4 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+                Vamos conhecer nosso sistema?
+              </h2>
+              <p className="mb-8 text-text-muted">
+                Acesse agora e descubra como a Unite pode transformar a gestão dos seus serviços.
+              </p>
+              <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="lg"
+                    className="group h-14 w-full rounded-2xl bg-gradient-to-r from-primary to-primary-hover px-8
+                               font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-5px_rgba(125,18,255,0.5)]
+                               transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:h-16"
+                  >
+                    Acessar o Sistema
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
+            </div>
+          </div>
+        </section>
 
         {/* Footer */}
-        <footer className="mt-16 text-[10px] uppercase tracking-[0.4em] text-text-muted/40 sm:absolute sm:bottom-8 sm:mt-0">
+        <footer className="py-8 text-[10px] uppercase tracking-[0.4em] text-text-muted/40">
           Unite © 2026 – Advanced Management System
         </footer>
       </main>
