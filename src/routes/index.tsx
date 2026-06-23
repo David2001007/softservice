@@ -4,6 +4,7 @@ import { Zap, Shield, BarChart3, LogIn, ArrowRight, X, Users, Code, CheckCircle2
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import CardSwap, { Card } from '@/components/animations/CardSwap'
 
 // Lazy-load the heavy WebGL component – page content renders immediately
 const FloatingLines = lazy(
@@ -76,6 +77,7 @@ const TECHNOLOGIES = [
 
 function LandingPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [activeFeatureIndex, setActiveFeatureIndex] = useState(0)
 
   const floatingLinesProps = useMemo(
     () => ({
@@ -276,28 +278,44 @@ function LandingPage() {
 
         {/* Funcionalidades */}
         <section id="funcionalidades" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
-          <div className="w-full max-w-5xl">
-            <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+          <div className="w-full max-w-6xl">
+            <h2 className="mb-12 text-center text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
               Funcionalidades e Diferenciais
             </h2>
 
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10">
-              {SYSTEM_FEATURES.map((feature, index) => (
-                <div
-                  key={index}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 transition-all hover:border-primary/40 hover:bg-white/10"
-                >
-                  <div className="mb-4 h-40 w-full rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-text-muted/50">
-                    [Print da funcionalidade]
-                  </div>
-                  <h3 className="text-lg font-black uppercase tracking-wider text-white">
-                    {feature.title}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-center lg:gap-16">
+              {/* Text side */}
+              <div className="text-left">
+                <div key={activeFeatureIndex} className="animate-in fade-in slide-in-from-left-4 duration-500">
+                  <h3 className="text-2xl font-black uppercase tracking-wider text-white mb-4">
+                    {SYSTEM_FEATURES[activeFeatureIndex].title}
                   </h3>
-                  <p className="mt-2 text-sm text-text-muted">
-                    {feature.description}
+                  <p className="text-lg text-text-muted">
+                    {SYSTEM_FEATURES[activeFeatureIndex].description}
                   </p>
                 </div>
-              ))}
+              </div>
+
+              {/* CardSwap side */}
+              <div className="relative h-[400px] w-full flex justify-center items-center">
+                <CardSwap
+                  width={420}
+                  height={280}
+                  cardDistance={35}
+                  verticalDistance={0}
+                  delay={5000}
+                  pauseOnHover={true}
+                  onActiveIndexChange={setActiveFeatureIndex}
+                >
+                  {SYSTEM_FEATURES.map((feature, index) => (
+                    <Card key={index} className="p-3">
+                      <div className="h-full w-full rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-text-muted/50 text-4xl">
+                        🖼️
+                      </div>
+                    </Card>
+                  ))}
+                </CardSwap>
+              </div>
             </div>
           </div>
         </section>
