@@ -1,12 +1,12 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { Zap, Shield, BarChart3, LogIn, ArrowRight, X, Users, Code, CheckCircle2, MonitorSmartphone, Server, Database, Globe } from 'lucide-react'
+import { LogIn, ArrowRight, X, Users, Code, CheckCircle2, MonitorSmartphone, Server, Database, Globe } from 'lucide-react'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import CardSwap, { Card } from '@/components/animations/CardSwap'
 
-// Lazy-load the heavy WebGL component – page content renders immediately
+// Lazy-load the heavy WebGL component - page content renders immediately
 const FloatingLines = lazy(
   () => import('@/components/animations/FloatingLines'),
 )
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/')({
   component: LandingPage,
 })
 
-// Defined outside component – never recreated
+// Defined outside component - never recreated
 const GRADIENT = [
   '#2A0A5E',
   '#7D12FF',
@@ -114,10 +114,10 @@ function LandingPage() {
         </Suspense>
       </div>
 
-      {/* ── Gradient overlay ── */}
+      {/* Gradient overlay */}
       <div className="fixed inset-0 z-[1] pointer-events-none bg-gradient-to-b from-background/30 via-background/55 to-background" />
 
-      {/* ── Navbar ── */}
+      {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-8 sm:px-12">
         <div className="flex items-center gap-3">
           <div className="relative group">
@@ -136,7 +136,7 @@ function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Main content with snap scrolling ── */}
+      {/* Main content with snap scrolling */}
       <main className="relative z-10 flex flex-col items-center text-center h-screen overflow-y-scroll snap-y snap-mandatory">
         {/* Hero */}
         <section id="hero" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
@@ -203,9 +203,9 @@ function LandingPage() {
         </section>
 
         {/* Nossa Equipe */}
-        <section id="equipe" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+        <section id="equipe" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-5xl">
-            <div className="mb-12">
+            <div className="mb-10 sm:mb-12 md:mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Users className="h-6 w-6 text-primary" />
                 <h2 className="text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
@@ -243,9 +243,9 @@ function LandingPage() {
         </section>
 
         {/* Sobre a Unite */}
-        <section id="sobre" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+        <section id="sobre" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-5xl">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-10 sm:p-16">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-10 md:p-12 lg:p-16">
               <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
                 O que é a <span className="text-primary">Unite</span>?
               </h2>
@@ -277,41 +277,57 @@ function LandingPage() {
         </section>
 
         {/* Funcionalidades */}
-        <section id="funcionalidades" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
-          <div className="w-full max-w-6xl">
-            <h2 className="mb-12 text-center text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+        <section id="funcionalidades" className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-24 lg:px-16 xl:px-20 2xl:px-24 snap-start">
+          <div className="w-full max-w-[92rem]">
+            <h2 className="mb-10 text-center text-3xl font-black uppercase tracking-tight text-white sm:mb-12 sm:text-4xl xl:text-5xl">
               Funcionalidades e Diferenciais
             </h2>
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-center lg:gap-16">
+            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(19rem,0.82fr)_minmax(29rem,1.18fr)] lg:gap-16 xl:gap-24">
               {/* Text side */}
-              <div className="text-left">
+              <div className="mx-auto w-full max-w-xl text-left lg:mx-0">
                 <div key={activeFeatureIndex} className="animate-in fade-in slide-in-from-left-4 duration-500">
-                  <h3 className="text-2xl font-black uppercase tracking-wider text-white mb-4">
+                  <h3 className="mb-4 text-2xl font-black uppercase tracking-wider text-white sm:text-3xl xl:text-4xl">
                     {SYSTEM_FEATURES[activeFeatureIndex].title}
                   </h3>
-                  <p className="text-lg text-text-muted">
+                  <p className="max-w-lg text-base leading-relaxed text-text-muted sm:text-lg xl:text-xl">
                     {SYSTEM_FEATURES[activeFeatureIndex].description}
                   </p>
                 </div>
               </div>
 
               {/* CardSwap side */}
-              <div className="relative h-[400px] w-full flex justify-center items-center">
+              <div className="relative h-[600px] w-full overflow-visible">
                 <CardSwap
-                  width={420}
-                  height={280}
-                  cardDistance={35}
-                  verticalDistance={0}
+                  width={750}
+                  height={500}
+                  cardDistance={60}
+                  verticalDistance={70}
                   delay={5000}
-                  pauseOnHover={true}
+                  pauseOnHover={false}
+                  easing="linear"
                   onActiveIndexChange={setActiveFeatureIndex}
                 >
-                  {SYSTEM_FEATURES.map((feature, index) => (
-                    <Card key={index} className="p-3">
-                      <div className="h-full w-full rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-text-muted/50 text-4xl">
-                        🖼️
-                      </div>
+                  {SYSTEM_FEATURES.map((_, index) => (
+                    <Card key={index}>
+                      {index === 0 && (
+                        <div className="absolute top-6 right-8 flex items-center gap-2 rounded-md bg-white/5 px-4 py-2 text-sm font-medium text-white border border-white/10 backdrop-blur-sm">
+                          <div className="h-2 w-2 rounded-full bg-white"></div>
+                          Smooth
+                        </div>
+                      )}
+                      {index === 1 && (
+                        <div className="absolute top-6 right-8 flex items-center gap-2 rounded-md bg-white/5 px-4 py-2 text-sm font-medium text-white border border-white/10 backdrop-blur-sm">
+                          <Code className="h-4 w-4" />
+                          Reliable
+                        </div>
+                      )}
+                      {index === 2 && (
+                        <div className="absolute top-6 right-8 flex items-center gap-2 rounded-md bg-white/5 px-4 py-2 text-sm font-medium text-white border border-white/10 backdrop-blur-sm">
+                          <MonitorSmartphone className="h-4 w-4" />
+                          Modern
+                        </div>
+                      )}
                     </Card>
                   ))}
                 </CardSwap>
@@ -321,9 +337,9 @@ function LandingPage() {
         </section>
 
         {/* Tecnologias */}
-        <section id="tecnologias" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+        <section id="tecnologias" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-5xl">
-            <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+            <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl text-center">
               Tecnologias Utilizadas
             </h2>
 
@@ -342,9 +358,9 @@ function LandingPage() {
         </section>
 
         {/* CTA Final */}
-        <section id="cta" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+        <section id="cta" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-3xl">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-10 sm:p-16">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-10 md:p-12 lg:p-16">
               <h2 className="mb-4 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
                 Vamos conhecer nosso sistema?
               </h2>
@@ -370,7 +386,7 @@ function LandingPage() {
 
         {/* Footer */}
         <footer className="py-8 text-[10px] uppercase tracking-[0.4em] text-text-muted/40">
-          Unite © 2026 – Advanced Management System
+          Unite © 2026 - Advanced Management System
         </footer>
       </main>
     </div>
