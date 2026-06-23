@@ -122,7 +122,7 @@ const CardSwap = ({
       }
 
       tl.to(elFront, {
-        y: '+=500',
+        y: '+=350',
         duration: config.durDrop,
         ease: config.ease,
       });

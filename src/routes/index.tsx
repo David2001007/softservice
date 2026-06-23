@@ -67,12 +67,12 @@ const SYSTEM_FEATURES = [
 ]
 
 const TECHNOLOGIES = [
-  { name: 'React', icon: Code },
-  { name: 'TypeScript', icon: Code },
-  { name: 'Tailwind CSS', icon: MonitorSmartphone },
-  { name: 'Node.js', icon: Server },
-  { name: 'Supabase', icon: Database },
-  { name: 'TanStack', icon: Globe },
+  { name: 'React', icon: Code, logo: '' },
+  { name: 'TypeScript', icon: Code, logo: '' },
+  { name: 'Tailwind CSS', icon: MonitorSmartphone, logo: '' },
+  { name: 'Node.js', icon: Server, logo: '' },
+  { name: 'Supabase', icon: Database, logo: '' },
+  { name: 'TanStack', icon: Globe, logo: '' },
 ]
 
 function LandingPage() {
@@ -191,7 +191,7 @@ function LandingPage() {
               variant="outline"
               size="lg"
               onClick={() => scrollToSection('equipe')}
-              className="group h-14 w-full rounded-2xl border-white/10 bg-white/5 px-8 font-black
+              className="hidden sm:flex group h-14 w-full rounded-2xl border-white/10 bg-white/5 px-8 font-black
                          uppercase tracking-widest text-white transition-all hover:bg-white/10
                          sm:w-auto sm:px-12 sm:h-16"
             >
@@ -203,7 +203,7 @@ function LandingPage() {
         </section>
 
         {/* Nossa Equipe */}
-        <section id="equipe" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section id="equipe" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-5xl">
             <div className="mb-10 sm:mb-12 md:mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
@@ -221,20 +221,30 @@ function LandingPage() {
               {TEAM.map((member, index) => (
                 <div
                   key={index}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:border-primary/40 hover:bg-white/10"
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1a0b2e] to-[#11061f] shadow-2xl transition-all hover:border-primary/40 hover:shadow-primary/20 hover:-translate-y-2 flex flex-col items-center pt-0"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  <div className="relative">
+                  <div className="w-full h-20 bg-[#2A0A5E]/40 flex items-center justify-center border-b border-white/5 relative">
+                    {/* Lanyard hole */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 border-4 border-[#11061f] rounded-full bg-background shadow-inner" />
+                    <img src="/logo.webp" alt="Unite Logo" className="h-8 opacity-80 mt-2" />
+                  </div>
+                  <div className="p-8 w-full flex flex-col items-center text-center relative">
                     {/* Avatar placeholder */}
-                    <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-4xl font-black text-primary">
+                    <div className="mb-6 flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/10 bg-gradient-to-br from-primary/20 to-transparent text-4xl font-black text-white shadow-lg overflow-hidden">
                       {member.name.charAt(0)}
                     </div>
                     <h3 className="text-xl font-black uppercase tracking-wider text-white">
                       {member.name}
                     </h3>
-                    <p className="mt-2 text-sm font-medium text-primary">
-                      {member.role}
-                    </p>
+                    <div className="mt-4 bg-primary/20 px-4 py-1.5 rounded-full border border-primary/30">
+                      <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                        {member.role}
+                      </p>
+                    </div>
+                    <div className="mt-8 w-full pt-4 border-t border-white/10 flex justify-between items-center px-2">
+                      <div className="text-[10px] font-mono text-white/30">ID: 00{index + 1}</div>
+                      <div className="h-4 w-12 bg-white/20 rounded-sm"></div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -243,9 +253,9 @@ function LandingPage() {
         </section>
 
         {/* Sobre a Unite */}
-        <section id="sobre" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section id="sobre" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-5xl">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-10 md:p-12 lg:p-16">
+            <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-8 sm:p-10 md:p-12 lg:p-16 shadow-2xl">
               <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
                 O que é a <span className="text-primary">Unite</span>?
               </h2>
@@ -277,7 +287,7 @@ function LandingPage() {
         </section>
 
         {/* Funcionalidades */}
-        <section id="funcionalidades" className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-24 lg:px-16 xl:px-20 2xl:px-24 snap-start">
+        <section id="funcionalidades" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-24 lg:px-16 xl:px-20 2xl:px-24 snap-start">
           <div className="w-full max-w-[92rem]">
             <h2 className="mb-10 text-center text-3xl font-black uppercase tracking-tight text-white sm:mb-12 sm:text-4xl xl:text-5xl">
               Funcionalidades e Diferenciais
@@ -297,12 +307,12 @@ function LandingPage() {
               </div>
 
               {/* CardSwap side */}
-              <div className="relative h-[600px] w-full overflow-visible">
+              <div className="relative flex h-[450px] sm:h-[500px] w-full items-center justify-center lg:justify-end overflow-visible">
                 <CardSwap
-                  width={750}
-                  height={500}
-                  cardDistance={60}
-                  verticalDistance={70}
+                  width={550}
+                  height={350}
+                  cardDistance={40}
+                  verticalDistance={50}
                   delay={5000}
                   pauseOnHover={false}
                   easing="linear"
@@ -337,7 +347,7 @@ function LandingPage() {
         </section>
 
         {/* Tecnologias */}
-        <section id="tecnologias" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section id="tecnologias" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-5xl">
             <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl text-center">
               Tecnologias Utilizadas
@@ -347,10 +357,16 @@ function LandingPage() {
               {TECHNOLOGIES.map((tech, index) => (
                 <div
                   key={index}
-                  className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-6 py-4 transition-all hover:border-primary/40 hover:bg-white/10"
+                  className="group flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-6 transition-all hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(125,18,255,0.3)] shadow-lg min-w-[140px]"
                 >
-                  <tech.icon className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-white">{tech.name}</span>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/5 p-2 transition-all group-hover:bg-white/10">
+                    {tech.logo ? (
+                      <img src={tech.logo} alt={`${tech.name} logo`} className="h-full w-full object-contain" />
+                    ) : (
+                      <tech.icon className="h-6 w-6 text-primary" />
+                    )}
+                  </div>
+                  <span className="font-semibold text-white text-sm tracking-wide">{tech.name}</span>
                 </div>
               ))}
             </div>
@@ -358,9 +374,9 @@ function LandingPage() {
         </section>
 
         {/* CTA Final */}
-        <section id="cta" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section id="cta" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
           <div className="w-full max-w-3xl">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-10 md:p-12 lg:p-16">
+            <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-8 sm:p-10 md:p-12 lg:p-16 shadow-2xl">
               <h2 className="mb-4 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
                 Vamos conhecer nosso sistema?
               </h2>
@@ -385,7 +401,7 @@ function LandingPage() {
         </section>
 
         {/* Footer */}
-        <footer className="py-8 text-[10px] uppercase tracking-[0.4em] text-text-muted/40">
+        <footer className="hidden sm:block py-8 text-[10px] uppercase tracking-[0.4em] text-text-muted/40">
           Unite © 2026 - Advanced Management System
         </footer>
       </main>
