@@ -18,6 +18,11 @@ export const Route = createFileRoute('/_app/ordens-servico/$id/gerenciar')({
 
 function RouteComponent() {
   const { os, tecnicos, materiais } = Route.useLoaderData()
+
+  if (!os) {
+    return null
+  }
+
   return (
     <GerenciarOSPage
       os={os}

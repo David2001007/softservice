@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus, Trash2, CheckCircle2, Wifi } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,37 +25,142 @@ import {
 import type {OsConclusaoInput} from '@/features/ordens-servico/schema';
 import { SpeedTest  } from './speed-test'
 import type {SpeedTestResults} from './speed-test';
+import { formatNumber, getEstoqueUnidadeLabel } from '@/lib/utils'
+import { SpeedTestDisplay, parseSpeedTestFromOs } from '../components/SpeedTestDisplay'
+import { salvarSpeedTestOs } from '@/features/ordens-servico/server'
+import { toast } from 'sonner'
+
+function toDatetimeLocalValue(date: string | Date | null | undefined): string {
+  if (!date) return ''
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) return ''
+  const offset = d.getTimezoneOffset()
+  const local = new Date(d.getTime() - offset * 60 * 1000)
+  return local.toISOString().slice(0, 16)
+}
 
 interface MaterialLinha {
   id: string
   materialId: number
   quantidade: string
   tipoUso: 'comodato' | 'venda' | 'uso_interno'
-  localSaida: 'estoque_principal' | 'estoque_tecnico'
 }
 
 interface ConclusaoFormProps {
+  osId: number | string
   onSubmit: (data: OsConclusaoInput) => Promise<void>
   isLoading: boolean
-  materiaisCatalogo: Array<{ id: number; codigo: string; descricao: string }>
+  materiaisCatalogo: Array<{ id: number; codigo: string; descricao: string; quantidade?: string | number; unidade?: string }>
+  materiaisExistentes?: Array<{
+    id: number
+    materialId: number
+    quantidade: string
+    tipoUso: 'comodato' | 'venda' | 'uso_interno'
+  }>
+  osSalva?: {
+    speedTestPing?: string | number | null
+    speedTestDownload?: string | number | null
+    speedTestUpload?: string | number | null
+    speedTestDataHora?: string | Date | null
+    dataInicioEfetivo?: string | Date | null
+    dataTerminoEfetivo?: string | Date | null
+    observacoesFinais?: string | null
+  } | null
+  readOnly?: boolean
 }
 
+interface ConclusaoCache {
+  formData: Partial<OsConclusaoInput>
+  materiais: Array<Omit<MaterialLinha, 'id'>>
+  speedTestResults: SpeedTestResults | null
+}
+
+const CACHE_KEY_PREFIX = 'os-gerenciar-conclusao-'
+
 export function ConclusaoForm({
+  osId,
   onSubmit,
   isLoading,
   materiaisCatalogo,
+  materiaisExistentes,
+  osSalva,
+  readOnly = false,
 }: ConclusaoFormProps) {
-  const [materiais, setMateriais] = useState<MaterialLinha[]>([])
+  const cacheKey = `${CACHE_KEY_PREFIX}${osId}`
   const [searchMaterial, setSearchMaterial] = useState('')
   const [openMaterialId, setOpenMaterialId] = useState<string | null>(null)
   const [showSpeedTest, setShowSpeedTest] = useState(false)
-  const [speedTestResults, setSpeedTestResults] =
-    useState<SpeedTestResults | null>(null)
+  const [isSavingSpeedTest, setIsSavingSpeedTest] = useState(false)
+
+  const savedSpeedTest = useMemo(
+    () => (osSalva ? parseSpeedTestFromOs(osSalva) : null),
+    [osSalva],
+  )
+
+  // Load from cache on mount
+  const initialData = useMemo(() => {
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      return JSON.parse(cached) as ConclusaoCache
+    }
+    return null
+  }, [cacheKey])
+
+  const [materiais, setMateriais] = useState<MaterialLinha[]>(() => {
+    if (initialData?.materiais && initialData.materiais.length > 0) {
+      return initialData.materiais.map((mat) => ({
+        ...mat,
+        id: `mat-${Date.now()}-${Math.random()}`,
+      }))
+    }
+    if (materiaisExistentes && materiaisExistentes.length > 0) {
+      return materiaisExistentes.map((mat) => ({
+        id: `mat-${mat.id}-${Date.now()}`,
+        materialId: mat.materialId,
+        quantidade: mat.quantidade,
+        tipoUso: mat.tipoUso,
+      }))
+    }
+    return []
+  })
+  const [speedTestResults, setSpeedTestResults] = useState<SpeedTestResults | null>(
+    initialData?.speedTestResults ?? savedSpeedTest ?? null,
+  )
 
   const form = useForm<OsConclusaoInput>({
     resolver: zodResolver(osConclusaoSchema),
-    defaultValues: { materiais: [] },
+    defaultValues: initialData?.formData || {
+      materiais: [],
+      dataInicioEfetivo: toDatetimeLocalValue(osSalva?.dataInicioEfetivo),
+      dataTerminoEfetivo: toDatetimeLocalValue(osSalva?.dataTerminoEfetivo),
+      observacoesFinais: osSalva?.observacoesFinais ?? '',
+    },
   })
+
+  // Save to cache whenever data changes
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      const { materiais: _, ...formDataWithoutMateriais } = data
+      const cacheData: ConclusaoCache = {
+        formData: formDataWithoutMateriais as Partial<OsConclusaoInput>,
+        materiais: materiais.filter(m => m.materialId > 0).map(({ id, ...rest }) => rest),
+        speedTestResults,
+      }
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+    })
+    return () => subscription.unsubscribe()
+  }, [form, cacheKey, materiais, speedTestResults])
+
+  // Update cache when materiais or speedTestResults change
+  useEffect(() => {
+    const { materiais: _, ...formDataWithoutMateriais } = form.getValues()
+    const cacheData: ConclusaoCache = {
+      formData: formDataWithoutMateriais as Partial<OsConclusaoInput>,
+      materiais: materiais.filter(m => m.materialId > 0).map(({ id, ...rest }) => rest),
+      speedTestResults,
+    }
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+  }, [materiais, speedTestResults, form, cacheKey])
 
   const filteredMateriais = useMemo(() => {
     if (!searchMaterial) return materiaisCatalogo
@@ -74,7 +179,6 @@ export function ConclusaoForm({
         materialId: 0,
         quantidade: '1',
         tipoUso: 'uso_interno',
-        localSaida: 'estoque_principal',
       },
     ])
   }
@@ -84,9 +188,13 @@ export function ConclusaoForm({
   }
 
   const handleSubmit = form.handleSubmit(async (data) => {
+    const materiaisValidos = materiais
+      .filter((m) => m.materialId > 0)
+      .map(({ id: _, ...rest }) => rest)
+
     await onSubmit({
       ...data,
-      materiais,
+      materiais: materiaisValidos,
       ...(speedTestResults
         ? {
             speedTestPing: speedTestResults.ping,
@@ -98,16 +206,98 @@ export function ConclusaoForm({
     })
   })
 
-  if (showSpeedTest) {
+  const handleSpeedTestConfirm = async (results: SpeedTestResults) => {
+    setSpeedTestResults(results)
+    setShowSpeedTest(false)
+
+    try {
+      setIsSavingSpeedTest(true)
+      await salvarSpeedTestOs({
+        data: {
+          id: Number(osId),
+          speedTestPing: results.ping,
+          speedTestDownload: results.download,
+          speedTestUpload: results.upload,
+          speedTestDataHora: results.dataHora,
+        },
+      })
+      toast.success('Teste de conexão salvo!')
+    } catch {
+      toast.error('Erro ao salvar teste de conexão')
+    } finally {
+      setIsSavingSpeedTest(false)
+    }
+  }
+
+  if (showSpeedTest && !readOnly) {
     return (
       <SpeedTest
         initialResults={speedTestResults}
-        onConfirm={(results) => {
-          setSpeedTestResults(results)
-          setShowSpeedTest(false)
-        }}
+        onConfirm={handleSpeedTestConfirm}
         onCancel={() => setShowSpeedTest(false)}
       />
+    )
+  }
+
+  if (readOnly) {
+    return (
+      <div className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Início Efetivo</p>
+            <p className="text-sm mt-0.5">
+              {osSalva?.dataInicioEfetivo
+                ? new Date(osSalva.dataInicioEfetivo).toLocaleString('pt-BR')
+                : '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Término Efetivo</p>
+            <p className="text-sm mt-0.5">
+              {osSalva?.dataTerminoEfetivo
+                ? new Date(osSalva.dataTerminoEfetivo).toLocaleString('pt-BR')
+                : '—'}
+            </p>
+          </div>
+        </div>
+        {osSalva?.observacoesFinais && (
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Observações Finais</p>
+            <p className="text-sm mt-0.5 whitespace-pre-wrap">{osSalva.observacoesFinais}</p>
+          </div>
+        )}
+        {materiaisExistentes && materiaisExistentes.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">Materiais Utilizados</p>
+            {materiaisExistentes.map((mat) => {
+              const material = materiaisCatalogo.find((m) => m.id === mat.materialId)
+              return (
+                <div
+                  key={mat.id}
+                  className="p-3 rounded-lg bg-muted border border-border text-sm"
+                >
+                  {material
+                    ? `${material.descricao} (${material.codigo})`
+                    : `Material #${mat.materialId}`}
+                  {' — '}
+                  Qtd: {formatNumber(mat.quantidade)} | Tipo: {mat.tipoUso}
+                </div>
+              )
+            })}
+          </div>
+        )}
+        {(osSalva?.speedTestPing != null || speedTestResults) && (
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">Teste de Conexão</p>
+            <SpeedTestDisplay
+              ping={speedTestResults?.ping ?? osSalva?.speedTestPing}
+              download={speedTestResults?.download ?? osSalva?.speedTestDownload}
+              upload={speedTestResults?.upload ?? osSalva?.speedTestUpload}
+              dataHora={speedTestResults?.dataHora ?? osSalva?.speedTestDataHora}
+            />
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -244,19 +434,27 @@ export function ConclusaoForm({
                 </PopoverContent>
               </Popover>
 
-              <Input
-                type="number"
-                step="0.001"
-                placeholder="Qtd."
-                value={m.quantidade}
-                onChange={(e) =>
-                  setMateriais((prev) =>
-                    prev.map((x) =>
-                      x.id === m.id ? { ...x, quantidade: e.target.value } : x,
-                    ),
-                  )
-                }
-              />
+              <div className="space-y-1.5">
+                <Input
+                  type="number"
+                  step={selectedMaterial?.unidade === 'M' ? '0.001' : '1'}
+                  min="0"
+                  placeholder={selectedMaterial?.unidade === 'M' ? 'Qtd. (metros)' : 'Qtd.'}
+                  value={m.quantidade}
+                  onChange={(e) =>
+                    setMateriais((prev) =>
+                      prev.map((x) =>
+                        x.id === m.id ? { ...x, quantidade: e.target.value } : x,
+                      ),
+                    )
+                  }
+                />
+                {selectedMaterial && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Disponível: {formatNumber(selectedMaterial.quantidade ?? 0)} {getEstoqueUnidadeLabel(selectedMaterial)}
+                  </p>
+                )}
+              </div>
 
               <Select
                 value={m.tipoUso}
@@ -281,33 +479,6 @@ export function ConclusaoForm({
               </Select>
 
               <div className="flex gap-2">
-                <Select
-                  value={m.localSaida}
-                  onValueChange={(value) =>
-                    setMateriais((prev) =>
-                      prev.map((x) =>
-                        x.id === m.id
-                          ? {
-                              ...x,
-                              localSaida: value as MaterialLinha['localSaida'],
-                            }
-                          : x,
-                      ),
-                    )
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="estoque_principal">
-                      Est. Principal
-                    </SelectItem>
-                    <SelectItem value="estoque_tecnico">
-                      Est. Técnico
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
                 <button
                   type="button"
                   onClick={() => removeMaterial(m.id)}
@@ -321,28 +492,24 @@ export function ConclusaoForm({
         })}
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-        {speedTestResults ? (
-          <div className="flex-1 flex gap-3 text-xs font-medium text-muted-foreground items-center bg-muted/50 py-1.5 px-3 rounded-lg w-max border border-border/50">
-            <span className="text-green-500 flex items-center gap-1.5">
-              <Wifi className="w-3.5 h-3.5" /> Teste OK
-            </span>
-            <div className="w-px h-3 bg-border" />
-            <span>Ping: {speedTestResults.ping}ms</span>
-            <div className="w-px h-3 bg-border" />
-            <span>↓ {speedTestResults.download}Mbps</span>
-            <div className="w-px h-3 bg-border" />
-            <span>↑ {speedTestResults.upload}Mbps</span>
-          </div>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-border">
+        {(speedTestResults || osSalva?.speedTestPing != null) ? (
+          <SpeedTestDisplay
+            compact
+            ping={speedTestResults?.ping ?? osSalva?.speedTestPing}
+            download={speedTestResults?.download ?? osSalva?.speedTestDownload}
+            upload={speedTestResults?.upload ?? osSalva?.speedTestUpload}
+            dataHora={speedTestResults?.dataHora ?? osSalva?.speedTestDataHora}
+          />
         ) : null}
         <DefaultButton
           type="button"
-          variant="ghost"
-          label={speedTestResults ? 'Refazer Teste' : 'Testar Conexão'}
+          label={speedTestResults || osSalva?.speedTestPing != null ? 'Refazer Teste' : 'Testar Conexão'}
           leftIcon={<Wifi className="w-4 h-4" />}
           onClick={() => setShowSpeedTest(true)}
+          isLoading={isSavingSpeedTest}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         />
-        <DefaultButton type="button" variant="ghost" label="Salvar Rascunho" />
         <DefaultButton
           type="submit"
           isLoading={isLoading}

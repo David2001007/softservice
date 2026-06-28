@@ -34,7 +34,6 @@ function Dashboard() {
       <TecnicoDashboard
         ordens={ordens}
         materiais={materiais}
-        tecnicoId={user.id}
       />
     )
   }

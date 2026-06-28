@@ -30,6 +30,10 @@ export const materialStatusEnum = pgEnum('material_status', [
   'ativo',
   'inativo',
 ])
+export const estoqueMovimentacaoTipoEnum = pgEnum(
+  'estoque_movimentacao_tipo',
+  ['ENTRADA', 'SAIDA_OS', 'AJUSTE'],
+)
 export const tipoUsoMaterialEnum = pgEnum('tipo_uso_material', [
   'comodato',
   'venda',
@@ -143,8 +147,23 @@ export const materiais = pgTable('materiais', {
     .default('0'),
   comodato: boolean('comodato').notNull().default(false),
   status: materialStatusEnum('status').notNull().default('ativo'),
+  assignedTecnicoId: integer('assigned_tecnico_id').references(() =>
+    tecnicos.id,
+  ),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const estoqueMovimentacoes = pgTable('estoque_movimentacoes', {
+  id: serial('id').primaryKey(),
+  materialId: integer('material_id')
+    .notNull()
+    .references(() => materiais.id),
+  tipo: estoqueMovimentacaoTipoEnum('tipo').notNull(),
+  quantidade: numeric('quantidade', { precision: 12, scale: 3 }).notNull(),
+  ordemServicoId: integer('ordem_servico_id').references(() => ordensServico.id),
+  usuarioId: integer('usuario_id'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
 /* ── Ordens de Serviço ── */
@@ -248,6 +267,7 @@ export const ordensServicoRelations = relations(
     }),
     materiais: many(osMateriais),
     historico: many(osHistorico),
+    arquivos: many(osArquivos),
   }),
 )
 
@@ -262,6 +282,25 @@ export const osMateriaisRelations = relations(osMateriais, ({ one }) => ({
   }),
 }))
 
+export const materiaisRelations = relations(materiais, ({ many }) => ({
+  movimentacoes: many(estoqueMovimentacoes),
+  osMateriais: many(osMateriais),
+}))
+
+export const estoqueMovimentacoesRelations = relations(
+  estoqueMovimentacoes,
+  ({ one }) => ({
+    material: one(materiais, {
+      fields: [estoqueMovimentacoes.materialId],
+      references: [materiais.id],
+    }),
+    os: one(ordensServico, {
+      fields: [estoqueMovimentacoes.ordemServicoId],
+      references: [ordensServico.id],
+    }),
+  }),
+)
+
 export const osHistoricoRelations = relations(osHistorico, ({ one }) => ({
   os: one(ordensServico, {
     fields: [osHistorico.osId],
@@ -270,6 +309,26 @@ export const osHistoricoRelations = relations(osHistorico, ({ one }) => ({
   usuario: one(users, {
     fields: [osHistorico.usuarioId],
     references: [users.id],
+  }),
+}))
+
+/* ── Arquivos da OS ── */
+export const osArquivos = pgTable('os_arquivos', {
+  id: serial('id').primaryKey(),
+  osId: integer('os_id')
+    .notNull()
+    .references(() => ordensServico.id, { onDelete: 'cascade' }),
+  nome: text('nome').notNull(),
+  tipoArquivo: text('tipo_arquivo').notNull(), // imagem, documento, etc.
+  arquivoPath: text('arquivo_path').notNull(), // Path to the file in storage
+  arquivoUrl: text('arquivo_url'), // Public URL to access the file
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const osArquivosRelations = relations(osArquivos, ({ one }) => ({
+  os: one(ordensServico, {
+    fields: [osArquivos.osId],
+    references: [ordensServico.id],
   }),
 }))
 

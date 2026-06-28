@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { logout } from '@/features/auth/server'
 
 export interface AuthUser {
   id: number
@@ -22,7 +23,10 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       setUser: (user) => set({ user, isAuthenticated: true }),
-      clearUser: () => set({ user: null, isAuthenticated: false }),
+      clearUser: () => {
+        set({ user: null, isAuthenticated: false })
+        logout().catch(console.error)
+      },
     }),
     { name: 'unite-auth' },
   ),

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useRouter } from '@tanstack/react-router'
-import { Plus, Settings2, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Settings2, Pencil, Trash2, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
@@ -19,7 +19,9 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { formatDate } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth.store'
 import { deleteOrdemServico } from '@/features/ordens-servico/server'
+import { OrdemServicoCardList } from './components/OrdemServicoCardList'
 
 const tipoServicoLabel: Record<string, string> = {
   instalacao: 'Instalação',
@@ -48,6 +50,8 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     numero: string
   } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const user = useAuthStore((s) => s.user)
+  const isTecnico = user?.type === 'tecnico'
 
   const handleDelete = async () => {
     if (!deleteTarget) return
@@ -68,9 +72,17 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     {
       header: 'Nº OS',
       cell: (r) => (
-        <span className="font-mono text-yellow-600 text-xs font-semibold">
-          {r.numero}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-yellow-600 text-xs font-semibold">
+            {r.numero}
+          </span>
+          {(r.arquivos || []).length > 0 && (
+            <div className="flex items-center gap-1 text-blue-500" title={`${(r.arquivos || []).length} arquivo(s) anexado(s)`}>
+              <FileText className="w-3 h-3" />
+              <span className="text-xs">{(r.arquivos || []).length}</span>
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -168,22 +180,28 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
   )
 
   return (
-    <div className="space-y-5 fade-in">
+    <div className="px-4 sm:px-0 space-y-5 fade-in">
       <PageHeader
         title="Lista de Ordens de Serviço"
-        subtitle="Gerenciamento de todas as OS"
+        subtitle={isTecnico ? 'Minhas Ordens de Serviço' : 'Gerenciamento de todas as OS'}
         action={
-          <Link to="/ordens-servico/nova">
-            <DefaultButton
-              label="Nova OS"
-              leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
-            />
-          </Link>
+          !isTecnico ? (
+            <Link to="/ordens-servico/nova">
+              <DefaultButton
+                label="Nova OS"
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 w-full sm:w-auto"
+              />
+            </Link>
+          ) : undefined
         }
       />
 
-      <AccordionFilters>
+      {isTecnico ? (
+        <OrdemServicoCardList data={filtered} />
+      ) : (
+        <>
+          <AccordionFilters>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-2">
             <Label className="text-xs">Nº OS</Label>
@@ -264,17 +282,19 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
         </div>
       </AccordionFilters>
 
-      <DefaultTable
-        columns={columns}
-        data={filtered.slice((page - 1) * 10, page * 10)}
-        emptyMessage="Nenhuma ordem de serviço encontrada"
-        pagination={{
-          currentPage: page,
-          totalPages: Math.ceil(filtered.length / 10),
-          totalItems: filtered.length,
-          onPageChange: setPage,
-        }}
-      />
+          <DefaultTable
+            columns={columns}
+            data={filtered.slice((page - 1) * 10, page * 10)}
+            emptyMessage="Nenhuma ordem de serviço encontrada"
+            pagination={{
+              currentPage: page,
+              totalPages: Math.ceil(filtered.length / 10),
+              totalItems: filtered.length,
+              onPageChange: setPage,
+            }}
+          />
+        </>
+      )}
 
       <DeleteConfirmationModal
         open={!!deleteTarget}

@@ -1,9 +1,9 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
 import * as schema from './schema.ts'
-import { config } from 'dotenv'
+import dotenv from 'dotenv'
 
-config({ path: ['.env.local', '.env'] })
+dotenv.config({ path: ['.env.local', '.env'] })
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL!,

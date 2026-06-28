@@ -40,7 +40,7 @@ export const osConclusaoSchema = z.object({
         materialId: z.number(),
         quantidade: z.string(),
         tipoUso: z.enum(['comodato', 'venda', 'uso_interno']),
-        localSaida: z.enum(['estoque_principal', 'estoque_tecnico']),
+        localSaida: z.enum(['estoque_principal', 'estoque_tecnico']).optional().default('estoque_principal'),
       }),
     )
     .default([]),

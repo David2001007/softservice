@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,6 +9,9 @@ import { DefaultButton } from '@/components/default-button'
 import { materialSchema  } from '@/features/materiais/schema'
 import type {MaterialInput} from '@/features/materiais/schema';
 import { createMaterial } from '@/features/materiais/server'
+import { getTecnicos } from '@/features/tecnicos/server'
+import { useAuthStore } from '@/stores/auth.store'
+import { TecnicoAutocomplete } from '@/features/materiais/components/TecnicoAutocomplete'
 
 const inputCls =
   'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
@@ -38,9 +42,13 @@ function Field({
 
 export function NovoMaterialPage() {
   const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  const isAdmin = user?.type === 'user'
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<MaterialInput>({
     resolver: zodResolver(materialSchema),
@@ -49,18 +57,40 @@ export function NovoMaterialPage() {
       estoqueMinimo: '0',
       comodato: false,
       status: 'ativo',
+      assignedTecnicoId: null,
     },
   })
 
+  const unidade = watch('unidade')
+  const isMetro = unidade === 'M'
+
   const onSubmit = async (data: MaterialInput) => {
     try {
-      await createMaterial({ data })
+      const payload = {
+        ...data,
+        assignedTecnicoId: data.assignedTecnicoId ? Number(data.assignedTecnicoId) : null,
+      }
+      await createMaterial({ data: payload })
       toast.success('Material cadastrado com sucesso!')
       await navigate({ to: '/materiais' })
     } catch (e) {
       toast.error('Erro ao cadastrar material')
     }
   }
+
+  const [tecnicosList, setTecnicosList] = React.useState<any[]>([])
+  const assignedTecnicoId = watch('assignedTecnicoId')
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const t = await getTecnicos()
+        setTecnicosList(t || [])
+      } catch {
+        // ignore
+      }
+    })()
+  }, [])
 
   return (
     <div className="max-w-2xl mx-auto space-y-5 fade-in">
@@ -113,20 +143,24 @@ export function NovoMaterialPage() {
             >
               <select {...register('unidade')} className={selectCls}>
                 <option value="">Selecione...</option>
-                <option value="unidade">Unidade</option>
-                <option value="metro">Metro</option>
-                <option value="rolo">Rolo</option>
-                <option value="par">Par</option>
-                <option value="caixa">Caixa</option>
-                <option value="kit">Kit</option>
+                <option value="UN">UN</option>
+                <option value="CX">CX</option>
+                <option value="M">M</option>
+                <option value="KG">KG</option>
               </select>
+              {isMetro && (
+                <p className="text-xs text-text-muted mt-1">
+                  Para materiais em metros, a quantidade aceita casas decimais.
+                </p>
+              )}
             </Field>
             <Field label="Quantidade Atual">
               <input
                 {...register('quantidade')}
                 type="number"
-                step="0.001"
-                placeholder="0"
+                step={isMetro ? '0.001' : '1'}
+                min="0"
+                placeholder={isMetro ? '0.000' : '0'}
                 className={inputCls}
               />
             </Field>
@@ -134,8 +168,9 @@ export function NovoMaterialPage() {
               <input
                 {...register('estoqueMinimo')}
                 type="number"
-                step="0.001"
-                placeholder="0"
+                step={isMetro ? '0.001' : '1'}
+                min="0"
+                placeholder={isMetro ? '0.000' : '0'}
                 className={inputCls}
               />
             </Field>
@@ -162,11 +197,32 @@ export function NovoMaterialPage() {
             </div>
 
             <Field label="Status">
-              <select {...register('status')} className={selectCls}>
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-              </select>
+              <div className="flex items-center gap-3">
+                <input
+                  id="statusToggle"
+                  type="checkbox"
+                  className="w-10 h-6 accent-primary cursor-pointer"
+                  checked={watch('status') === 'ativo'}
+                  onChange={(e) => setValue('status', e.target.checked ? 'ativo' : 'inativo')}
+                />
+                <label htmlFor="statusToggle" className="text-sm">
+                  {watch('status') === 'ativo' ? 'Ativo' : 'Inativo'}
+                </label>
+              </div>
             </Field>
+
+            {isAdmin && (
+              <Field label="Técnico vinculado">
+                <TecnicoAutocomplete
+                  tecnicos={tecnicosList}
+                  value={assignedTecnicoId}
+                  onChange={(id) => setValue('assignedTecnicoId', id)}
+                />
+                <p className="text-xs text-text-muted mt-1.5">
+                  Apenas o técnico vinculado poderá visualizar e dar baixa neste material nas ordens de serviço. Sem vínculo, o material fica no estoque principal (somente administradores).
+                </p>
+              </Field>
+            )}
           </div>
         </div>
 

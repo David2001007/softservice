@@ -154,7 +154,7 @@ export function SpeedTest({
       </div>
 
       {/* Progress Steps */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <PhaseCard
           label="Ping"
           icon={Activity}
@@ -205,7 +205,7 @@ export function SpeedTest({
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-border">
         <DefaultButton variant="ghost" label="Cancelar" onClick={onCancel} />
         <DefaultButton
           variant="ghost"

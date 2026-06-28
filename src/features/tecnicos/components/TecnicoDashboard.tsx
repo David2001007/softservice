@@ -7,20 +7,18 @@ import {
   Clock,
 } from 'lucide-react'
 import { StatusBadge } from '@/components/status-badge'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatNumber } from '@/lib/utils'
 
 interface TecnicoDashboardProps {
   ordens: any[]
   materiais: any[]
-  tecnicoId: number
 }
 
 export function TecnicoDashboard({
   ordens,
   materiais,
-  tecnicoId,
 }: TecnicoDashboardProps) {
-  const minhasOrdens = ordens.filter((o) => o.tecnicoId === tecnicoId)
+  const minhasOrdens = ordens
 
   const abertas = minhasOrdens.filter((o) => o.status === 'aberta').length
   const agendadas = minhasOrdens.filter((o) => o.status === 'agendada').length
@@ -240,7 +238,7 @@ export function TecnicoDashboard({
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className="text-xs font-bold text-danger">
-                          {Number(mat.quantidade).toFixed(0)}
+                          {formatNumber(mat.quantidade)}
                         </span>
                         <span className="text-[10px] text-text-muted ml-1">
                           {mat.unidade}
@@ -248,7 +246,7 @@ export function TecnicoDashboard({
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className="text-xs text-text-muted">
-                          {Number(mat.estoqueMinimo).toFixed(0)}
+                          {formatNumber(mat.estoqueMinimo)}
                         </span>
                       </td>
                     </tr>

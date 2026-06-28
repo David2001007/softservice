@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -7,6 +7,8 @@ import {
   XCircle,
   History,
   Lock,
+  Upload,
+  FileText,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
@@ -24,13 +26,49 @@ import { ConclusaoForm } from './conclusao'
 import { ReagendamentoForm } from './reagendamento'
 import { CancelamentoForm } from './cancelamento'
 import { Historico } from './historico'
+import { ArquivoUploadModal } from '../components/ArquivoUploadModal'
+import { ArquivoList } from '../components/ArquivoList'
 
 type Tab = 'conclusao' | 'reagendamento' | 'cancelamento' | 'historico'
 
 interface GerenciarOSPageProps {
-  os: any
-  materiais: any[]
-  tecnicos: any[]
+  os?: {
+    id: number | string
+    numero?: string
+    cliente?: { nome?: string; logradouro?: string | null; cidade?: string | null }
+    tecnico?: { nome?: string | null } | null
+    tecnicoId?: number | null | undefined
+    dataAbertura: string | Date
+    historico?: any[]
+    arquivos?: any[]
+    materiais?: Array<{
+      id: number
+      materialId: number
+      quantidade: string
+      tipoUso: 'comodato' | 'venda' | 'uso_interno'
+      localSaida: 'estoque_principal' | 'estoque_tecnico'
+    }>
+    status?: string
+    prioridade?: string
+    tipoServico?: string
+    dataAgendada?: string | Date | null
+    dataInicioEfetivo?: string | Date | null
+    dataTerminoEfetivo?: string | Date | null
+    observacoesFinais?: string | null
+    observacoes?: string | null
+    resultadoServico?: boolean | null
+    valor?: string | number | null
+    speedTestPing?: string | number | null
+    speedTestDownload?: string | number | null
+    speedTestUpload?: string | number | null
+    speedTestDataHora?: string | Date | null
+    motivoReagendamento?: string | null
+    novaDataAgendada?: string | Date | null
+    motivoCancelamento?: string | null
+    dataCancelamento?: string | Date | null
+  } | null
+  materiais: Array<{ id: number; codigo: string; descricao: string; quantidade?: string | number; unidade?: string }>
+  tecnicos: Array<{ id: number; nome: string }>
 }
 
 const TABS = [
@@ -39,6 +77,16 @@ const TABS = [
   { id: 'cancelamento' as const, label: 'Cancelamento', icon: XCircle },
   { id: 'historico' as const, label: 'Histórico', icon: History },
 ]
+
+// Clear cache for the given OS id
+function clearCache(osId: number | string) {
+  const keysToRemove = [
+    `os-gerenciar-conclusao-${osId}`,
+    `os-gerenciar-reagendamento-${osId}`,
+    `os-gerenciar-cancelamento-${osId}`,
+  ]
+  keysToRemove.forEach((key) => localStorage.removeItem(key))
+}
 
 export function GerenciarOSPage({
   os,
@@ -49,6 +97,17 @@ export function GerenciarOSPage({
   const user = useAuthStore((state) => state.user)
   const [activeTab, setActiveTab] = useState<Tab>('conclusao')
   const [isLoading, setIsLoading] = useState(false)
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [arquivos, setArquivos] = useState(() => os?.arquivos || [])
+
+  // Clear cache when component unmounts (leaving the page)
+  useEffect(() => {
+    return () => {
+      if (os?.id) {
+        clearCache(os.id)
+      }
+    }
+  }, [os?.id])
 
   if (!os) return null
 
@@ -64,10 +123,17 @@ export function GerenciarOSPage({
     try {
       setIsLoading(true)
       await concluirOrdemServico({ data: { id: Number(os.id), data } })
+      clearCache(os.id)
       toast.success('OS concluída e materiais baixados com sucesso!')
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
-      toast.error('Erro ao concluir OS')
+      if (e instanceof Error) {
+        toast.error(e.message)
+      } else if (typeof e === 'string') {
+        toast.error(e)
+      } else {
+        toast.error('Erro ao concluir OS')
+      }
       console.error(e)
     } finally {
       setIsLoading(false)
@@ -103,7 +169,7 @@ export function GerenciarOSPage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 fade-in">
+    <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-5 fade-in">
       <PageHeader
         title="Gerenciador de Ordem de Serviço"
         action={
@@ -149,10 +215,38 @@ export function GerenciarOSPage({
               <p className="text-xs text-muted-foreground font-medium">
                 {label}
               </p>
-              <p className="text-sm mt-0.5">{value}</p>
+              <p className="text-sm mt-0.5 break-words">{value}</p>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Arquivos */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-gray-500" />
+            <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+              Arquivos Anexados ({arquivos.length}/5)
+            </h3>
+          </div>
+          {canEdit && arquivos.length < 5 && (
+            <DefaultButton
+              label="Adicionar Arquivo"
+              leftIcon={<Upload className="w-4 h-4" />}
+              onClick={() => setUploadModalOpen(true)}
+              className="bg-primary hover:bg-primary-hover text-white w-full sm:w-auto"
+            />
+          )}
+        </div>
+        <ArquivoList
+          arquivos={arquivos}
+          showDelete={canEdit}
+          onArquivoDeleted={(deletedId) => {
+            // Refresh files
+            setArquivos(arquivos.filter((a: any) => a.id !== deletedId))
+          }}
+        />
       </div>
 
       {/* Aviso de OS Bloqueada */}
@@ -175,7 +269,7 @@ export function GerenciarOSPage({
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="flex border-b border-border overflow-x-auto">
           {TABS.map(({ id, label, icon: Icon }) => {
-            const isEditTab = id !== 'historico'
+            const isEditTab = id !== 'historico' && id !== 'conclusao'
             const isDisabled = isEditTab && isOSLocked && !canEditLockedOS
 
             return (
@@ -201,7 +295,7 @@ export function GerenciarOSPage({
         </div>
 
         <div className="p-5">
-          {!canEdit && activeTab !== 'historico' && (
+          {!canEdit && activeTab !== 'historico' && activeTab !== 'conclusao' && (
             <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-4">
               <p className="text-sm text-destructive">
                 Você não tem permissão para editar esta ordem de serviço.
@@ -209,26 +303,35 @@ export function GerenciarOSPage({
             </div>
           )}
 
-          {activeTab === 'conclusao' && canEdit && (
-            <ConclusaoForm
-              onSubmit={handleConcluir}
-              isLoading={isLoading}
-              materiaisCatalogo={materiais}
-            />
-          )}
+          {activeTab === 'conclusao' && (
+          <ConclusaoForm
+            osId={os.id}
+            onSubmit={handleConcluir}
+            isLoading={isLoading}
+            materiaisCatalogo={materiais}
+            materiaisExistentes={os.materiais ?? []}
+            osSalva={os}
+            readOnly={!canEdit}
+          />
+        )}
 
           {activeTab === 'reagendamento' && canEdit && (
             <ReagendamentoForm
+              osId={os.id}
               onSubmit={handleReagendar}
               isLoading={isLoading}
-              dataAgendadaAtual={os.dataAgendada}
-              tecnicoNomeAtual={os.tecnico?.nome}
+              dataAgendadaAtual={os.dataAgendada ?? undefined}
+              tecnicoNomeAtual={os.tecnico?.nome ?? undefined}
               tecnicos={tecnicos}
             />
           )}
 
           {activeTab === 'cancelamento' && canEdit && (
-            <CancelamentoForm onSubmit={handleCancelar} isLoading={isLoading} />
+            <CancelamentoForm 
+              osId={os.id}
+              onSubmit={handleCancelar} 
+              isLoading={isLoading} 
+            />
           )}
 
           {activeTab === 'historico' && (
@@ -236,6 +339,15 @@ export function GerenciarOSPage({
           )}
         </div>
       </div>
+
+      <ArquivoUploadModal
+        open={uploadModalOpen}
+        onOpenChange={setUploadModalOpen}
+        osId={Number(os.id)}
+        onUploadSuccess={(arquivosAtualizados) => {
+          setArquivos(arquivosAtualizados)
+        }}
+      />
     </div>
   )
 }

@@ -11,9 +11,10 @@ import {
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { sendMail } from '@/lib/mail'
+import { setAuthCookie, clearAuthCookie } from '@/lib/auth-server'
 
 export const sendResetCode = createServerFn({ method: 'POST' })
-  .inputValidator(forgotPasswordSchema)
+  .validator(forgotPasswordSchema)
   .handler(async ({ data }) => {
     const { email } = data
 
@@ -66,7 +67,7 @@ export const sendResetCode = createServerFn({ method: 'POST' })
   })
 
 export const verifyResetCodeAndSetPassword = createServerFn({ method: 'POST' })
-  .inputValidator(resetPasswordSchema)
+  .validator(resetPasswordSchema)
   .handler(async ({ data }) => {
     const { email, code, newPassword } = data
 
@@ -126,7 +127,7 @@ export const verifyResetCodeAndSetPassword = createServerFn({ method: 'POST' })
   })
 
 export const login = createServerFn({ method: 'POST' })
-  .inputValidator(loginSchema)
+  .validator(loginSchema)
   .handler(async ({ data }) => {
     const { identifier, password } = data
 
@@ -140,6 +141,7 @@ export const login = createServerFn({ method: 'POST' })
     if (user) {
       const passwordMatch = await bcrypt.compare(password, user.passwordHash)
       if (passwordMatch) {
+        await setAuthCookie(user.id, 'user')
         return {
           id: user.id,
           nome: user.nome,
@@ -162,6 +164,7 @@ export const login = createServerFn({ method: 'POST' })
     if (tecnico) {
       const passwordMatch = await bcrypt.compare(password, tecnico.passwordHash)
       if (passwordMatch) {
+        await setAuthCookie(tecnico.id, 'tecnico')
         return {
           id: tecnico.id,
           nome: tecnico.nome,
@@ -176,7 +179,7 @@ export const login = createServerFn({ method: 'POST' })
   })
 
 export const changePassword = createServerFn({ method: 'POST' })
-  .inputValidator(
+  .validator(
     z.object({
       userId: z.number(),
       userType: z.enum(['user', 'tecnico']),
@@ -227,3 +230,8 @@ export const changePassword = createServerFn({ method: 'POST' })
 
     return { success: true }
   })
+
+export const logout = createServerFn({ method: 'POST' }).handler(async () => {
+  await clearAuthCookie()
+  return { success: true }
+})

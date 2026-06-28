@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { XCircle, AlertTriangle } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
 import { DefaultButton } from '@/components/default-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,17 +21,41 @@ import {
 import type {OsCancelamentoInput} from '@/features/ordens-servico/schema';
 
 interface CancelamentoFormProps {
+  osId: number | string
   onSubmit: (data: OsCancelamentoInput) => Promise<void>
   isLoading: boolean
 }
 
+const CACHE_KEY_PREFIX = 'os-gerenciar-cancelamento-'
+
 export function CancelamentoForm({
+  osId,
   onSubmit,
   isLoading,
 }: CancelamentoFormProps) {
+  const cacheKey = `${CACHE_KEY_PREFIX}${osId}`
+  
+  // Load from cache on mount
+  const initialData = useMemo(() => {
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      return JSON.parse(cached) as Partial<OsCancelamentoInput>
+    }
+    return null
+  }, [cacheKey])
+
   const form = useForm<OsCancelamentoInput>({
     resolver: zodResolver(osCancelamentoSchema),
+    defaultValues: initialData || {},
   })
+
+  // Save to cache whenever data changes
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      localStorage.setItem(cacheKey, JSON.stringify(data))
+    })
+    return () => subscription.unsubscribe()
+  }, [form, cacheKey])
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

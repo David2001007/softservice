@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CalendarClock, AlertCircle } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
 import { DefaultButton } from '@/components/default-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,6 +21,7 @@ import type {OsReagendamentoInput} from '@/features/ordens-servico/schema';
 import { formatDate } from '@/lib/utils'
 
 interface ReagendamentoFormProps {
+  osId: number | string
   onSubmit: (data: OsReagendamentoInput) => Promise<void>
   isLoading: boolean
   dataAgendadaAtual?: Date | string
@@ -27,16 +29,39 @@ interface ReagendamentoFormProps {
   tecnicos?: Array<{ id: number; nome: string }>
 }
 
+const CACHE_KEY_PREFIX = 'os-gerenciar-reagendamento-'
+
 export function ReagendamentoForm({
+  osId,
   onSubmit,
   isLoading,
   dataAgendadaAtual,
   tecnicoNomeAtual,
   tecnicos,
 }: ReagendamentoFormProps) {
+  const cacheKey = `${CACHE_KEY_PREFIX}${osId}`
+  
+  // Load from cache on mount
+  const initialData = useMemo(() => {
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      return JSON.parse(cached) as Partial<OsReagendamentoInput>
+    }
+    return null
+  }, [cacheKey])
+
   const form = useForm<OsReagendamentoInput>({
     resolver: zodResolver(osReagendamentoSchema),
+    defaultValues: initialData || {},
   })
+
+  // Save to cache whenever data changes
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      localStorage.setItem(cacheKey, JSON.stringify(data))
+    })
+    return () => subscription.unsubscribe()
+  }, [form, cacheKey])
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

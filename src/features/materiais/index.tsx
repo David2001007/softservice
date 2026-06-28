@@ -4,36 +4,51 @@ import { Plus, Eye, Pencil, AlertTriangle, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
-import { DefaultTable  } from '@/components/default-table'
-import type {Column} from '@/components/default-table';
+import { DefaultTable } from '@/components/default-table'
+import type { Column } from '@/components/default-table'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { deleteMaterial } from '@/features/materiais/server'
+import { useAuthStore } from '@/stores/auth.store'
+import { MaterialCardList } from './components/MaterialCardList'
+import { formatNumber, getEstoqueUnidadeLabel } from '@/lib/utils'
 
 export function MateriaisPage({ materiais }: { materiais: any[] }) {
   const router = useRouter()
+
   const [filtros, setFiltros] = useState({
     codigo: '',
     descricao: '',
     categoria: '',
     status: '',
   })
+
   const [page, setPage] = useState(1)
+
   const [deleteTarget, setDeleteTarget] = useState<{
     id: number
     descricao: string
   } | null>(null)
+
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const user = useAuthStore((s) => s.user)
+  const isTecnico = user?.type === 'tecnico'
+
+  
   const handleDelete = async () => {
     if (!deleteTarget) return
+
     setIsDeleting(true)
+
     try {
       await deleteMaterial({ data: deleteTarget.id })
+
       toast.success(
         `Material "${deleteTarget.descricao}" excluído com sucesso!`,
       )
+
       setDeleteTarget(null)
       router.invalidate()
     } catch {
@@ -49,14 +64,18 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
       accessorKey: 'codigo',
       className: 'font-mono text-gold text-xs',
     },
-    { header: 'Descrição', accessorKey: 'descricao' },
+    {
+      header: 'Descrição',
+      accessorKey: 'descricao',
+    },
     {
       header: 'Categoria',
       accessorKey: 'categoria',
       className: 'text-text-muted text-sm',
     },
     {
-      header: 'Unidade',
+      header: 'Unidade de Medida',
+      cell: (r) => getEstoqueUnidadeLabel(r),
       accessorKey: 'unidade',
       className: 'text-text-muted text-sm',
     },
@@ -64,10 +83,15 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
       header: 'Qtd. Estoque',
       cell: (r) => (
         <span
-          className={`font-semibold ${r.quantidade <= r.estoqueMinimo ? 'text-danger' : 'text-text'}`}
+          className={`font-semibold ${
+            Number(r.quantidade) <= Number(r.estoqueMinimo)
+              ? 'text-danger'
+              : 'text-text'
+          }`}
         >
-          {r.quantidade}
-          {r.quantidade <= r.estoqueMinimo && (
+          {formatNumber(r.quantidade)} {getEstoqueUnidadeLabel(r)}
+
+          {Number(r.quantidade) <= Number(r.estoqueMinimo) && (
             <AlertTriangle className="inline w-3.5 h-3.5 ml-1 text-warning" />
           )}
         </span>
@@ -75,7 +99,7 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
     },
     {
       header: 'Est. Mínimo',
-      accessorKey: 'estoqueMinimo',
+      cell: (r) => `${formatNumber(r.estoqueMinimo)} ${getEstoqueUnidadeLabel(r)}`,
       className: 'text-text-muted text-sm',
     },
     {
@@ -95,6 +119,7 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
               className="h-7 text-xs"
             />
           </Link>
+
           <Link to="/materiais/$id/editar" params={{ id: String(r.id) }}>
             <DefaultButton
               size="sm"
@@ -104,6 +129,7 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
               className="h-7 text-xs"
             />
           </Link>
+
           <DefaultButton
             size="sm"
             variant="ghost"
@@ -111,7 +137,10 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
             label="Excluir"
             className="h-7 text-xs text-danger hover:text-danger hover:bg-danger/10"
             onClick={() =>
-              setDeleteTarget({ id: r.id, descricao: r.descricao })
+              setDeleteTarget({
+                id: r.id,
+                descricao: r.descricao,
+              })
             }
           />
         </div>
@@ -136,17 +165,18 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
         title="Lista de Materiais / Estoque"
         subtitle="Materiais e equipamentos disponíveis"
         action={
-          <Link to="/materiais/novo">
-            <DefaultButton
-              label="Novo Material"
-              leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
-            />
-          </Link>
+          !isTecnico ? (
+            <Link to="/materiais/novo">
+              <DefaultButton
+                label="Novo Material"
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
+              />
+            </Link>
+          ) : undefined
         }
       />
 
-      {/* Alert estoque baixo */}
       {materiais.some(
         (m) => Number(m.quantidade) <= Number(m.estoqueMinimo),
       ) && (
@@ -156,66 +186,83 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
         </div>
       )}
 
-      <AccordionFilters>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { key: 'codigo', label: 'Código', placeholder: 'MAT-001...' },
-            { key: 'descricao', label: 'Descrição', placeholder: 'Buscar...' },
-            {
-              key: 'categoria',
-              label: 'Categoria',
-              placeholder: 'Fibra, Equipamento...',
-            },
-          ].map(({ key, label, placeholder }) => (
-            <div key={key} className="space-y-1.5">
-              <label className="text-xs font-medium text-text-muted">
-                {label}
-              </label>
-              <input
-                value={filtros[key as keyof typeof filtros]}
-                onChange={(e) =>
-                  setFiltros((f) => ({ ...f, [key]: e.target.value }))
-                }
-                placeholder={placeholder}
-                className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-          ))}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">
-              Status
-            </label>
-            <select
-              value={filtros.status}
-              onChange={(e) =>
-                setFiltros((f) => ({ ...f, status: e.target.value }))
-              }
-              className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm focus:outline-none focus:border-primary transition-colors"
-            >
-              <option value="">Todos</option>
-              <option value="ativo">Ativo</option>
-              <option value="inativo">Inativo</option>
-            </select>
-          </div>
-        </div>
-      </AccordionFilters>
+      {isTecnico ? (
+        <MaterialCardList data={filtered} />
+      ) : (
+        <>
+          <AccordionFilters>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { key: 'codigo', label: 'Código', placeholder: 'MAT-001...' },
+                { key: 'descricao', label: 'Descrição', placeholder: 'Buscar...' },
+                {
+                  key: 'categoria',
+                  label: 'Categoria',
+                  placeholder: 'Fibra, Equipamento...',
+                },
+              ].map(({ key, label, placeholder }) => (
+                <div key={key} className="space-y-1.5">
+                  <label className="text-xs font-medium text-text-muted">
+                    {label}
+                  </label>
 
-      <DefaultTable
-        columns={columns}
-        data={filtered.slice((page - 1) * 10, page * 10)}
-        emptyMessage="Nenhum material encontrado"
-        pagination={{
-          currentPage: page,
-          totalPages: Math.ceil(filtered.length / 10),
-          totalItems: filtered.length,
-          onPageChange: setPage,
-        }}
-      />
+                  <input
+                    value={filtros[key as keyof typeof filtros]}
+                    onChange={(e) =>
+                      setFiltros((f) => ({
+                        ...f,
+                        [key]: e.target.value,
+                      }))
+                    }
+                    placeholder={placeholder}
+                    className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+              ))}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-text-muted">
+                  Status
+                </label>
+
+                <select
+                  value={filtros.status}
+                  onChange={(e) =>
+                    setFiltros((f) => ({
+                      ...f,
+                      status: e.target.value,
+                    }))
+                  }
+                  className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm focus:outline-none focus:border-primary transition-colors"
+                >
+                  <option value="">Todos</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                </select>
+              </div>
+            </div>
+          </AccordionFilters>
+
+          <DefaultTable
+            columns={columns}
+            data={filtered.slice((page - 1) * 10, page * 10)}
+            emptyMessage="Nenhum material encontrado"
+            pagination={{
+              currentPage: page,
+              totalPages: Math.ceil(filtered.length / 10),
+              totalItems: filtered.length,
+              onPageChange: setPage,
+            }}
+          />
+        </>
+      )}
 
       <DeleteConfirmationModal
         open={!!deleteTarget}
         onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null)
+          if (!open) {
+            setDeleteTarget(null)
+          }
         }}
         onConfirm={handleDelete}
         isLoading={isDeleting}

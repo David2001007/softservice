@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { deleteMaterial } from '@/features/materiais/server'
+import { formatNumber, getEstoqueUnidadeLabel } from '@/lib/utils'
 
 export function VerMaterialPage({
   material,
@@ -38,9 +39,9 @@ export function VerMaterialPage({
     Código: material.codigo,
     Descrição: material.descricao,
     Categoria: material.categoria,
-    Unidade: material.unidade,
-    Quantidade: material.quantidade,
-    'Est. Mínimo': material.estoqueMinimo,
+    Unidade: getEstoqueUnidadeLabel(material),
+    Quantidade: `${formatNumber(material.quantidade)} ${getEstoqueUnidadeLabel(material)}`,
+    'Est. Mínimo': `${formatNumber(material.estoqueMinimo)} ${getEstoqueUnidadeLabel(material)}`,
     Comodato: material.comodato ? 'Sim' : 'Não',
     Status: material.status,
   }
