@@ -36,6 +36,7 @@
     "@tanstack/react-table": "latest",
     "@tanstack/router-core": "latest",
     "@tanstack/router-plugin": "latest",
+    "@tanstack/start-server-core": "1.169.14",
     "@types/three": "^0.184.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
