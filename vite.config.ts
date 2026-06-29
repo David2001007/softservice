@@ -16,6 +16,10 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  ssr: {
+    // These modules are resolved at runtime by Nitro/Node — Rolldown must not try to bundle them
+    external: ['@tanstack/start-server-core/request-response'],
+  },
 })
 
 export default config
