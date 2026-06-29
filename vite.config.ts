@@ -16,16 +16,7 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
-  environments: {
-    ssr: {
-      build: {
-        rollupOptions: {
-          // Rolldown cannot resolve this subpath during SSR build — externalize so Nitro resolves at runtime
-          external: ['@tanstack/start-server-core/request-response'],
-        },
-      },
-    },
-  },
 })
+
 
 export default config
