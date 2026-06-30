@@ -12,6 +12,49 @@ import { z } from 'zod'
 import { uploadFileToStorage, deleteFileFromStorage } from '@/lib/supabase-storage'
 import { requireTecnicoOrAdmin } from '@/lib/auth-server'
 import { getEstoqueUnidadeLabel } from '@/lib/utils'
+import { getSettingValue } from '@/features/configuracoes/db'
+import { isHoliday, isWeekend, checkBusinessHours } from '@/lib/holidays'
+import type { BusinessHoursConfig } from '@/lib/holidays'
+
+/**
+ * Valida a data de agendamento contra as regras globais configuradas.
+ * Lança Error com mensagem detalhada se alguma regra for violada.
+ */
+async function validateAgendamento(dataAgendada: string | Date | null | undefined, checkRetroactive: boolean = false) {
+  if (!dataAgendada) return
+  const d = typeof dataAgendada === 'string' ? new Date(dataAgendada) : dataAgendada
+
+  // Feriados
+  const bloquearFeriados = await getSettingValue('bloquear_atendimento_feriados', 'false')
+  if (bloquearFeriados === 'true' && isHoliday(d)) {
+    throw new Error('Nao e possivel agendar atendimento em feriados.')
+  }
+
+  // Finais de semana
+  const bloquearFDS = await getSettingValue('bloquear_finais_de_semana', 'false')
+  if (bloquearFDS === 'true' && isWeekend(d)) {
+    throw new Error('Nao e possivel agendar atendimento em finais de semana.')
+  }
+
+  // Horário de atendimento
+  const config: BusinessHoursConfig = {
+    entrada: await getSettingValue('horario_entrada', ''),
+    inicioIntervalo: await getSettingValue('horario_inicio_intervalo', ''),
+    fimIntervalo: await getSettingValue('horario_fim_intervalo', ''),
+    saida: await getSettingValue('horario_saida', ''),
+  }
+  const hrError = checkBusinessHours(d, config)
+  if (hrError) throw new Error(hrError)
+
+  // Agendamento retroativo
+  if (checkRetroactive && d < new Date()) {
+    const comportamentoRetroativo = await getSettingValue('comportamento_agendamento_retroativo', 'aviso')
+    if (comportamentoRetroativo === 'bloquear') {
+      throw new Error('O agendamento retroativo está bloqueado pelas configurações do sistema.')
+    }
+  }
+}
+
 
 export const getOrdensServico = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -151,7 +194,12 @@ export const deleteOsArquivo = createServerFn({ method: 'POST' })
 export const createOrdemServico = createServerFn({ method: 'POST' })
   .validator(osSchema)
   .handler(async ({ data }) => {
+    if (data.dataAgendada) {
+      await validateAgendamento(data.dataAgendada, true)
+    }
+
     const status = data.dataAgendada ? 'agendada' : (data.status || 'aberta')
+
 
     const [novaOs] = await db
       .insert(ordensServico)
@@ -331,6 +379,11 @@ export const reagendarOrdemServico = createServerFn({ method: 'POST' })
         )
       }
 
+      if (data.data.novaDataAgendada) {
+        await validateAgendamento(data.data.novaDataAgendada, true)
+      }
+
+
       const [osAtualizada] = await tx
         .update(ordensServico)
         .set({
@@ -402,7 +455,12 @@ export const cancelarOrdemServico = createServerFn({ method: 'POST' })
 export const updateOrdemServico = createServerFn({ method: 'POST' })
   .validator(z.object({ id: z.number(), data: osSchema }))
   .handler(async ({ data }) => {
+    if (data.data.dataAgendada) {
+      await validateAgendamento(data.data.dataAgendada)
+    }
+
     const status = data.data.dataAgendada ? 'agendada' : data.data.status
+
 
     const [atualizada] = await db
       .update(ordensServico)

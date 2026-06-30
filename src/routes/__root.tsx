@@ -48,6 +48,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           position="top-right"
           richColors
           theme="dark"
+          duration={3000}
+          closeButton
           toastOptions={{
             style: {
               background: '#0F172A',

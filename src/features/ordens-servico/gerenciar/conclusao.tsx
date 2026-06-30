@@ -25,7 +25,7 @@ import {
 import type {OsConclusaoInput} from '@/features/ordens-servico/schema';
 import { SpeedTest  } from './speed-test'
 import type {SpeedTestResults} from './speed-test';
-import { formatNumber, getEstoqueUnidadeLabel } from '@/lib/utils'
+import { formatDate, formatNumber, getEstoqueUnidadeLabel } from '@/lib/utils'
 import { SpeedTestDisplay, parseSpeedTestFromOs } from '../components/SpeedTestDisplay'
 import { salvarSpeedTestOs } from '@/features/ordens-servico/server'
 import { toast } from 'sonner'
@@ -246,19 +246,16 @@ export function ConclusaoForm({
           <div>
             <p className="text-xs text-muted-foreground font-medium">Início Efetivo</p>
             <p className="text-sm mt-0.5">
-              {osSalva?.dataInicioEfetivo
-                ? new Date(osSalva.dataInicioEfetivo).toLocaleString('pt-BR')
-                : '—'}
+              {formatDate(osSalva?.dataInicioEfetivo, { time: true })}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground font-medium">Término Efetivo</p>
             <p className="text-sm mt-0.5">
-              {osSalva?.dataTerminoEfetivo
-                ? new Date(osSalva.dataTerminoEfetivo).toLocaleString('pt-BR')
-                : '—'}
+              {formatDate(osSalva?.dataTerminoEfetivo, { time: true })}
             </p>
           </div>
+
         </div>
         {osSalva?.observacoesFinais && (
           <div>

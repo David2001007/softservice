@@ -132,17 +132,13 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
           />
           <DetailItem
             label="Abertura"
-            value={
-              os.dataAbertura
-                ? new Date(os.dataAbertura).toLocaleString('pt-BR')
-                : '—'
-            }
+            value={formatDate(os.dataAbertura, { time: true })}
           />
           <DetailItem
             label="Agendamento"
             value={
               os.dataAgendada
-                ? new Date(os.dataAgendada).toLocaleString('pt-BR')
+                ? formatDate(os.dataAgendada, { time: true })
                 : 'Não agendado'
             }
           />
@@ -174,19 +170,11 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
             <DetailItem
               label="Início Efetivo"
-              value={
-                os.dataInicioEfetivo
-                  ? new Date(os.dataInicioEfetivo).toLocaleString('pt-BR')
-                  : '—'
-              }
+              value={formatDate(os.dataInicioEfetivo, { time: true })}
             />
             <DetailItem
               label="Término Efetivo"
-              value={
-                os.dataTerminoEfetivo
-                  ? new Date(os.dataTerminoEfetivo).toLocaleString('pt-BR')
-                  : '—'
-              }
+              value={formatDate(os.dataTerminoEfetivo, { time: true })}
             />
             {os.resultadoServico != null && (
               <DetailItem
@@ -245,11 +233,7 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
             <DetailItem label="Motivo" value={os.motivoCancelamento} />
             <DetailItem
               label="Data do Cancelamento"
-              value={
-                os.dataCancelamento
-                  ? new Date(os.dataCancelamento).toLocaleString('pt-BR')
-                  : '—'
-              }
+              value={formatDate(os.dataCancelamento, { time: true })}
             />
           </div>
         </Section>

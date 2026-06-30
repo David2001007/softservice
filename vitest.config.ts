@@ -1,0 +1,15 @@
+import { defineConfig } from 'vitest/config'
+import viteReact from '@vitejs/plugin-react'
+import { fileURLToPath } from 'url'
+
+export default defineConfig({
+  plugins: [viteReact()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  test: {
+    environment: 'node',
+  },
+})

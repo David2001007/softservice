@@ -16,6 +16,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppTecnicosIndexRouteImport } from './routes/_app.tecnicos.index'
 import { Route as AppOrdensServicoIndexRouteImport } from './routes/_app.ordens-servico.index'
 import { Route as AppMateriaisIndexRouteImport } from './routes/_app.materiais.index'
+import { Route as AppConfiguracoesIndexRouteImport } from './routes/_app.configuracoes.index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app.clientes.index'
 import { Route as AppAtendentesIndexRouteImport } from './routes/_app.atendentes.index'
 import { Route as AppAgendaIndexRouteImport } from './routes/_app.agenda.index'
@@ -68,6 +69,11 @@ const AppOrdensServicoIndexRoute = AppOrdensServicoIndexRouteImport.update({
 const AppMateriaisIndexRoute = AppMateriaisIndexRouteImport.update({
   id: '/materiais/',
   path: '/materiais/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesIndexRoute = AppConfiguracoesIndexRouteImport.update({
+  id: '/configuracoes/',
+  path: '/configuracoes/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppClientesIndexRoute = AppClientesIndexRouteImport.update({
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/agenda/': typeof AppAgendaIndexRoute
   '/atendentes/': typeof AppAtendentesIndexRoute
   '/clientes/': typeof AppClientesIndexRoute
+  '/configuracoes/': typeof AppConfiguracoesIndexRoute
   '/materiais/': typeof AppMateriaisIndexRoute
   '/ordens-servico/': typeof AppOrdensServicoIndexRoute
   '/tecnicos/': typeof AppTecnicosIndexRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AppAgendaIndexRoute
   '/atendentes': typeof AppAtendentesIndexRoute
   '/clientes': typeof AppClientesIndexRoute
+  '/configuracoes': typeof AppConfiguracoesIndexRoute
   '/materiais': typeof AppMateriaisIndexRoute
   '/ordens-servico': typeof AppOrdensServicoIndexRoute
   '/tecnicos': typeof AppTecnicosIndexRoute
@@ -236,6 +244,7 @@ export interface FileRoutesById {
   '/_app/agenda/': typeof AppAgendaIndexRoute
   '/_app/atendentes/': typeof AppAtendentesIndexRoute
   '/_app/clientes/': typeof AppClientesIndexRoute
+  '/_app/configuracoes/': typeof AppConfiguracoesIndexRoute
   '/_app/materiais/': typeof AppMateriaisIndexRoute
   '/_app/ordens-servico/': typeof AppOrdensServicoIndexRoute
   '/_app/tecnicos/': typeof AppTecnicosIndexRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/agenda/'
     | '/atendentes/'
     | '/clientes/'
+    | '/configuracoes/'
     | '/materiais/'
     | '/ordens-servico/'
     | '/tecnicos/'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/atendentes'
     | '/clientes'
+    | '/configuracoes'
     | '/materiais'
     | '/ordens-servico'
     | '/tecnicos'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/_app/agenda/'
     | '/_app/atendentes/'
     | '/_app/clientes/'
+    | '/_app/configuracoes/'
     | '/_app/materiais/'
     | '/_app/ordens-servico/'
     | '/_app/tecnicos/'
@@ -391,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/materiais'
       fullPath: '/materiais/'
       preLoaderRoute: typeof AppMateriaisIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracoes/': {
+      id: '/_app/configuracoes/'
+      path: '/configuracoes'
+      fullPath: '/configuracoes/'
+      preLoaderRoute: typeof AppConfiguracoesIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/clientes/': {
@@ -539,6 +558,7 @@ interface AppRouteChildren {
   AppAgendaIndexRoute: typeof AppAgendaIndexRoute
   AppAtendentesIndexRoute: typeof AppAtendentesIndexRoute
   AppClientesIndexRoute: typeof AppClientesIndexRoute
+  AppConfiguracoesIndexRoute: typeof AppConfiguracoesIndexRoute
   AppMateriaisIndexRoute: typeof AppMateriaisIndexRoute
   AppOrdensServicoIndexRoute: typeof AppOrdensServicoIndexRoute
   AppTecnicosIndexRoute: typeof AppTecnicosIndexRoute
@@ -565,6 +585,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAgendaIndexRoute: AppAgendaIndexRoute,
   AppAtendentesIndexRoute: AppAtendentesIndexRoute,
   AppClientesIndexRoute: AppClientesIndexRoute,
+  AppConfiguracoesIndexRoute: AppConfiguracoesIndexRoute,
   AppMateriaisIndexRoute: AppMateriaisIndexRoute,
   AppOrdensServicoIndexRoute: AppOrdensServicoIndexRoute,
   AppTecnicosIndexRoute: AppTecnicosIndexRoute,

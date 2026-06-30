@@ -340,3 +340,11 @@ export const passwordResetCodes = pgTable('password_reset_codes', {
   used: boolean('used').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 })
+
+export const settings = pgTable('settings', {
+  id: serial('id').primaryKey(),
+  key: text('key').notNull().unique(),
+  value: text('value').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+

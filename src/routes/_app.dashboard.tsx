@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate } from '@/lib/utils'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { useAuthStore } from '@/stores/auth.store'
 
 import { getOrdensServico } from '@/features/ordens-servico/server'
@@ -121,12 +123,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
         <h1 className="text-2xl font-bold text-text">Dashboard</h1>
         <p className="text-sm text-text-muted mt-0.5">
           Visão geral das ordens de serviço —{' '}
-          {new Date().toLocaleDateString('pt-BR', {
-            weekday: 'long',
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-          })}
+          {format(new Date(), "eeee, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
         </p>
       </div>
 

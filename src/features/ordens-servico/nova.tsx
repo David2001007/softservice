@@ -15,7 +15,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { osSchema } from '@/features/ordens-servico/schema'
 import type { OsInput } from '@/features/ordens-servico/schema'
 import { createOrdemServico } from '@/features/ordens-servico/server'
-import { cn } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
+import { isHoliday, isWeekend, checkBusinessHours } from '@/lib/holidays'
+import type { BusinessHoursConfig } from '@/lib/holidays'
+
 
 function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -31,15 +34,22 @@ function FormSection({ title, children }: { title: string; children: React.React
 interface NovaOrdemServicoPageProps {
   clientes: any[]
   tecnicos: any[]
+  configuracoes?: Record<string, string>
 }
 
-export function NovaOrdemServicoPage({ clientes, tecnicos }: NovaOrdemServicoPageProps) {
+export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: NovaOrdemServicoPageProps) {
   const navigate = useNavigate()
   const [searchCliente, setSearchCliente] = useState('')
   const [openClienteList, setOpenClienteList] = useState(false)
   const [showRetroactiveModal, setShowRetroactiveModal] = useState(false)
   const [pendingOsData, setPendingOsData] = useState<OsInput | null>(null)
   const [isConfirming, setIsConfirming] = useState(false)
+  const [isHolidaySelected, setIsHolidaySelected] = useState(false)
+  const [showHolidayMsg, setShowHolidayMsg] = useState(false)
+  const [isWeekendSelected, setIsWeekendSelected] = useState(false)
+  const [showWeekendMsg, setShowWeekendMsg] = useState(false)
+  const [businessHoursError, setBusinessHoursError] = useState<string | null>(null)
+  const [showBusinessHoursMsg, setShowBusinessHoursMsg] = useState(false)
   const clienteInputRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -53,10 +63,50 @@ export function NovaOrdemServicoPage({ clientes, tecnicos }: NovaOrdemServicoPag
     defaultValues: { prioridade: 'normal', status: 'aberta' },
   })
 
-  // combine date and time into dataAgendada (hidden field)
   const date = watch('dataAgendadaDate')
   const time = watch('dataAgendadaTime')
+
   useEffect(() => {
+    if (date) {
+      const d = new Date(date + 'T00:00:00')
+      const isFeriado = isHoliday(d)
+      const blockFeriados = configuracoes?.['bloquear_atendimento_feriados'] === 'true'
+      const newHoliday = isFeriado && blockFeriados
+      setIsHolidaySelected(newHoliday)
+      if (!newHoliday) setShowHolidayMsg(false)
+
+      const blockFDS = configuracoes?.['bloquear_finais_de_semana'] === 'true'
+      const newFDS = isWeekend(d) && blockFDS
+      setIsWeekendSelected(newFDS)
+      if (!newFDS) setShowWeekendMsg(false)
+    } else {
+      setIsHolidaySelected(false)
+      setShowHolidayMsg(false)
+      setIsWeekendSelected(false)
+      setShowWeekendMsg(false)
+    }
+  }, [date, configuracoes])
+
+  useEffect(() => {
+    if (date && time) {
+      const config: BusinessHoursConfig = {
+        entrada: configuracoes?.['horario_entrada'] ?? '',
+        inicioIntervalo: configuracoes?.['horario_inicio_intervalo'] ?? '',
+        fimIntervalo: configuracoes?.['horario_fim_intervalo'] ?? '',
+        saida: configuracoes?.['horario_saida'] ?? '',
+      }
+      const err = checkBusinessHours(new Date(`${date}T${time}`), config)
+      setBusinessHoursError(err)
+      if (!err) setShowBusinessHoursMsg(false)
+    } else {
+      setBusinessHoursError(null)
+      setShowBusinessHoursMsg(false)
+    }
+  }, [date, time, configuracoes])
+
+  // combine date and time into dataAgendada (hidden field)
+  useEffect(() => {
+
     if (date && time) {
       setValue('dataAgendada', `${date}T${time}`)
     }
@@ -112,15 +162,31 @@ export function NovaOrdemServicoPage({ clientes, tecnicos }: NovaOrdemServicoPag
   }
 
   const onSubmit = async (data: OsInput) => {
+    if (isHolidaySelected) {
+      toast.error('Não é possível realizar Agendamentos nesta data.')
+      return
+    }
     if (data.dataAgendada) {
       const dataAgendadaDate = new Date(data.dataAgendada)
       const now = new Date()
       if (dataAgendadaDate < now) {
-        setPendingOsData(data)
-        setShowRetroactiveModal(true)
-        return
+        const comportamentoRetroativo = configuracoes?.['comportamento_agendamento_retroativo'] || 'aviso'
+        
+        if (comportamentoRetroativo === 'bloquear') {
+          toast.error('O agendamento retroativo está bloqueado pelas configurações do sistema.')
+          return
+        }
+        
+        if (comportamentoRetroativo === 'aviso') {
+          setPendingOsData(data)
+          setShowRetroactiveModal(true)
+          return
+        }
+        
+        // se for 'permitir', passa reto e cria.
       }
     }
+
     await processSubmit(data)
   }
 
@@ -148,7 +214,7 @@ export function NovaOrdemServicoPage({ clientes, tecnicos }: NovaOrdemServicoPag
             </div>
             <div className="space-y-2">
               <Label>Data de Abertura</Label>
-              <Input value={new Date().toLocaleDateString('pt-BR')} readOnly disabled />
+              <Input value={formatDate(new Date())} readOnly disabled />
             </div>
             <div className="space-y-2">
               <Label>Criado por</Label>
@@ -238,12 +304,76 @@ export function NovaOrdemServicoPage({ clientes, tecnicos }: NovaOrdemServicoPag
         <FormSection title="Agendamento">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dataAgendadaDate">Data</Label>
-              <Input id="dataAgendadaDate" type="date" {...register('dataAgendadaDate')} />
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="dataAgendadaDate">Data</Label>
+                {isHolidaySelected && (
+                  <button
+                    type="button"
+                    onClick={() => setShowHolidayMsg(v => !v)}
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-destructive text-white text-[10px] font-bold cursor-pointer leading-none select-none hover:bg-destructive/80 transition-colors"
+                    aria-label="Ver aviso de feriado"
+                  >
+                    ?
+                  </button>
+                )}
+                {isWeekendSelected && (
+                  <button
+                    type="button"
+                    onClick={() => setShowWeekendMsg(v => !v)}
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-destructive text-white text-[10px] font-bold cursor-pointer leading-none select-none hover:bg-destructive/80 transition-colors"
+                    aria-label="Ver aviso de final de semana"
+                  >
+                    ?
+                  </button>
+                )}
+              </div>
+              <Input
+                id="dataAgendadaDate"
+                type="date"
+                {...register('dataAgendadaDate')}
+                className={cn(
+                  (isHolidaySelected || isWeekendSelected) && '!border-b-destructive !border-b-2'
+                )}
+              />
+              {isHolidaySelected && showHolidayMsg && (
+                <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  <span className="shrink-0 text-base leading-none">⚠️</span>
+                  <span className="font-medium">Não é possível realizar Agendamentos nesta data.</span>
+                </div>
+              )}
+              {isWeekendSelected && showWeekendMsg && (
+                <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  <span className="shrink-0 text-base leading-none">🚫</span>
+                  <span className="font-medium">Não é possível realizar Agendamentos em finais de semana.</span>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dataAgendadaTime">Hora</Label>
-              <Input id="dataAgendadaTime" type="time" {...register('dataAgendadaTime')} />
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="dataAgendadaTime">Hora</Label>
+                {businessHoursError && (
+                  <button
+                    type="button"
+                    onClick={() => setShowBusinessHoursMsg(v => !v)}
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-destructive text-white text-[10px] font-bold cursor-pointer leading-none select-none hover:bg-destructive/80 transition-colors"
+                    aria-label="Ver aviso de horário"
+                  >
+                    ?
+                  </button>
+                )}
+              </div>
+              <Input
+                id="dataAgendadaTime"
+                type="time"
+                {...register('dataAgendadaTime')}
+                className={cn(businessHoursError && '!border-b-destructive !border-b-2')}
+              />
+              {businessHoursError && showBusinessHoursMsg && (
+                <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  <span className="shrink-0 text-base leading-none">⏰</span>
+                  <span className="font-medium">{businessHoursError}</span>
+                </div>
+              )}
             </div>
             <input type="hidden" {...register('dataAgendada')} />
             <div className="space-y-2">

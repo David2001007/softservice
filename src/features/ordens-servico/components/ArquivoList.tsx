@@ -2,6 +2,7 @@ import { FileText, Image as ImageIcon, Trash2, ExternalLink } from 'lucide-react
 import { DefaultButton } from '@/components/default-button'
 import { toast } from 'sonner'
 import { deleteOsArquivo } from '../server'
+import { formatDate } from '@/lib/utils'
 
 interface Arquivo {
   id: number
@@ -52,7 +53,7 @@ export function ArquivoList({ arquivos, onArquivoDeleted, showDelete = true }: A
             <div className="min-w-0">
               <p className="text-sm font-medium text-text truncate">{arquivo.nome}</p>
               <p className="text-xs text-text-muted">
-                {new Date(arquivo.createdAt).toLocaleDateString('pt-BR')}
+                {formatDate(arquivo.createdAt)}
               </p>
             </div>
           </div>

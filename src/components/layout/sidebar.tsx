@@ -9,9 +9,11 @@ import {
   UserCheck,
   ChevronLeft,
   ChevronRight,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -21,7 +23,9 @@ const navItems = [
   { to: '/agenda', label: 'Agenda', icon: CalendarDays },
   { to: '/materiais', label: 'Estoque', icon: Package },
   { to: '/atendentes', label: 'Usuários', icon: UserCheck },
+  { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
+
 
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUiStore()
@@ -57,7 +61,13 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
-        {navItems.map((item) => {
+        {navItems.filter(item => {
+          if (item.to === '/configuracoes') {
+            const role = useAuthStore.getState().user?.role
+            return role !== 'atendente'
+          }
+          return true
+        }).map((item) => {
           const active = isActive(item.to, item.exact)
           return (
             <Link

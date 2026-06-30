@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate, formatNumber } from '@/lib/utils'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 interface TecnicoDashboardProps {
   ordens: any[]
@@ -107,11 +109,7 @@ export function TecnicoDashboard({
         <h1 className="text-xl font-bold text-text">Meu Dashboard</h1>
         <p className="text-xs text-text-muted mt-0.5">
           Resumo de atividades —{' '}
-          {new Date().toLocaleDateString('pt-BR', {
-            weekday: 'short',
-            day: '2-digit',
-            month: 'long',
-          })}
+          {format(new Date(), "eee, dd 'de' MMMM", { locale: ptBR })}
         </p>
       </div>
 
