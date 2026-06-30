@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { LogIn, ArrowRight, X, Users, Code, CheckCircle2, MonitorSmartphone, Server, Database, Globe } from 'lucide-react'
+import { LogIn, ArrowRight, X, Users, Code, CheckCircle2, MonitorSmartphone } from 'lucide-react'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
@@ -67,12 +67,12 @@ const SYSTEM_FEATURES = [
 ]
 
 const TECHNOLOGIES = [
-  { name: 'React', icon: Code, logo: '' },
-  { name: 'TypeScript', icon: Code, logo: '' },
-  { name: 'Tailwind CSS', icon: MonitorSmartphone, logo: '' },
-  { name: 'Node.js', icon: Server, logo: '' },
-  { name: 'Supabase', icon: Database, logo: '' },
-  { name: 'TanStack', icon: Globe, logo: '' },
+  { name: 'React', logo: '/assets/tecnologias/react.png' },
+  { name: 'TypeScript', logo: '/assets/tecnologias/typesctript.webp' },
+  { name: 'Tailwind CSS', logo: '/assets/tecnologias/tailwind.png' },
+  { name: 'Node.js', logo: '/assets/tecnologias/node.png' },
+  { name: 'Supabase', logo: '/assets/tecnologias/supabase.png' },
+  { name: 'TanStack', logo: '/assets/tecnologias/tanstack.png' },
 ]
 
 function LandingPage() {
@@ -357,14 +357,15 @@ function LandingPage() {
               {TECHNOLOGIES.map((tech, index) => (
                 <div
                   key={index}
-                  className="group flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-6 transition-all hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(125,18,255,0.3)] shadow-lg min-w-[140px]"
+                  className="group flex min-h-[150px] min-w-[150px] flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-6 shadow-lg transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_10px_30px_-10px_rgba(125,18,255,0.3)]"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/5 p-2 transition-all group-hover:bg-white/10">
-                    {tech.logo ? (
-                      <img src={tech.logo} alt={`${tech.name} logo`} className="h-full w-full object-contain" />
-                    ) : (
-                      <tech.icon className="h-6 w-6 text-primary" />
-                    )}
+                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/95 p-3 shadow-[0_12px_30px_-18px_rgba(255,255,255,0.8)] transition-all group-hover:scale-105 group-hover:bg-white">
+                    <img
+                      src={tech.logo}
+                      alt={`Logo ${tech.name}`}
+                      className="h-full w-full object-contain"
+                      loading="lazy"
+                    />
                   </div>
                   <span className="font-semibold text-white text-sm tracking-wide">{tech.name}</span>
                 </div>
