@@ -5,7 +5,13 @@ export const tecnicoSchema = z.object({
   tipo: z.enum(['interno', 'terceiro']).default('interno'),
   empresa: z.string().optional(),
   cnpj: z.string().optional(),
-  telefone: z.string().min(10, 'Telefone inválido'),
+  telefone: z
+    .string()
+    .min(1, 'Telefone obrigatório')
+    .refine(
+      (v) => v.replace(/\D/g, '').length === 11,
+      'Telefone deve ter 11 dígitos: (XX) XXXXX-XXXX',
+    ),
   email: z.string().email('E-mail inválido'),
   regiao: z.string().optional(),
   especialidade: z.string().optional(),
@@ -16,7 +22,10 @@ export const tecnicoSchema = z.object({
     .min(6, 'Senha deve ter ao menos 6 caracteres')
     .optional()
     .or(z.literal('')),
-  ativo: z.boolean().default(true),
+  ativo: z.preprocess(
+    (v) => (v === 'true' || v === true ? true : v === 'false' || v === false ? false : v),
+    z.boolean().default(true),
+  ),
 })
 
 export type TecnicoInput = z.input<typeof tecnicoSchema>

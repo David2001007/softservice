@@ -10,6 +10,7 @@ import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { tecnicoSchema  } from '@/features/tecnicos/schema'
 import type {TecnicoInput} from '@/features/tecnicos/schema';
 import { updateTecnico, deleteTecnico } from '@/features/tecnicos/server'
+import { applyPhoneMask, applyCpfCnpjMask } from '@/lib/utils'
 
 const inputCls =
   'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
@@ -69,6 +70,7 @@ export function EditarTecnicoPage({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<TecnicoInput>({
     resolver: zodResolver(tecnicoSchema),
@@ -76,10 +78,10 @@ export function EditarTecnicoPage({
       ? {
           nome: tecnico.nome,
           tipo: tecnico.tipo,
-          telefone: tecnico.telefone,
+          telefone: applyPhoneMask(tecnico.telefone ?? ''),
           email: tecnico.email || '',
           empresa: tecnico.empresa || '',
-          cnpj: tecnico.cnpj || '',
+          cnpj: applyCpfCnpjMask(tecnico.cnpj ?? ''),
           regiao: tecnico.regiao || '',
           especialidade: tecnico.especialidade || '',
           perfil: tecnico.perfil,
@@ -96,8 +98,9 @@ export function EditarTecnicoPage({
       await updateTecnico({ data: { id: Number(id), data } })
       toast.success('Técnico atualizado com sucesso!')
       await navigate({ to: '/tecnicos' })
-    } catch (e) {
-      toast.error('Erro ao atualizar técnico')
+    } catch (e: any) {
+      console.error(e)
+      toast.error(e.message || 'Erro ao atualizar técnico')
     }
   }
 
@@ -162,6 +165,12 @@ export function EditarTecnicoPage({
                     {...register('cnpj')}
                     placeholder="00.000.000/0001-00"
                     className={inputCls}
+                    maxLength={18}
+                    onChange={(e) => {
+                      const masked = applyCpfCnpjMask(e.target.value)
+                      e.target.value = masked
+                      setValue('cnpj', masked, { shouldValidate: true })
+                    }}
                   />
                 </Field>
               </>
@@ -172,6 +181,12 @@ export function EditarTecnicoPage({
                 {...register('telefone')}
                 placeholder="(44) 99999-0000"
                 className={inputCls}
+                maxLength={15}
+                onChange={(e) => {
+                  const masked = applyPhoneMask(e.target.value)
+                  e.target.value = masked
+                  setValue('telefone', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <Field label="E-mail" error={errors.email?.message}>

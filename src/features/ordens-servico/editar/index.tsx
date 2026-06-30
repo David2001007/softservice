@@ -23,7 +23,7 @@ import {
   updateOrdemServico,
   deleteOrdemServico,
 } from '@/features/ordens-servico/server'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatPhone } from '@/lib/utils'
 import { isHoliday, isWeekend, checkBusinessHours } from '@/lib/holidays'
 import type { BusinessHoursConfig } from '@/lib/holidays'
 
@@ -88,8 +88,23 @@ export function EditarOrdemServicoPage({
           observacoes: os.observacoes || '',
           status: os.status,
           dataAgendada: os.dataAgendada,
-          dataAgendadaDate: os.dataAgendada ? new Date(os.dataAgendada).toISOString().slice(0,10) : '',
-          dataAgendadaTime: os.dataAgendada ? new Date(os.dataAgendada).toISOString().slice(11,16) : '',
+          dataAgendadaDate: os.dataAgendada
+            ? (() => {
+                const d = new Date(os.dataAgendada)
+                const y = d.getFullYear()
+                const m = String(d.getMonth() + 1).padStart(2, '0')
+                const day = String(d.getDate()).padStart(2, '0')
+                return `${y}-${m}-${day}`
+              })()
+            : '',
+          dataAgendadaTime: os.dataAgendada
+            ? (() => {
+                const d = new Date(os.dataAgendada)
+                const h = String(d.getHours()).padStart(2, '0')
+                const min = String(d.getMinutes()).padStart(2, '0')
+                return `${h}:${min}`
+              })()
+            : '',
           tecnicoId: os.tecnicoId || undefined,
           valor: os.valor || '',
         }
@@ -137,9 +152,10 @@ export function EditarOrdemServicoPage({
   // Sync separate date and time fields into combined datetime
   const date = watch('dataAgendadaDate');
   const time = watch('dataAgendadaTime');
+  // Acrescenta o offset de Brasília (-03:00) para evitar interpretação UTC pelo servidor
   useEffect(() => {
     if (date && time) {
-      setValue('dataAgendada', `${date}T${time}`);
+      setValue('dataAgendada', `${date}T${time}:00-03:00`);
     }
   }, [date, time, setValue]);
 
@@ -288,7 +304,7 @@ export function EditarOrdemServicoPage({
                       <div className="text-sm font-medium">{c.nome}</div>
                       {c.telefone && (
                         <div className="text-xs text-muted-foreground">
-                          {c.telefone}
+                          {formatPhone(c.telefone)}
                         </div>
                       )}
                     </button>
@@ -306,7 +322,7 @@ export function EditarOrdemServicoPage({
             <div className="space-y-2">
               <Label>Telefone de Contato</Label>
               <Input
-                value={clienteSelecionado?.telefone ?? ''}
+                value={clienteSelecionado?.telefone ? formatPhone(clienteSelecionado.telefone) : ''}
                 readOnly
                 disabled
               />

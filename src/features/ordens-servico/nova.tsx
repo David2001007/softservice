@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { osSchema } from '@/features/ordens-servico/schema'
 import type { OsInput } from '@/features/ordens-servico/schema'
 import { createOrdemServico } from '@/features/ordens-servico/server'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatDate, formatPhone } from '@/lib/utils'
 import { isHoliday, isWeekend, checkBusinessHours } from '@/lib/holidays'
 import type { BusinessHoursConfig } from '@/lib/holidays'
 
@@ -105,10 +105,10 @@ export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: Nova
   }, [date, time, configuracoes])
 
   // combine date and time into dataAgendada (hidden field)
+  // Acrescenta o offset de Brasília (-03:00) para evitar interpretação UTC pelo servidor
   useEffect(() => {
-
     if (date && time) {
-      setValue('dataAgendada', `${date}T${time}`)
+      setValue('dataAgendada', `${date}T${time}:00-03:00`)
     }
   }, [date, time, setValue])
 
@@ -268,7 +268,7 @@ export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: Nova
                     >
                       <div className="text-sm font-medium">{c.nome}</div>
                       {c.telefone && (
-                        <div className="text-xs text-muted-foreground">{c.telefone}</div>
+                        <div className="text-xs text-muted-foreground">{formatPhone(c.telefone)}</div>
                       )}
                     </button>
                   ))}
@@ -282,7 +282,7 @@ export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: Nova
             </div>
             <div className="space-y-2">
               <Label>Telefone de Contato</Label>
-              <Input value={clienteSelecionado?.telefone ?? ''} readOnly disabled placeholder="Selecione um cliente" />
+              <Input value={clienteSelecionado?.telefone ? formatPhone(clienteSelecionado.telefone) : ''} readOnly disabled placeholder="Selecione um cliente" />
             </div>
             <div className="sm:col-span-2 space-y-2">
               <Label>Endereço</Label>

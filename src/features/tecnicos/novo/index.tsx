@@ -8,6 +8,7 @@ import { DefaultButton } from '@/components/default-button'
 import { tecnicoSchema  } from '@/features/tecnicos/schema'
 import type {TecnicoInput} from '@/features/tecnicos/schema';
 import { createTecnico } from '@/features/tecnicos/server'
+import { applyPhoneMask, applyCpfCnpjMask } from '@/lib/utils'
 
 const inputCls =
   'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
@@ -58,6 +59,7 @@ export function NovoTecnicoPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<TecnicoInput>({
     resolver: zodResolver(tecnicoSchema),
@@ -71,8 +73,9 @@ export function NovoTecnicoPage() {
       await createTecnico({ data })
       toast.success('Técnico cadastrado com sucesso!')
       await navigate({ to: '/tecnicos' })
-    } catch (e) {
-      toast.error('Erro ao cadastrar técnico')
+    } catch (e: any) {
+      console.error(e)
+      toast.error(e.message || 'Erro ao cadastrar técnico')
     }
   }
 
@@ -121,6 +124,12 @@ export function NovoTecnicoPage() {
                     {...register('cnpj')}
                     placeholder="00.000.000/0001-00"
                     className={inputCls}
+                    maxLength={18}
+                    onChange={(e) => {
+                      const masked = applyCpfCnpjMask(e.target.value)
+                      e.target.value = masked
+                      setValue('cnpj', masked, { shouldValidate: true })
+                    }}
                   />
                 </Field>
               </>
@@ -131,6 +140,12 @@ export function NovoTecnicoPage() {
                 {...register('telefone')}
                 placeholder="(44) 99999-0000"
                 className={inputCls}
+                maxLength={15}
+                onChange={(e) => {
+                  const masked = applyPhoneMask(e.target.value)
+                  e.target.value = masked
+                  setValue('telefone', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <Field label="E-mail" required error={errors.email?.message}>
@@ -162,7 +177,12 @@ export function NovoTecnicoPage() {
               </select>
             </Field>
             <Field label="Situação">
-              <select {...register('ativo')} className={selectCls}>
+              <select
+                {...register('ativo', {
+                  setValueAs: (v) => v === 'true' || v === true,
+                })}
+                className={selectCls}
+              >
                 <option value="true">Ativo</option>
                 <option value="false">Inativo</option>
               </select>

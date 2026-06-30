@@ -11,6 +11,7 @@ import {
 } from '@/features/atendentes/schema'
 import type {AtendenteInput} from '@/features/atendentes/schema';
 import { createAtendente } from '@/features/atendentes/server'
+import { applyCpfCnpjMask } from '@/lib/utils'
 
 const inputCls =
   'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
@@ -44,6 +45,7 @@ export function NovoAtendentePage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AtendenteInput>({
     resolver: zodResolver(atendenteSchema),
@@ -99,6 +101,12 @@ export function NovoAtendentePage() {
                 {...register('cpf')}
                 placeholder="000.000.000-00"
                 className={inputCls}
+                maxLength={14}
+                onChange={(e) => {
+                  const masked = applyCpfCnpjMask(e.target.value)
+                  e.target.value = masked
+                  setValue('cpf', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <Field label="E-mail" required error={errors.email?.message}>

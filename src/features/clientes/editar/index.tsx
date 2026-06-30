@@ -10,6 +10,7 @@ import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { clienteSchema  } from '@/features/clientes/schema'
 import type {ClienteInput} from '@/features/clientes/schema';
 import { updateCliente, deleteCliente } from '@/features/clientes/server'
+import { applyPhoneMask, applyCepMask, applyCpfCnpjMask } from '@/lib/utils'
 
 const inputCls =
   'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
@@ -69,20 +70,21 @@ export function EditarClientePage({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClienteInput>({
     resolver: zodResolver(clienteSchema),
     values: clienteData
       ? {
           nome: clienteData.nome,
-          cpfCnpj: clienteData.cpfCnpj,
-          telefone: clienteData.telefone,
+          cpfCnpj: applyCpfCnpjMask(clienteData.cpfCnpj ?? ''),
+          telefone: applyPhoneMask(clienteData.telefone ?? ''),
           cidade: clienteData.cidade || '',
           uf: clienteData.uf || '',
           status: clienteData.status,
           situacaoContrato: clienteData.situacaoContrato,
           plano: clienteData.plano || '',
-          cep: clienteData.cep || '',
+          cep: applyCepMask(clienteData.cep ?? ''),
           logradouro: clienteData.logradouro || '',
           numero: clienteData.numero || '',
           complemento: clienteData.complemento || '',
@@ -151,6 +153,12 @@ export function EditarClientePage({
                 {...register('cpfCnpj')}
                 placeholder="000.000.000-00 ou 00.000.000/0001-00"
                 className={inputCls}
+                maxLength={18}
+                onChange={(e) => {
+                  const masked = applyCpfCnpjMask(e.target.value)
+                  e.target.value = masked
+                  setValue('cpfCnpj', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <Field label="Telefone" required error={errors.telefone?.message}>
@@ -158,6 +166,12 @@ export function EditarClientePage({
                 {...register('telefone')}
                 placeholder="(44) 99999-0000"
                 className={inputCls}
+                maxLength={15}
+                onChange={(e) => {
+                  const masked = applyPhoneMask(e.target.value)
+                  e.target.value = masked
+                  setValue('telefone', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <Field label="Status">
@@ -176,6 +190,12 @@ export function EditarClientePage({
                 {...register('cep')}
                 placeholder="00000-000"
                 className={inputCls}
+                maxLength={9}
+                onChange={(e) => {
+                  const masked = applyCepMask(e.target.value)
+                  e.target.value = masked
+                  setValue('cep', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <div className="sm:col-span-2">

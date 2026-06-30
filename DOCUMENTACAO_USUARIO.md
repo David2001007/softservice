@@ -345,6 +345,18 @@ As mensagens flutuantes (pop-ups de sistema) foram aprimoradas para carregar o v
 - O contador (barra de progresso) agora utiliza sempre a cor roxa (primária) do sistema.
 - O botão de fechar `[X]` foi posicionado no canto superior direito do balão e ganhou um design moderno com contorno translúcido na cor primária para maior destaque.
 
+### 15.4 Máscaras e Formatação Inteligente de Dados
+Para garantir a padronização e integridade dos dados no sistema, implementamos máscaras interativas em diversos campos de cadastro (Clientes, Técnicos e Atendentes):
+- **Telefone:** Formatação automática para `(XX) XXXXX-XXXX` (11 dígitos).
+- **CPF e CNPJ:** Formatação automática em tempo real. O sistema também valida se a quantidade de dígitos informada está correta (11 dígitos para CPF, 14 para CNPJ).
+- **CEP:** Formatação padrão `XXXXX-XXX` limitando-se corretamente a 8 caracteres numéricos.
+Esses dados são padronizados nas telas de exibição (ver detalhes, listagens, cartões de ordens de serviço) facilitando a leitura e a experiência do usuário.
+
+### 15.5 Ajustes de Fuso Horário nos Agendamentos
+Melhoramos a estabilidade e a precisão das Ordens de Serviço (OS) agendadas:
+- O sistema agora converte automaticamente o horário escolhido (no navegador do atendente) garantindo a compatibilidade com o fuso horário padrão de Brasília (UTC-3).
+- Isso resolve problemas que poderiam ocorrer com horários aparecendo diferentes do momento de criação.
+
 ---
 
 **Última atualização:** Junho/2026  

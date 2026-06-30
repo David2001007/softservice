@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { deleteAtendente } from '@/features/atendentes/server'
+import { formatCPFCNPJ } from '@/lib/utils'
 
 export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
   const router = useRouter()
@@ -67,7 +68,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
       className: 'font-mono text-gold text-xs',
     },
     { header: 'Nome', accessorKey: 'nome' },
-    { header: 'CPF', accessorKey: 'cpf', className: 'text-text-muted text-sm' },
+    { header: 'CPF', cell: (r) => formatCPFCNPJ(r.cpf ?? ''), className: 'text-text-muted text-sm' },
     {
       header: 'E-mail',
       accessorKey: 'email',

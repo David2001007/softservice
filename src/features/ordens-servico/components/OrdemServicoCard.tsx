@@ -1,7 +1,7 @@
 import { StatusBadge } from '@/components/status-badge'
 import { DefaultButton } from '@/components/default-button'
 import { Calendar, MapPin, Phone, Eye, Settings2 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatPhone } from '@/lib/utils'
 import { useNavigate } from '@tanstack/react-router'
 
 interface OrdemServicoCardProps {
@@ -50,7 +50,7 @@ export function OrdemServicoCard({ os }: OrdemServicoCardProps) {
         {os.cliente?.telefone && (
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 shrink-0" />
-            <span>{os.cliente.telefone}</span>
+            <span>{formatPhone(os.cliente.telefone)}</span>
           </div>
         )}
       </div>
