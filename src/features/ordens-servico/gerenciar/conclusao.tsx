@@ -39,6 +39,18 @@ function toDatetimeLocalValue(date: string | Date | null | undefined): string {
   return local.toISOString().slice(0, 16)
 }
 
+/**
+ * Converte o valor de um <input type="datetime-local"> ("YYYY-MM-DDTHH:mm", sem fuso)
+ * para uma string ISO com offset fixo de Brasília (-03:00).
+ * Sem isso, o servidor interpreta o valor como UTC e salva 3 horas a mais.
+ */
+function toISOWithBROffset(datetimeLocal: string): string {
+  if (!datetimeLocal) return datetimeLocal
+  // Garante que tem segundos antes de adicionar o offset
+  const normalized = datetimeLocal.length === 16 ? `${datetimeLocal}:00` : datetimeLocal
+  return `${normalized}-03:00`
+}
+
 interface MaterialLinha {
   id: string
   materialId: number
@@ -194,6 +206,13 @@ export function ConclusaoForm({
 
     await onSubmit({
       ...data,
+      // Converter datetime-local (sem fuso) para ISO com offset de Brasília
+      dataInicioEfetivo: data.dataInicioEfetivo
+        ? toISOWithBROffset(data.dataInicioEfetivo)
+        : data.dataInicioEfetivo,
+      dataTerminoEfetivo: data.dataTerminoEfetivo
+        ? toISOWithBROffset(data.dataTerminoEfetivo)
+        : data.dataTerminoEfetivo,
       materiais: materiaisValidos,
       ...(speedTestResults
         ? {

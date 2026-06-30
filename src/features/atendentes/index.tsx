@@ -27,6 +27,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
     username: '',
     email: '',
     role: '',
+    ativo: '',
   })
   const [page, setPage] = useState(1)
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -58,7 +59,8 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
         a.username?.toLowerCase().includes(filtros.username.toLowerCase())) &&
       (!filtros.email ||
         a.email?.toLowerCase().includes(filtros.email.toLowerCase())) &&
-      (!filtros.role || a.role === filtros.role),
+      (!filtros.role || a.role === filtros.role) &&
+      (!filtros.ativo || String(a.ativo) === filtros.ativo),
   )
 
   const columns: Column<any>[] = [
@@ -90,6 +92,20 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
           }`}
         >
           {r.role === 'admin' ? 'Admin' : 'Atendente'}
+        </span>
+      ),
+    },
+    {
+      header: 'Status',
+      cell: (r) => (
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+            r.ativo
+              ? 'bg-success/15 text-success border-success/30'
+              : 'bg-danger/15 text-danger border-danger/30'
+          }`}
+        >
+          {r.ativo ? 'Ativo' : 'Inativo'}
         </span>
       ),
     },
@@ -136,7 +152,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
         action={
           <Link to="/atendentes/novo">
             <DefaultButton
-              label="Novo Atendente"
+              label="Novo Usuário"
               leftIcon={<Plus className="w-4 h-4" />}
               className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20"
             />
@@ -145,7 +161,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
       />
 
       <AccordionFilters>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-2">
             <Label className="text-xs">Nome</Label>
             <Input
@@ -194,6 +210,27 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="atendente">Atendente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs">Status</Label>
+            <Select
+              value={filtros.ativo || 'todos'}
+              onValueChange={(value) =>
+                setFiltros((f) => ({
+                  ...f,
+                  ativo: value === 'todos' ? '' : value,
+                }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="true">Ativo</SelectItem>
+                <SelectItem value="false">Inativo</SelectItem>
               </SelectContent>
             </Select>
           </div>

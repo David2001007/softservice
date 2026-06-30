@@ -6,7 +6,7 @@ interface MaterialCardProps {
 }
 
 export function MaterialCard({ material }: MaterialCardProps) {
-  const isEstoqueBaixo = material.quantidade <= (material.estoqueMinimo || 0)
+  const isEstoqueBaixo = Number(material.quantidade) <= Number(material.estoqueMinimo ?? 0)
   const unidadeLabel = getEstoqueUnidadeLabel(material)
 
   return (

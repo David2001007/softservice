@@ -84,6 +84,7 @@ export function EditarAtendentePage({
           email: atendente.email,
           username: atendente.username,
           role: atendente.role,
+          ativo: String(atendente.ativo) === 'true',
         }
       : undefined,
   })
@@ -181,6 +182,12 @@ export function EditarAtendentePage({
               <select {...register('role')} className={selectCls}>
                 <option value="atendente">Atendente</option>
                 <option value="admin">Administrador</option>
+              </select>
+            </Field>
+            <Field label="Status">
+              <select className={selectCls} {...register('ativo')}>
+                <option value="true">Ativo</option>
+                <option value="false">Inativo</option>
               </select>
             </Field>
             <div className="sm:col-span-2">

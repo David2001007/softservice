@@ -49,7 +49,7 @@ export function NovoAtendentePage() {
     formState: { errors, isSubmitting },
   } = useForm<AtendenteInput>({
     resolver: zodResolver(atendenteSchema),
-    defaultValues: { role: 'atendente' },
+    defaultValues: { role: 'atendente', ativo: true },
   })
 
   const onSubmit = async (data: AtendenteInput) => {
@@ -138,16 +138,24 @@ export function NovoAtendentePage() {
                 <option value="admin">Administrador</option>
               </select>
             </Field>
-            <Field label="Senha" required error={errors.password?.message}>
-              <input
-                {...register('password', {
-                  required: 'Senha é obrigatória para novos cadastros',
-                })}
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                className={inputCls}
-              />
+            <Field label="Status">
+              <select className={selectCls} {...register('ativo')}>
+                <option value="true">Ativo</option>
+                <option value="false">Inativo</option>
+              </select>
             </Field>
+            <div className="sm:col-span-2">
+              <Field label="Senha" required error={errors.password?.message}>
+                <input
+                  {...register('password', {
+                    required: 'Senha é obrigatória para novos cadastros',
+                  })}
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
           </div>
         </div>
 

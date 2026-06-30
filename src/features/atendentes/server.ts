@@ -48,7 +48,7 @@ export const createAtendente = createServerFn({ method: 'POST' })
         username: data.username,
         passwordHash: hashedPassword,
         role: data.role,
-        ativo: true,
+        ativo: data.ativo,
       })
       .returning()
     return novo
@@ -79,6 +79,7 @@ export const updateAtendente = createServerFn({ method: 'POST' })
       email: data.data.email,
       username: data.data.username,
       role: data.data.role,
+      ativo: data.data.ativo,
     }
 
     if (data.data.password) {
