@@ -8,6 +8,7 @@ import { DefaultButton } from '@/components/default-button'
 import { clienteSchema  } from '@/features/clientes/schema'
 import type {ClienteInput} from '@/features/clientes/schema';
 import { createCliente } from '@/features/clientes/server'
+import { applyPhoneMask, applyCepMask, applyCpfCnpjMask } from '@/lib/utils'
 
 function FormSection({
   title,
@@ -54,6 +55,7 @@ export function NovoClientePage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClienteInput>({
     resolver: zodResolver(clienteSchema),
@@ -105,6 +107,12 @@ export function NovoClientePage() {
                 {...register('cpfCnpj')}
                 placeholder="000.000.000-00 ou 00.000.000/0001-00"
                 className={inputCls}
+                maxLength={18}
+                onChange={(e) => {
+                  const masked = applyCpfCnpjMask(e.target.value)
+                  e.target.value = masked
+                  setValue('cpfCnpj', masked, { shouldValidate: true })
+                }}
               />
               {errors.cpfCnpj && (
                 <p className="text-xs text-danger mt-1">
@@ -117,6 +125,12 @@ export function NovoClientePage() {
                 {...register('telefone')}
                 placeholder="(44) 99999-0000"
                 className={inputCls}
+                maxLength={15}
+                onChange={(e) => {
+                  const masked = applyPhoneMask(e.target.value)
+                  e.target.value = masked
+                  setValue('telefone', masked, { shouldValidate: true })
+                }}
               />
               {errors.telefone && (
                 <p className="text-xs text-danger mt-1">
@@ -142,6 +156,11 @@ export function NovoClientePage() {
                 placeholder="00000-000"
                 className={inputCls}
                 maxLength={9}
+                onChange={(e) => {
+                  const masked = applyCepMask(e.target.value)
+                  e.target.value = masked
+                  setValue('cep', masked, { shouldValidate: true })
+                }}
               />
             </Field>
             <div className="sm:col-span-2">

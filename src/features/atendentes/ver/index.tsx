@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { deleteAtendente } from '@/features/atendentes/server'
+import { formatCPFCNPJ } from '@/lib/utils'
 
 export function VerAtendentePage({
   atendente,
@@ -37,7 +38,7 @@ export function VerAtendentePage({
   const details = {
     Código: atendente.codigo,
     Nome: atendente.nome,
-    CPF: atendente.cpf,
+    CPF: formatCPFCNPJ(atendente.cpf ?? ''),
     'E-mail': atendente.email,
     Usuário: atendente.username,
     Perfil: atendente.role === 'admin' ? 'Administrador' : 'Atendente',

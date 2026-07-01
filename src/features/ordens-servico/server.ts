@@ -256,6 +256,8 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
         throw new Error('Não é possível editar uma OS cancelada ou concluída')
       }
 
+      const materiaisAbaixoMinimo: string[] = []
+
       if (data.data.materiais.length > 0) {
         for (const mat of data.data.materiais) {
           const quantidade = Number(mat.quantidade)
@@ -309,6 +311,18 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
             ordemServicoId: data.id,
             usuarioId: auth.userId,
           })
+
+          // Verificar se o saldo pós-baixa ficou abaixo do estoque mínimo
+          const [materialAtualizado] = await tx
+            .select()
+            .from(materiais)
+            .where(eq(materiais.id, mat.materialId))
+          if (
+            materialAtualizado &&
+            Number(materialAtualizado.quantidade) <= Number(materialAtualizado.estoqueMinimo ?? 0)
+          ) {
+            materiaisAbaixoMinimo.push(materialAtualizado.descricao)
+          }
         }
       }
 
@@ -349,7 +363,7 @@ export const concluirOrdemServico = createServerFn({ method: 'POST' })
         detalhes: 'OS finalizada pelo técnico',
       })
 
-      return osAtualizada
+      return { os: osAtualizada, materiaisAbaixoMinimo }
     })
   })
 

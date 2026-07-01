@@ -2,9 +2,27 @@ import { z } from 'zod'
 
 export const clienteSchema = z.object({
   nome: z.string().min(2, 'Nome obrigatório'),
-  cpfCnpj: z.string().min(11, 'CPF/CNPJ inválido'),
-  telefone: z.string().min(10, 'Telefone inválido'),
-  cep: z.string().optional(),
+  cpfCnpj: z
+    .string()
+    .min(1, 'CPF/CNPJ obrigatório')
+    .refine(
+      (v) => v.replace(/\D/g, '').length >= 11,
+      'CPF/CNPJ inválido',
+    ),
+  telefone: z
+    .string()
+    .min(1, 'Telefone obrigatório')
+    .refine(
+      (v) => v.replace(/\D/g, '').length === 11,
+      'Telefone deve ter 11 dígitos: (XX) XXXXX-XXXX',
+    ),
+  cep: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || v.replace(/\D/g, '').length === 8,
+      'CEP inválido (deve ter 8 dígitos)',
+    ),
   logradouro: z.string().optional(),
   numero: z.string().optional(),
   complemento: z.string().optional(),

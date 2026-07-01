@@ -98,6 +98,39 @@ export function formatPhone(value: string): string {
   return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
 }
 
+/** Aplica máscara de telefone enquanto o usuário digita: (XX) XXXXX-XXXX */
+export function applyPhoneMask(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  if (digits.length <= 2) return digits.replace(/(\d{0,2})/, '($1')
+  if (digits.length <= 6) return digits.replace(/(\d{2})(\d{1,4})/, '($1) $2')
+  if (digits.length <= 10) return digits.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3')
+  return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+}
+
+/** Aplica máscara de CEP enquanto o usuário digita: XXXXX-XXX */
+export function applyCepMask(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 5) return digits
+  return digits.replace(/(\d{5})(\d{1,3})/, '$1-$2')
+}
+
+/** Aplica máscara de CPF (000.000.000-00) ou CNPJ (00.000.000/0001-00) enquanto o usuário digita */
+export function applyCpfCnpjMask(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 14)
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return digits.replace(/(\d{3})(\d{1,3})/, '$1.$2')
+  if (digits.length <= 9) return digits.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3')
+  if (digits.length <= 11) return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4')
+  if (digits.length <= 12) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})/, '$1.$2.$3/$4')
+  if (digits.length <= 13) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1})/, '$1.$2.$3/$4-$5')
+  return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+}
+
+/** Remove todos os caracteres não numéricos de uma string mascarada */
+export function stripMask(value: string): string {
+  return value.replace(/\D/g, '')
+}
+
 export function gerarCodigo(prefix: string): string {
   const now = Date.now().toString(36).toUpperCase()
   return `${prefix}-${now}`

@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { deleteTecnico } from '@/features/tecnicos/server'
-import { formatPhone } from '@/lib/utils'
+import { formatPhone, formatCPFCNPJ } from '@/lib/utils'
 
 export function VerTecnicoPage({ tecnico, id }: { tecnico: any; id: string }) {
   const navigate = useNavigate()
@@ -34,7 +34,7 @@ export function VerTecnicoPage({ tecnico, id }: { tecnico: any; id: string }) {
     Nome: tecnico.nome,
     Tipo: tecnico.tipo === 'interno' ? 'Interno' : 'Terceiro',
     Empresa: tecnico.empresa,
-    CNPJ: tecnico.cnpj,
+    CNPJ: formatCPFCNPJ(tecnico.cnpj ?? ''),
     Telefone: formatPhone(tecnico.telefone),
     'E-mail': tecnico.email,
     Região: tecnico.regiao,

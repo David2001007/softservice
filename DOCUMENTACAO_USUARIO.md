@@ -345,6 +345,29 @@ As mensagens flutuantes (pop-ups de sistema) foram aprimoradas para carregar o v
 - O contador (barra de progresso) agora utiliza sempre a cor roxa (primária) do sistema.
 - O botão de fechar `[X]` foi posicionado no canto superior direito do balão e ganhou um design moderno com contorno translúcido na cor primária para maior destaque.
 
+### 15.4 Máscaras e Formatação Inteligente de Dados
+Para garantir a padronização e integridade dos dados no sistema, implementamos máscaras interativas em diversos campos de cadastro (Clientes, Técnicos e Atendentes):
+- **Telefone:** Formatação automática para `(XX) XXXXX-XXXX` (11 dígitos).
+- **CPF e CNPJ:** Formatação automática em tempo real. O sistema também valida se a quantidade de dígitos informada está correta (11 dígitos para CPF, 14 para CNPJ).
+- **CEP:** Formatação padrão `XXXXX-XXX` limitando-se corretamente a 8 caracteres numéricos.
+Esses dados são padronizados nas telas de exibição (ver detalhes, listagens, cartões de ordens de serviço) facilitando a leitura e a experiência do usuário.
+
+### 15.5 Ajustes Globais de Fuso Horário nos Formulários
+Melhoramos a estabilidade e a precisão das Ordens de Serviço (OS) em todas as telas que dependem de data/hora (Abertura, Edição, Reagendamento e Conclusão):
+- O sistema agora converte automaticamente o horário escolhido (no navegador do atendente) garantindo a compatibilidade com o fuso horário padrão de Brasília (UTC-3).
+- Isso resolve problemas que poderiam ocorrer com horários aparecendo diferentes do momento de criação, ou cálculos errados no momento da conclusão/reagendamento da OS.
+
+### 15.6 Correção e Melhoria nas Validações do Sistema
+Para evitar erros genéricos e confusões durante o preenchimento de formulários (ex: *"Invalid input: expected string, received undefined"*), aprimoramos o sistema de validação:
+- Ao tentar salvar Ordens de Serviço (Nova, Edição, Reagendamento, Cancelamento ou Conclusão) ou usuários (Atendentes) sem preencher campos obrigatórios, o sistema exibirá os alertas e textos em vermelho, orientando de forma clara o que falta ser preenchido (ex: *"Nova data obrigatória"*, *"Motivo obrigatório"*).
+- Além disso, a tela de Reagendamento agora respeita as regras de negócio de Agendamento (feriados, finais de semana e horário comercial), possuindo os mesmos avisos flutuantes (?) em vermelho e bloqueando reagendamentos fora do expediente estipulado nas Configurações da Empresa.
+
+### 15.7 Gerenciamento de Status de Usuários (Atendentes)
+Para maior segurança e controle de acesso, agora é possível gerenciar quais Atendentes podem acessar o sistema:
+- Foi adicionado o campo de "Status" (Ativo / Inativo) nos formulários de criação e edição de Atendentes.
+- A tela de listagem geral agora exibe selos/badges indicando o status do usuário, bem como novos filtros de pesquisa que facilitam a localização de contas desativadas.
+- Dessa forma, se um colaborador se desligar da empresa, basta editar o perfil dele e alterar para "Inativo" ao invés de apagá-lo, preservando todo o histórico de suas ações no Unite.
+
 ---
 
 **Última atualização:** Junho/2026  

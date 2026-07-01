@@ -31,8 +31,8 @@ export const osSchema = z.object({
 })
 
 export const osConclusaoSchema = z.object({
-  dataInicioEfetivo: z.string().min(1, 'Data/hora de início obrigatória'),
-  dataTerminoEfetivo: z.string().min(1, 'Data/hora de término obrigatória'),
+  dataInicioEfetivo: z.string({ message: 'Data/hora de início obrigatória' }).min(1, 'Data/hora de início obrigatória'),
+  dataTerminoEfetivo: z.string({ message: 'Data/hora de término obrigatória' }).min(1, 'Data/hora de término obrigatória'),
   observacoesFinais: z.string().optional(),
   materiais: z
     .array(
@@ -51,13 +51,13 @@ export const osConclusaoSchema = z.object({
 })
 
 export const osReagendamentoSchema = z.object({
-  motivoReagendamento: z.string().min(1, 'Motivo obrigatório'),
-  novaDataAgendada: z.string().min(1, 'Nova data obrigatória'),
+  motivoReagendamento: z.string({ message: 'Motivo obrigatório' }).min(1, 'Motivo obrigatório'),
+  novaDataAgendada: z.string({ message: 'Nova data obrigatória' }).min(1, 'Nova data obrigatória'),
   tecnicoId: z.number().optional(),
 })
 
 export const osCancelamentoSchema = z.object({
-  motivoCancelamento: z.string().min(1, 'Motivo obrigatório'),
+  motivoCancelamento: z.string({ message: 'Motivo obrigatório' }).min(1, 'Motivo obrigatório'),
   observacoes: z.string().optional(),
 })
 

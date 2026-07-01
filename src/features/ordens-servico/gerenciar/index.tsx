@@ -69,6 +69,7 @@ interface GerenciarOSPageProps {
   } | null
   materiais: Array<{ id: number; codigo: string; descricao: string; quantidade?: string | number; unidade?: string }>
   tecnicos: Array<{ id: number; nome: string }>
+  configuracoes?: Record<string, string>
 }
 
 const TABS = [
@@ -92,6 +93,7 @@ export function GerenciarOSPage({
   os,
   materiais,
   tecnicos,
+  configuracoes,
 }: GerenciarOSPageProps) {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
@@ -122,9 +124,19 @@ export function GerenciarOSPage({
   const handleConcluir = async (data: OsConclusaoInput) => {
     try {
       setIsLoading(true)
-      await concluirOrdemServico({ data: { id: Number(os.id), data } })
+      const resultado = await concluirOrdemServico({ data: { id: Number(os.id), data } })
       clearCache(os.id)
       toast.success('OS concluída e materiais baixados com sucesso!')
+
+      // Alertar sobre materiais abaixo do estoque mínimo após a baixa
+      if (resultado?.materiaisAbaixoMinimo && resultado.materiaisAbaixoMinimo.length > 0) {
+        const nomes = resultado.materiaisAbaixoMinimo.join(', ')
+        toast.warning(
+          `⚠️ Estoque mínimo atingido: ${nomes}. Verifique a tela de Materiais.`,
+          { duration: 8000 },
+        )
+      }
+
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
       if (e instanceof Error) {
@@ -316,13 +328,14 @@ export function GerenciarOSPage({
         )}
 
           {activeTab === 'reagendamento' && canEdit && (
-            <ReagendamentoForm
+          <ReagendamentoForm
               osId={os.id}
               onSubmit={handleReagendar}
               isLoading={isLoading}
               dataAgendadaAtual={os.dataAgendada ?? undefined}
               tecnicoNomeAtual={os.tecnico?.nome ?? undefined}
               tecnicos={tecnicos}
+              configuracoes={configuracoes}
             />
           )}
 
