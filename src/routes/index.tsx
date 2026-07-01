@@ -35,11 +35,19 @@ const GRADIENT = [
   '#2A0A5E',
 ]
 
-const TEAM = [
+type TeamMember = {
+  name: string
+  role: string
+  photo: string
+  photoClass?: string
+}
+
+const TEAM: TeamMember[] = [
   {
     name: 'David Lucas Machado',
     role: 'Desenvolvedor',
-    photo: '/assets/pessoas/david.png',    
+    photo: '/assets/pessoas/david.png',
+    photoClass: 'scale-90',
   },
   {
     name: 'Fabricio Milioransa Dalanhol',
@@ -49,6 +57,7 @@ const TEAM = [
   {
     name: 'Felipe de Lima Rodrigues',
     role: 'Analista/Desenvolvedor',
+    photo: '/assets/pessoas/felipe.jpeg',
   },
 ]
 
@@ -216,16 +225,12 @@ function LandingPage() {
                   </div>
                   <div className="p-8 w-full flex flex-col items-center text-center relative">
                     <div className="mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white/10 bg-gradient-to-br from-primary/20 to-transparent text-4xl font-black text-white shadow-lg ring-2 ring-primary/20">
-                      {'photo' in member ? (
-                        <img
-                          src={member.photo}
-                          alt={`Foto de ${member.name}`}
-                          className={`h-full w-full object-cover ${'photoClass' in member ? member.photoClass : ''}`}
-                          loading="lazy"
-                        />
-                      ) : (
-                        member.name.charAt(0)
-                      )}
+                      <img
+                        src={member.photo}
+                        alt={`Foto de ${member.name}`}
+                        className={`h-full w-full object-cover ${member.photoClass ?? ''}`}
+                        loading="lazy"
+                      />
                     </div>
                     <h3 className="text-xl font-black uppercase tracking-wider text-white">
                       {member.name}
