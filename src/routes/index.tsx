@@ -1,10 +1,9 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { LogIn, ArrowRight, X, Users, Code, CheckCircle2, MonitorSmartphone } from 'lucide-react'
+import { LogIn, ArrowRight, X, Users, CheckCircle2 } from 'lucide-react'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import CardSwap, { Card } from '@/components/animations/CardSwap'
 
 // Lazy-load the heavy WebGL component - page content renders immediately
 const FloatingLines = lazy(
@@ -51,20 +50,6 @@ const TEAM = [
   },
 ]
 
-const SYSTEM_FEATURES = [
-  {
-    title: 'Gestão de Ordens de Serviço',
-    description: 'Controle completo de todas as etapas do atendimento, do agendamento à conclusão.',
-  },
-  {
-    title: 'Equipe Multidisciplinar',
-    description: 'Atendentes, técnicos e clientes integrados em uma única plataforma.',
-  },
-  {
-    title: 'Relatórios e Análises',
-    description: 'Dados em tempo real para tomar decisões estratégicas.',
-  },
-]
 
 const TECHNOLOGIES = [
   { name: 'React', logo: '/assets/tecnologias/react.png' },
@@ -77,7 +62,6 @@ const TECHNOLOGIES = [
 
 function LandingPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [activeFeatureIndex, setActiveFeatureIndex] = useState(0)
 
   const floatingLinesProps = useMemo(
     () => ({
@@ -276,7 +260,7 @@ function LandingPage() {
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-primary" />
                     <div>
-                      <h4 className="font-semibold text-white">Diferenciais</h4>
+                      <h4 className="font-semibold text-white">Beneficios</h4>
                       <p className="text-sm">Interface moderna, relatórios em tempo real, segurança de dados e integração total.</p>
                     </div>
                   </div>
@@ -286,65 +270,6 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* Funcionalidades */}
-        <section id="funcionalidades" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-24 lg:px-16 xl:px-20 2xl:px-24 snap-start">
-          <div className="w-full max-w-[92rem]">
-            <h2 className="mb-10 text-center text-3xl font-black uppercase tracking-tight text-white sm:mb-12 sm:text-4xl xl:text-5xl">
-              Funcionalidades e Diferenciais
-            </h2>
-
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(19rem,0.82fr)_minmax(29rem,1.18fr)] lg:gap-16 xl:gap-24">
-              {/* Text side */}
-              <div className="mx-auto w-full max-w-xl text-left lg:mx-0">
-                <div key={activeFeatureIndex} className="animate-in fade-in slide-in-from-left-4 duration-500">
-                  <h3 className="mb-4 text-2xl font-black uppercase tracking-wider text-white sm:text-3xl xl:text-4xl">
-                    {SYSTEM_FEATURES[activeFeatureIndex].title}
-                  </h3>
-                  <p className="max-w-lg text-base leading-relaxed text-text-muted sm:text-lg xl:text-xl">
-                    {SYSTEM_FEATURES[activeFeatureIndex].description}
-                  </p>
-                </div>
-              </div>
-
-              {/* CardSwap side */}
-              <div className="relative flex h-[450px] sm:h-[500px] w-full items-center justify-center lg:justify-end overflow-visible">
-                <CardSwap
-                  width={550}
-                  height={350}
-                  cardDistance={40}
-                  verticalDistance={50}
-                  delay={5000}
-                  pauseOnHover={false}
-                  easing="linear"
-                  onActiveIndexChange={setActiveFeatureIndex}
-                >
-                  {SYSTEM_FEATURES.map((_, index) => (
-                    <Card key={index}>
-                      {index === 0 && (
-                        <div className="absolute top-6 right-8 flex items-center gap-2 rounded-md bg-white/5 px-4 py-2 text-sm font-medium text-white border border-white/10 backdrop-blur-sm">
-                          <div className="h-2 w-2 rounded-full bg-white"></div>
-                          Smooth
-                        </div>
-                      )}
-                      {index === 1 && (
-                        <div className="absolute top-6 right-8 flex items-center gap-2 rounded-md bg-white/5 px-4 py-2 text-sm font-medium text-white border border-white/10 backdrop-blur-sm">
-                          <Code className="h-4 w-4" />
-                          Reliable
-                        </div>
-                      )}
-                      {index === 2 && (
-                        <div className="absolute top-6 right-8 flex items-center gap-2 rounded-md bg-white/5 px-4 py-2 text-sm font-medium text-white border border-white/10 backdrop-blur-sm">
-                          <MonitorSmartphone className="h-4 w-4" />
-                          Modern
-                        </div>
-                      )}
-                    </Card>
-                  ))}
-                </CardSwap>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Tecnologias */}
         <section id="tecnologias" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
