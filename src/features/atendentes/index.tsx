@@ -41,11 +41,11 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
     setIsDeleting(true)
     try {
       await deleteAtendente({ data: deleteTarget.id })
-      toast.success(`Atendente "${deleteTarget.nome}" excluído com sucesso!`)
+      toast.success(`Usuário "${deleteTarget.nome}" excluído com sucesso!`)
       setDeleteTarget(null)
       router.invalidate()
     } catch {
-      toast.error('Erro ao excluir atendente')
+      toast.error('Erro ao excluir usuário')
     } finally {
       setIsDeleting(false)
     }
@@ -147,7 +147,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
   return (
     <div className="space-y-5 fade-in">
       <PageHeader
-        title="Cadastro de Atendentes"
+        title="Cadastro de Usuários"
         subtitle="Usuários que criam e gerenciam ordens de serviço"
         action={
           <Link to="/atendentes/novo">
@@ -169,7 +169,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
               onChange={(e) =>
                 setFiltros((f) => ({ ...f, nome: e.target.value }))
               }
-              placeholder="Nome do atendente..."
+              placeholder="Nome do usuário..."
             />
           </div>
           <div className="space-y-2">
@@ -240,7 +240,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
       <DefaultTable
         columns={columns}
         data={filtered.slice((page - 1) * 10, page * 10)}
-        emptyMessage="Nenhum atendente encontrado"
+        emptyMessage="Nenhum usuário encontrado"
         pagination={{
           currentPage: page,
           totalPages: Math.ceil(filtered.length / 10),
@@ -256,8 +256,8 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
         }}
         onConfirm={handleDelete}
         isLoading={isDeleting}
-        title="Excluir Atendente"
-        description={`Tem certeza que deseja excluir o atendente "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}
+        title="Excluir Usuário"
+        description={`Tem certeza que deseja excluir o usuário "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}
       />
     </div>
   )

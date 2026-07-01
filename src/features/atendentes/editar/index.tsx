@@ -118,7 +118,7 @@ export function EditarAtendentePage({
   return (
     <div className="max-w-2xl mx-auto space-y-5 fade-in">
       <PageHeader
-        title={`Editar Atendente #${id}`}
+        title={`Editar Usuário #${id}`}
         action={
           <DefaultButton
             variant="ghost"

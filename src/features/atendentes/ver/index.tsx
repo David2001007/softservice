@@ -25,10 +25,10 @@ export function VerAtendentePage({
     setIsDeleting(true)
     try {
       await deleteAtendente({ data: Number(id) })
-      toast.success('Atendente excluído com sucesso!')
+      toast.success('Usuário excluído com sucesso!')
       navigate({ to: '/atendentes' })
     } catch {
-      toast.error('Erro ao excluir atendente')
+      toast.error('Erro ao excluir usuário')
     } finally {
       setIsDeleting(false)
       setShowDeleteModal(false)
@@ -48,7 +48,7 @@ export function VerAtendentePage({
   return (
     <div className="max-w-xl mx-auto space-y-5 fade-in">
       <PageHeader
-        title={`Atendente #${id}`}
+        title={`Usuário #${id}`}
         action={
           <div className="flex gap-2">
             <DefaultButton
@@ -90,8 +90,8 @@ export function VerAtendentePage({
         onOpenChange={setShowDeleteModal}
         onConfirm={handleDelete}
         isLoading={isDeleting}
-        title="Excluir Atendente"
-        description={`Tem certeza que deseja excluir o atendente "${atendente.nome}"? Esta ação não pode ser desfeita.`}
+        title="Excluir Usuário"
+        description={`Tem certeza que deseja excluir o usuário "${atendente.nome}"? Esta ação não pode ser desfeita.`}
       />
     </div>
   )

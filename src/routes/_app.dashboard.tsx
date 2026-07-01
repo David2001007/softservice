@@ -5,12 +5,28 @@ import {
   CheckCircle2,
   AlertTriangle,
   CalendarClock,
+  BarChart3,
+  PieChart as PieChartIcon,
 } from 'lucide-react'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useAuthStore } from '@/stores/auth.store'
+import { useState, useMemo } from 'react'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from 'recharts'
 
 import { getOrdensServico } from '@/features/ordens-servico/server'
 import { getMateriais } from '@/features/materiais/server'
@@ -43,19 +59,126 @@ function Dashboard() {
   return <AdminDashboard ordens={ordens} />
 }
 
+// ─── Label map ────────────────────────────────────────────────────────────────
+const tipoServicoLabel: Record<string, string> = {
+  instalacao: 'Instalação',
+  manutencao: 'Manutenção',
+  troca_equipamento: 'Troca Equipamento',
+  infra: 'Infraestrutura',
+  outro: 'Outro',
+}
+
+// ─── Custom Tooltip ───────────────────────────────────────────────────────────
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean
+  payload?: any[]
+  label?: string
+}) {
+  if (!active || !payload?.length) return null
+  return (
+    <div
+      style={{
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 10,
+        padding: '8px 14px',
+        fontSize: 12,
+        color: 'var(--color-text)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+      }}
+    >
+      {label && (
+        <p style={{ marginBottom: 4, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+          {label}
+        </p>
+      )}
+      {payload.map((entry: any) => (
+        <div key={entry.name}>
+          <p style={{ margin: '2px 0' }}>
+            <span style={{ color: entry.color, marginRight: 6 }}>●</span>
+            <span style={{ color: 'var(--color-text-muted)' }}>{entry.name}: </span>
+            <strong style={{ color: 'var(--color-text)' }}>{entry.value}</strong>
+          </p>
+          {entry.name === 'Outros' && entry.payload.outrosDetalhe && Object.keys(entry.payload.outrosDetalhe).length > 0 && (
+            <div style={{ paddingLeft: 14, marginTop: 2, marginBottom: 4 }}>
+              {Object.entries(entry.payload.outrosDetalhe).map(([k, v]) => (
+                <p key={k} style={{ margin: 0, fontSize: 11, color: 'var(--color-text-muted)' }}>
+                  - <span style={{ textTransform: 'capitalize' }}>{k.replace('_', ' ')}</span>: {v as number}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CustomPieTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean
+  payload?: any[]
+}) {
+  if (!active || !payload?.length) return null
+  const item = payload[0]
+  return (
+    <div
+      style={{
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 10,
+        padding: '8px 14px',
+        fontSize: 12,
+        color: 'var(--color-text)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+      }}
+    >
+      <p style={{ margin: 0 }}>
+        <span style={{ color: item.payload.fill, marginRight: 6 }}>●</span>
+        <strong style={{ color: 'var(--color-text)' }}>{item.name}</strong>
+      </p>
+      <p style={{ margin: '4px 0 0', color: 'var(--color-text-muted)' }}>
+        {item.value} OS{' '}
+        <span style={{ color: 'var(--color-text)' }}>
+          ({((item.value / item.payload.total) * 100).toFixed(1)}%)
+        </span>
+      </p>
+    </div>
+  )
+}
+
+// ─── AdminDashboard ───────────────────────────────────────────────────────────
 function AdminDashboard({ ordens }: { ordens: any[] }) {
-  const abertas = ordens.filter((o) => o.status === 'aberta').length
-  const emExecucao = ordens.filter((o) => o.status === 'em_execucao').length
-  const concluidasMes = ordens.filter(
-    (o) =>
-      o.status === 'concluida' &&
-      new Date(o.updatedAt).getMonth() === new Date().getMonth(),
+  const [selectedTecnicos, setSelectedTecnicos] = useState<number[]>([])
+  const [periodoDias, setPeriodoDias] = useState<number>(30)
+
+  const filteredOrdens = useMemo(() => {
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - periodoDias)
+    return ordens.filter(
+      (o) => new Date(o.dataAbertura || o.createdAt) >= cutoff
+    )
+  }, [ordens, periodoDias])
+
+  const abertas = filteredOrdens.filter((o) => o.status === 'aberta').length
+  const emExecucao = filteredOrdens.filter((o) => o.status === 'em_execucao').length
+  const concluidas = filteredOrdens.filter(
+    (o) => o.status === 'concluida'
   ).length
-  const atrasadas = ordens.filter(
+  const atrasadas = filteredOrdens.filter(
     (o) =>
       o.status === 'agendada' &&
       o.dataAgendada &&
       new Date(o.dataAgendada) < new Date(),
+  ).length
+  const agendadasFuturas = filteredOrdens.filter(
+    (o) => o.status === 'agendada' && new Date(o.dataAgendada) >= new Date(),
   ).length
 
   const cards = [
@@ -76,8 +199,8 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       border: 'border-warning/20',
     },
     {
-      label: 'Concluídas (mês)',
-      value: concluidasMes,
+      label: 'Concluídas',
+      value: concluidas,
       icon: CheckCircle2,
       color: 'text-success',
       bg: 'bg-success/10',
@@ -93,7 +216,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
     },
     {
       label: 'OS Agendadas',
-      value: ordens.filter((o) => o.status === 'agendada' && new Date(o.dataAgendada) >= new Date()).length,
+      value: agendadasFuturas,
       icon: CalendarClock,
       color: 'text-primary',
       bg: 'bg-primary/10',
@@ -101,8 +224,76 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
     },
   ]
 
+  // ── Chart data: tipo de serviço ──────────────────────────────────────────
+  const tiposCount: Record<string, number> = {}
+  for (const o of filteredOrdens) {
+    if (o.tipoServico) {
+      tiposCount[o.tipoServico] = (tiposCount[o.tipoServico] ?? 0) + 1
+    }
+  }
+  const totalTipos = Object.values(tiposCount).reduce((a, b) => a + b, 0)
+  const TIPO_COLORS = [
+    '#7c6af7', // primary / purple
+    '#3abff8', // info / cyan
+    '#36d399', // success / green
+    '#fbbd23', // warning / yellow
+    '#f87272', // danger / red
+  ]
+  const tiposData = Object.entries(tiposCount).map(([key, value], i) => ({
+    name: tipoServicoLabel[key] ?? key,
+    value,
+    fill: TIPO_COLORS[i % TIPO_COLORS.length],
+    total: totalTipos,
+  }))
+
+  // ── Chart data: OS por técnico ───────────────────────────────────────────
+  const todosTecnicos = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const o of filteredOrdens) {
+      if (o.tecnico?.id && o.tecnico?.nome) {
+        map.set(o.tecnico.id, o.tecnico.nome)
+      }
+    }
+    return Array.from(map.entries())
+      .map(([id, nome]) => ({ id, nome }))
+      .sort((a, b) => a.nome.localeCompare(b.nome))
+  }, [filteredOrdens])
+
+  const tecnicoData = useMemo(() => {
+    const map: Record<number, { id: number; name: string; abertas: number; concluidas: number; outros: number; outrosDetalhe: Record<string, number> }> = {}
+    
+    for (const o of filteredOrdens) {
+      if (!o.tecnico?.id) continue
+      
+      if (selectedTecnicos.length > 0 && !selectedTecnicos.includes(o.tecnico.id)) {
+        continue
+      }
+
+      const tId = o.tecnico.id
+      const name = o.tecnico.nome ? o.tecnico.nome.split(' ')[0] : 'Desconhecido'
+
+      if (!map[tId]) {
+        map[tId] = { id: tId, name, abertas: 0, concluidas: 0, outros: 0, outrosDetalhe: {} }
+      }
+
+      if (o.status === 'aberta' || o.status === 'em_execucao' || o.status === 'agendada') {
+        map[tId].abertas++
+      } else if (o.status === 'concluida') {
+        map[tId].concluidas++
+      } else {
+        map[tId].outros++
+        map[tId].outrosDetalhe[o.status] = (map[tId].outrosDetalhe[o.status] || 0) + 1
+      }
+    }
+
+    return Object.values(map)
+      .sort((a, b) => b.abertas + b.concluidas - (a.abertas + a.concluidas))
+      .slice(0, selectedTecnicos.length > 0 ? undefined : 8)
+  }, [filteredOrdens, selectedTecnicos])
+
+  // ── Próximos atendimentos ────────────────────────────────────────────────
   const hojeStr = new Date().toISOString().split('T')[0]
-  const proximosAtendimentos = ordens
+  const proximosAtendimentos = filteredOrdens
     .filter(
       (o) =>
         o.dataAgendada &&
@@ -119,12 +310,35 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-text">Dashboard</h1>
-        <p className="text-sm text-text-muted mt-0.5">
-          Visão geral das ordens de serviço —{' '}
-          {format(new Date(), "eeee, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text">Dashboard</h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            Visão geral das ordens de serviço —{' '}
+            {format(new Date(), "eeee, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          </p>
+        </div>
+        
+        <div className="flex flex-col gap-1 sm:items-end">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-text-muted">Período:</span>
+            <select
+              className="bg-surface border border-border text-sm rounded-lg px-3 py-1.5 text-text focus:border-primary focus:outline-none shadow-sm cursor-pointer"
+              value={periodoDias}
+              onChange={(e) => setPeriodoDias(Number(e.target.value))}
+            >
+              <option value={7}>Últimos 7 dias</option>
+              <option value={15}>Últimos 15 dias</option>
+              <option value={30}>Últimos 30 dias</option>
+              <option value={90}>Últimos 3 meses</option>
+              <option value={180}>Últimos 6 meses</option>
+              <option value={365}>Último 1 ano</option>
+            </select>
+          </div>
+          <p className="text-[10px] text-text-muted/70 italic sm:text-right">
+            * O filtro aplica-se à data de criação das ordens
+          </p>
+        </div>
       </div>
 
       {/* Cards */}
@@ -143,6 +357,167 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Donut – Tipo de Serviço */}
+        <div className="bg-surface border border-border rounded-xl shadow-soft overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+            <PieChartIcon className="w-4 h-4 text-primary" />
+            <h2 className="font-semibold text-text text-sm">OS por Tipo de Serviço</h2>
+            <span className="ml-auto text-xs bg-primary/15 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">
+              {totalTipos} total
+            </span>
+          </div>
+
+          {tiposData.length === 0 ? (
+            <div className="flex items-center justify-center h-56 text-sm text-text-muted">
+              Sem dados para exibir
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 px-5 py-4">
+              <ResponsiveContainer width="50%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={tiposData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {tiposData.map((entry, index) => (
+                      <Cell key={index} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomPieTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* Legend */}
+              <div className="flex flex-col gap-2 flex-1 min-w-0">
+                {tiposData.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2 min-w-0">
+                    <span
+                      className="shrink-0 w-2.5 h-2.5 rounded-full"
+                      style={{ background: item.fill }}
+                    />
+                    <span className="text-xs text-text-muted truncate">{item.name}</span>
+                    <span className="ml-auto text-xs font-semibold text-text shrink-0">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bar – OS por Técnico */}
+        <div className="bg-surface border border-border rounded-xl shadow-soft overflow-hidden flex flex-col">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-border flex-wrap">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            <h2 className="font-semibold text-text text-sm">Carga de OS por Técnico</h2>
+            
+            <div className="ml-auto flex items-center gap-2">
+              <select
+                className="bg-background border border-border text-xs rounded-md px-2 py-1 text-text-muted focus:border-primary focus:outline-none"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'all') {
+                    setSelectedTecnicos([])
+                  } else {
+                    const id = Number(val)
+                    if (!selectedTecnicos.includes(id)) {
+                      setSelectedTecnicos([...selectedTecnicos, id])
+                    }
+                  }
+                }}
+                value="all"
+              >
+                <option value="all">Filtrar técnico...</option>
+                {todosTecnicos.filter(t => !selectedTecnicos.includes(t.id)).map(t => (
+                  <option key={t.id} value={t.id}>{t.nome}</option>
+                ))}
+              </select>
+
+              <span className="text-xs bg-primary/15 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium shrink-0">
+                {tecnicoData.length} técnicos
+              </span>
+            </div>
+          </div>
+
+          {selectedTecnicos.length > 0 && (
+            <div className="px-5 py-2 border-b border-border bg-background/20 flex flex-wrap gap-2 items-center">
+              <button 
+                onClick={() => setSelectedTecnicos([])}
+                className="text-[10px] text-text-muted hover:text-text transition-colors"
+              >
+                Limpar filtros
+              </button>
+              {selectedTecnicos.map(id => {
+                const tec = todosTecnicos.find(t => t.id === id)
+                return (
+                  <span key={id} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 border border-primary/20">
+                    {tec?.nome?.split(' ')[0]}
+                    <button 
+                      onClick={() => setSelectedTecnicos(prev => prev.filter(p => p !== id))}
+                      className="hover:text-danger ml-1"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          )}
+
+          {tecnicoData.length === 0 ? (
+            <div className="flex items-center justify-center h-56 text-sm text-text-muted">
+              Nenhum técnico com OS atribuídas
+            </div>
+          ) : (
+            <div className="px-2 pt-4 pb-2">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart
+                  data={tecnicoData}
+                  margin={{ top: 0, right: 16, left: -20, bottom: 0 }}
+                  barSize={14}
+                  barGap={3}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.05)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                  <Legend
+                    wrapperStyle={{ fontSize: 11, color: 'var(--color-text-muted)', paddingTop: 8 }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                  <Bar dataKey="abertas" name="Em Aberto" fill="#7c6af7" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="concluidas" name="Concluídas" fill="#36d399" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="outros" name="Outros" fill="#4b5563" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Próximos atendimentos */}
@@ -174,28 +549,36 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
               </tr>
             </thead>
             <tbody>
-              {proximosAtendimentos.map((os, i) => (
-                <tr
-                  key={os.id}
-                  className={`border-b border-border/50 hover:bg-surface-hover transition-colors ${i % 2 === 0 ? '' : 'bg-background/20'}`}
-                >
-                  <td className="px-5 py-3.5 text-sm font-mono font-medium text-gold">
-                    {os.numero}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-text">
-                    {os.cliente?.nome}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-text-muted">
-                    {os.tecnico?.nome}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-text-muted whitespace-nowrap">
-                    {formatDate(new Date(os.dataAgendada!), { time: true })}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge value={os.status} type="os" />
+              {proximosAtendimentos.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-text-muted">
+                    Nenhum atendimento agendado para hoje.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                proximosAtendimentos.map((os, i) => (
+                  <tr
+                    key={os.id}
+                    className={`border-b border-border/50 hover:bg-surface-hover transition-colors ${i % 2 === 0 ? '' : 'bg-background/20'}`}
+                  >
+                    <td className="px-5 py-3.5 text-sm font-mono font-medium text-gold">
+                      {os.numero}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm text-text">
+                      {os.cliente?.nome}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm text-text-muted">
+                      {os.tecnico?.nome}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm text-text-muted whitespace-nowrap">
+                      {formatDate(new Date(os.dataAgendada!), { time: true })}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <StatusBadge value={os.status} type="os" />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

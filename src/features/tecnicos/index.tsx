@@ -9,6 +9,15 @@ import type {Column} from '@/components/default-table';
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { formatPhone } from '@/lib/utils'
 import { deleteTecnico } from '@/features/tecnicos/server'
 
@@ -18,7 +27,7 @@ export function TecnicosPage({ tecnicos }: { tecnicos: any[] }) {
     nome: '',
     tipo: '',
     regiao: '',
-    status: '',
+    ativo: '',
   })
   const [page, setPage] = useState(1)
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -72,7 +81,17 @@ export function TecnicosPage({ tecnicos }: { tecnicos: any[] }) {
     },
     {
       header: 'Status',
-      cell: (r) => <StatusBadge value={r.status} type="cliente" />,
+      cell: (r) => (
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+            r.ativo
+              ? 'bg-success/15 text-success border-success/30'
+              : 'bg-danger/15 text-danger border-danger/30'
+          }`}
+        >
+          {r.ativo ? 'Ativo' : 'Inativo'}
+        </span>
+      ),
     },
     {
       header: 'Ações',
@@ -115,8 +134,8 @@ export function TecnicosPage({ tecnicos }: { tecnicos: any[] }) {
         t.nome.toLowerCase().includes(filtros.nome.toLowerCase())) &&
       (!filtros.tipo || t.tipo === filtros.tipo) &&
       (!filtros.regiao ||
-        t.regiao.toLowerCase().includes(filtros.regiao.toLowerCase())) &&
-      (!filtros.status || t.status === filtros.status),
+        (t.regiao && t.regiao.toLowerCase().includes(filtros.regiao.toLowerCase()))) &&
+      (!filtros.ativo || String(t.ativo) === filtros.ativo),
   )
 
   return (
@@ -137,59 +156,67 @@ export function TecnicosPage({ tecnicos }: { tecnicos: any[] }) {
 
       <AccordionFilters>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">Nome</label>
-            <input
+          <div className="space-y-2">
+            <Label className="text-xs">Nome</Label>
+            <Input
               value={filtros.nome}
               onChange={(e) =>
                 setFiltros((f) => ({ ...f, nome: e.target.value }))
               }
               placeholder="Buscar..."
-              className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">Tipo</label>
-            <select
-              value={filtros.tipo}
-              onChange={(e) =>
-                setFiltros((f) => ({ ...f, tipo: e.target.value }))
+          <div className="space-y-2">
+            <Label className="text-xs">Tipo</Label>
+            <Select
+              value={filtros.tipo || 'todos'}
+              onValueChange={(value) =>
+                setFiltros((f) => ({
+                  ...f,
+                  tipo: value === 'todos' ? '' : value,
+                }))
               }
-              className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm focus:outline-none focus:border-primary transition-colors"
             >
-              <option value="">Todos</option>
-              <option value="interno">Interno</option>
-              <option value="terceiro">Terceiro</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="interno">Interno</SelectItem>
+                <SelectItem value="terceiro">Terceiro</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">
-              Região
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label className="text-xs">Região</Label>
+            <Input
               value={filtros.regiao}
               onChange={(e) =>
                 setFiltros((f) => ({ ...f, regiao: e.target.value }))
               }
               placeholder="Região..."
-              className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">
-              Status
-            </label>
-            <select
-              value={filtros.status}
-              onChange={(e) =>
-                setFiltros((f) => ({ ...f, status: e.target.value }))
+          <div className="space-y-2">
+            <Label className="text-xs">Status</Label>
+            <Select
+              value={filtros.ativo || 'todos'}
+              onValueChange={(value) =>
+                setFiltros((f) => ({
+                  ...f,
+                  ativo: value === 'todos' ? '' : value,
+                }))
               }
-              className="w-full h-9 px-3 rounded-lg bg-background border border-border text-text text-sm focus:outline-none focus:border-primary transition-colors"
             >
-              <option value="">Todos</option>
-              <option value="ativo">Ativo</option>
-              <option value="inativo">Inativo</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="true">Ativo</SelectItem>
+                <SelectItem value="false">Inativo</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </AccordionFilters>

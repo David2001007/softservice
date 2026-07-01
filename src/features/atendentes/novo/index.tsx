@@ -66,7 +66,7 @@ export function NovoAtendentePage() {
   return (
     <div className="max-w-2xl mx-auto space-y-5 fade-in">
       <PageHeader
-        title="Cadastro de Atendente"
+        title="Cadastro de Usuário"
         action={
           <DefaultButton
             variant="ghost"
