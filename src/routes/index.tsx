@@ -39,10 +39,12 @@ const TEAM = [
   {
     name: 'David Lucas Machado',
     role: 'Desenvolvedor',
+    photo: '/assets/pessoas/david.png',    
   },
   {
     name: 'Fabricio Milioransa Dalanhol',
     role: 'Testes/Desenvolvedor',
+    photo: '/assets/pessoas/fabricio.png',
   },
   {
     name: 'Felipe de Lima Rodrigues',
@@ -213,9 +215,17 @@ function LandingPage() {
                     <img src="/logo.webp" alt="Unite Logo" className="h-8 opacity-80 mt-2" />
                   </div>
                   <div className="p-8 w-full flex flex-col items-center text-center relative">
-                    {/* Avatar placeholder */}
-                    <div className="mb-6 flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/10 bg-gradient-to-br from-primary/20 to-transparent text-4xl font-black text-white shadow-lg overflow-hidden">
-                      {member.name.charAt(0)}
+                    <div className="mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white/10 bg-gradient-to-br from-primary/20 to-transparent text-4xl font-black text-white shadow-lg ring-2 ring-primary/20">
+                      {'photo' in member ? (
+                        <img
+                          src={member.photo}
+                          alt={`Foto de ${member.name}`}
+                          className={`h-full w-full object-cover ${'photoClass' in member ? member.photoClass : ''}`}
+                          loading="lazy"
+                        />
+                      ) : (
+                        member.name.charAt(0)
+                      )}
                     </div>
                     <h3 className="text-xl font-black uppercase tracking-wider text-white">
                       {member.name}
