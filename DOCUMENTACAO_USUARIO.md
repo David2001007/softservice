@@ -368,7 +368,13 @@ Para maior segurança e controle de acesso, agora é possível gerenciar quais A
 - A tela de listagem geral agora exibe selos/badges indicando o status do usuário, bem como novos filtros de pesquisa que facilitam a localização de contas desativadas.
 - Dessa forma, se um colaborador se desligar da empresa, basta editar o perfil dele e alterar para "Inativo" ao invés de apagá-lo, preservando todo o histórico de suas ações no Unite.
 
+### 15.8 Evolução do Dashboard, Usuários e Técnicos
+- O **Dashboard** agora possui um filtro de período global (canto superior direito), permitindo analisar os indicadores de ordens (de 7 dias até 1 ano). Os gráficos e os cards de contadores refletem os dados com precisão, filtrando sempre baseados na data de criação (abertura) de cada OS.
+- O gráfico interativo de **Carga de OS por Técnico** ganhou um filtro para que o gestor possa cruzar e exibir informações de apenas um ou mais técnicos específicos em segundos, ajudando a gerir a carga de trabalho de forma clara. Os balões flutuantes (tooltips) ganharam detalhamento extra mostrando exatidão de OS canceladas ou reagendadas.
+- O antigo módulo de **Atendentes** passou por um reajuste semântico e agora atende universalmente pelo nome de **Usuários**, tanto na listagem quanto nas telas de criação e edição.
+- A tela de **Técnicos** recebeu polimento na interface de filtros, trocando entradas genéricas pelos novos padrões gráficos adotados nas listagens, além da correção crucial e padronização visual do indicador de Status (Ativo/Inativo).
+
 ---
 
-**Última atualização:** Junho/2026  
+**Última atualização:** Julho/2026  
 **Versão do Sistema:** Unite v1.1
