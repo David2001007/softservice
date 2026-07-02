@@ -92,15 +92,15 @@ export function SpeedTest({
       setDownloadResult(dlMbps)
 
       // ── UPLOAD ──
-      // Use a smaller payload for upload to avoid hitting server body-size limits (1MB)
+      // Use a smaller payload for upload to avoid hitting server body-size limits.
       setPhase('upload')
-      const uploadSizeMB = 1 // 1 megabyte
-      const payloadString = '0'.repeat(uploadSizeMB * 1024 * 1024)
+      const uploadSizeKB = 512 // 512 kilobytes
+      const payloadString = '0'.repeat(uploadSizeKB * 1024)
       const ulStart = performance.now()
       await speedTestUpload({ data: { payload: payloadString } })
       const ulEnd = performance.now()
       const ulTimeSeconds = (ulEnd - ulStart) / 1000
-      const ulMbps = parseFloat(((uploadSizeMB * 8) / ulTimeSeconds).toFixed(2))
+      const ulMbps = parseFloat(((uploadSizeKB / 1024 * 8) / ulTimeSeconds).toFixed(2))
       setUploadResult(ulMbps)
 
       setTestDateTime(new Date().toISOString())
