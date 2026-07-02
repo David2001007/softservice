@@ -327,6 +327,7 @@ Se você tiver dúvidas ou encontrar problemas:
 - Verifique a seção "Problemas Comuns"
 - Entre em contato com o administrador do sistema
 
+<<<<<<< HEAD
 ## 15. Novas Funcionalidades (Atualizações Recentes)
 
 ### 15.1 Configurações Globais
@@ -387,3 +388,9 @@ Para facilitar ainda mais a vida no momento de preencher dados:
 
 **Última atualização:** Julho/2026  
 **Versão do Sistema:** Unite v1.1
+=======
+---
+
+**Última atualização:** Junho/2025  
+**Versão do Sistema:** Unite v1.0
+>>>>>>> 3962b97 (correcao cadastro de OS com numero duplicado)
