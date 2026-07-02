@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useRouter, useSearch } from '@tanstack/react-router'
-import { Plus, Settings2, Pencil, Trash2, FileText } from 'lucide-react'
+import { Plus, Settings2, Pencil, Trash2, FileText, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
@@ -57,6 +57,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
   const initialStatuses = search.status ? search.status.split(',') : []
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialStatuses)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [globalSearch, setGlobalSearch] = useState('')
   const user = useAuthStore((s) => s.user)
   const isTecnico = user?.type === 'tecnico'
 
@@ -200,6 +201,17 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
       if (filtros.tecnico && !o.tecnico?.nome.toLowerCase().includes(filtros.tecnico.toLowerCase())) return false;
       if (filtros.tipoServico && o.tipoServico !== filtros.tipoServico) return false;
 
+      // Busca Global (Header)
+      if (globalSearch) {
+        const term = globalSearch.toLowerCase()
+        if (
+          !o.numero.toLowerCase().includes(term) &&
+          (!o.cliente?.nome || !o.cliente.nome.toLowerCase().includes(term))
+        ) {
+          return false
+        }
+      }
+
       // Filtros de Data de Criação (Abertura)
       if (filtros.dataInicial) {
         const osDate = new Date(o.dataAbertura).toISOString().split('T')[0]
@@ -237,15 +249,27 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
         title="Lista de Ordens de Serviço"
         subtitle={isTecnico ? 'Minhas Ordens de Serviço' : 'Gerenciamento de todas as OS'}
         action={
-          !isTecnico ? (
-            <Link to="/ordens-servico/nova">
-              <DefaultButton
-                label="Nova OS"
-                leftIcon={<Plus className="w-4 h-4" />}
-                className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 w-full sm:w-auto"
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-text-muted" />
+              <Input
+                type="search"
+                placeholder="Buscar OS ou Cliente..."
+                className="pl-9 w-full sm:w-64 bg-surface"
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
               />
-            </Link>
-          ) : undefined
+            </div>
+            {!isTecnico && (
+              <Link to="/ordens-servico/nova">
+                <DefaultButton
+                  label="Nova OS"
+                  leftIcon={<Plus className="w-4 h-4" />}
+                  className="bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 w-full sm:w-auto"
+                />
+              </Link>
+            )}
+          </div>
         }
       />
 
