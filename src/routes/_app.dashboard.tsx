@@ -155,11 +155,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
     cutoff.setDate(cutoff.getDate() - periodoDias)
     
     return ordens.filter((o) => {
-      // Regra de Ouro: Trabalho pendente NUNCA desaparece por causa do tempo.
-      const isPendente = !['concluida', 'cancelada'].includes(o.status)
-      if (isPendente) return true
-      
-      // O filtro de tempo (ex: 30 dias) aplica-se apenas para o histórico concluído
+      // O filtro de tempo aplica-se a todas as OS baseado na data de abertura
       return new Date(o.dataAbertura || o.createdAt) >= cutoff
     })
   }, [ordens, periodoDias])
