@@ -92,13 +92,15 @@ export function SpeedTest({
       setDownloadResult(dlMbps)
 
       // ── UPLOAD ──
+      // Use a smaller payload for upload to avoid hitting server body-size limits (1MB)
       setPhase('upload')
-      const payloadString = '0'.repeat(10 * 1024 * 1024)
+      const uploadSizeMB = 1 // 1 megabyte
+      const payloadString = '0'.repeat(uploadSizeMB * 1024 * 1024)
       const ulStart = performance.now()
       await speedTestUpload({ data: { payload: payloadString } })
       const ulEnd = performance.now()
       const ulTimeSeconds = (ulEnd - ulStart) / 1000
-      const ulMbps = parseFloat(((10 * 8) / ulTimeSeconds).toFixed(2))
+      const ulMbps = parseFloat(((uploadSizeMB * 8) / ulTimeSeconds).toFixed(2))
       setUploadResult(ulMbps)
 
       setTestDateTime(new Date().toISOString())
@@ -191,7 +193,7 @@ export function SpeedTest({
           <span className="text-sm text-muted-foreground">
             {phase === 'ping' && 'Medindo latência...'}
             {phase === 'download' && 'Testando download (10MB)...'}
-            {phase === 'upload' && 'Testando upload (10MB)...'}
+            {phase === 'upload' && 'Testando upload (1MB)...'}
           </span>
         </div>
       )}
