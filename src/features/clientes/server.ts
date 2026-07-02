@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db'
 import { clientes } from '@/db/schema'
 import { eq } from 'drizzle-orm'
-import { clienteSchema } from './schema'
+import { baseClienteSchema } from './schema'
 import { z } from 'zod'
 
 export const getClientes = createServerFn({ method: 'GET' }).handler(
@@ -22,7 +22,7 @@ export const getCliente = createServerFn({ method: 'GET' })
   })
 
 export const createCliente = createServerFn({ method: 'POST' })
-  .inputValidator(clienteSchema)
+  .validator(baseClienteSchema)
   .handler(async ({ data }) => {
     const [novoCliente] = await db
       .insert(clientes)
@@ -31,8 +31,8 @@ export const createCliente = createServerFn({ method: 'POST' })
           .toString()
           .padStart(4, '0')}`,
         nome: data.nome,
-        cpfCnpj: data.cpfCnpj,
-        telefone: data.telefone,
+        cpfCnpj: data.cpfCnpj?.trim() ? data.cpfCnpj : null,
+        telefone: data.telefone?.trim() ? data.telefone : null,
         cep: data.cep,
         logradouro: data.logradouro,
         numero: data.numero,
@@ -50,14 +50,14 @@ export const createCliente = createServerFn({ method: 'POST' })
   })
 
 export const updateCliente = createServerFn({ method: 'POST' })
-  .inputValidator(z.object({ id: z.number(), data: clienteSchema }))
+  .validator(z.object({ id: z.number(), data: baseClienteSchema }))
   .handler(async ({ data }) => {
     const [atualizado] = await db
       .update(clientes)
       .set({
         nome: data.data.nome,
-        cpfCnpj: data.data.cpfCnpj,
-        telefone: data.data.telefone,
+        cpfCnpj: data.data.cpfCnpj?.trim() ? data.data.cpfCnpj : null,
+        telefone: data.data.telefone?.trim() ? data.data.telefone : null,
         cep: data.data.cep,
         logradouro: data.data.logradouro,
         numero: data.data.numero,

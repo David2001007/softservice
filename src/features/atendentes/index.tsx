@@ -161,7 +161,7 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
       />
 
       <AccordionFilters>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 items-end">
           <div className="space-y-2">
             <Label className="text-xs">Nome</Label>
             <Input
@@ -233,6 +233,23 @@ export function AtendentesPage({ atendentes }: { atendentes: any[] }) {
                 <SelectItem value="false">Inativo</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <DefaultButton 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                setFiltros({
+                  nome: '',
+                  username: '',
+                  email: '',
+                  role: '',
+                  ativo: '',
+                })
+              }}
+            >
+              Limpar Todos
+            </DefaultButton>
           </div>
         </div>
       </AccordionFilters>

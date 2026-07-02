@@ -284,7 +284,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
         <OrdemServicoCardList data={filtered} />
       ) : (
         <>
-          <AccordionFilters>
+          <AccordionFilters defaultOpen={!!(search.status || search.dataInicial || search.dataFinal)}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end">
           <div className="space-y-2">
             <Label className="text-xs">Nº OS</Label>

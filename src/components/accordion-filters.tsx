@@ -6,14 +6,16 @@ interface AccordionFiltersProps {
   children: React.ReactNode
   title?: string
   className?: string
+  defaultOpen?: boolean
 }
 
 export function AccordionFilters({
   children,
   title = 'Filtros de Pesquisa',
   className,
+  defaultOpen = false,
 }: AccordionFiltersProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(defaultOpen)
 
   return (
     <div

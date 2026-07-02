@@ -203,6 +203,15 @@ export function EditarOrdemServicoPage({
       toast.error('Verifique os avisos no campo de agendamento antes de salvar.')
       return
     }
+
+    if (configuracoes?.['bloquear_os_contrato_nao_assinado'] === 'true') {
+      const selectedClient = clientes.find(c => c.id === data.clienteId)
+      if (selectedClient && selectedClient.situacaoContrato !== 'assinado') {
+        toast.error('Edição bloqueada: o cliente não possui contrato assinado.')
+        return
+      }
+    }
+
     try {
       const osAtualizada = await updateOrdemServico({ data: { id: os.id, data } })
       toast.success(

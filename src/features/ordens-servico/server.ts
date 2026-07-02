@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db'
-import { ordensServico, osHistorico, osMateriais, materiais, osArquivos, estoqueMovimentacoes } from '@/db/schema'
+import { ordensServico, osHistorico, osMateriais, materiais, osArquivos, estoqueMovimentacoes, settings, clientes } from '@/db/schema'
 import { eq, sql, count } from 'drizzle-orm'
 import {
   osSchema,
@@ -194,12 +194,30 @@ export const deleteOsArquivo = createServerFn({ method: 'POST' })
 export const createOrdemServico = createServerFn({ method: 'POST' })
   .validator(osSchema)
   .handler(async ({ data }) => {
+    // Check setting for blocking OS creation when contract is not signed
+    const blockSetting = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.key, 'bloquear_os_contrato_nao_assinado'))
+      .then((res) => res[0])
+    
+    if (blockSetting && blockSetting.value === 'true') {
+      const cliente = await db
+        .select()
+        .from(clientes)
+        .where(eq(clientes.id, data.clienteId))
+        .then((res) => res[0])
+      
+      if (cliente && cliente.situacaoContrato !== 'assinado') {
+        throw new Error('Não é possível criar OS: O cliente não possui contrato assinado.')
+      }
+    }
+
     if (data.dataAgendada) {
       await validateAgendamento(data.dataAgendada, true)
     }
 
     const status = data.dataAgendada ? 'agendada' : (data.status || 'aberta')
-
 
     const [novaOs] = await db
       .insert(ordensServico)
@@ -469,12 +487,30 @@ export const cancelarOrdemServico = createServerFn({ method: 'POST' })
 export const updateOrdemServico = createServerFn({ method: 'POST' })
   .validator(z.object({ id: z.number(), data: osSchema }))
   .handler(async ({ data }) => {
+    // Check setting for blocking OS update when contract is not signed
+    const blockSetting = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.key, 'bloquear_os_contrato_nao_assinado'))
+      .then((res) => res[0])
+    
+    if (blockSetting && blockSetting.value === 'true') {
+      const cliente = await db
+        .select()
+        .from(clientes)
+        .where(eq(clientes.id, data.data.clienteId))
+        .then((res) => res[0])
+      
+      if (cliente && cliente.situacaoContrato !== 'assinado') {
+        throw new Error('Não é possível atualizar OS: O cliente não possui contrato assinado.')
+      }
+    }
+
     if (data.data.dataAgendada) {
       await validateAgendamento(data.data.dataAgendada)
     }
 
     const status = data.data.dataAgendada ? 'agendada' : data.data.status
-
 
     const [atualizada] = await db
       .update(ordensServico)

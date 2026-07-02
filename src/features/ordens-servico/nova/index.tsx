@@ -57,10 +57,13 @@ function FormSection({
 }
 
 export function NovaOrdemServicoPage({
+  clientes,
   tecnicos,
+  configuracoes,
 }: {
   clientes: any[]
   tecnicos: any[]
+  configuracoes: Record<string, string>
 }) {
   const navigate = useNavigate()
   const {
@@ -82,24 +85,38 @@ export function NovaOrdemServicoPage({
   const [clienteSelecionado, setClienteSelecionado] = useState<any>(null)
 
   const handleSearchClient = () => {
-    // Mock for now. In real app, call an API.
     if (!buscaCliente) return
     if (buscaCliente.length < 3) {
       toast.error('Digite pelo menos 3 caracteres para buscar')
       return
     }
-    setClienteSelecionado({
-      id: 1,
-      nome: 'João da Silva',
-      cpfCnpj: '123.456.789-00',
-      endereco: 'Rua das Flores, 123 - Centro',
-      plano: '300 Mbps',
-    })
-    setValue('clienteId', 1, { shouldValidate: true })
-    toast.success('Cliente encontrado!')
+    
+    const term = buscaCliente.toLowerCase()
+    const found = clientes.find(
+      (c) =>
+        c.nome.toLowerCase().includes(term) ||
+        (c.cpfCnpj && c.cpfCnpj.includes(term)) ||
+        c.codigo.toLowerCase().includes(term),
+    )
+
+    if (found) {
+      setClienteSelecionado(found)
+      setValue('clienteId', found.id, { shouldValidate: true })
+      toast.success('Cliente encontrado!')
+    } else {
+      toast.error('Nenhum cliente encontrado com esse termo.')
+    }
   }
 
   const onSubmit = async (data: OsInput) => {
+    if (
+      configuracoes['bloquear_os_contrato_nao_assinado'] === 'true' &&
+      clienteSelecionado?.situacaoContrato !== 'assinado'
+    ) {
+      toast.error('Criação de OS bloqueada: o cliente não possui contrato assinado.')
+      return
+    }
+
     try {
       const novaOs = await createOrdemServico({
         data,
@@ -243,7 +260,22 @@ export function NovaOrdemServicoPage({
                         {clienteSelecionado.nome}
                       </p>
                       <p className="text-xs text-text-muted">
-                        {clienteSelecionado.cpfCnpj}
+                        {clienteSelecionado.cpfCnpj || 'Sem documento'}
+                      </p>
+                      <p className="text-xs text-text-muted mt-0.5">
+                        {clienteSelecionado.logradouro ? `${clienteSelecionado.logradouro}, ${clienteSelecionado.numero || 'S/N'}` : 'Sem endereço cadastrado'}
+                      </p>
+                      <p className="text-xs mt-1">
+                        Status do Contrato:{' '}
+                        <span
+                          className={
+                            clienteSelecionado.situacaoContrato === 'assinado'
+                              ? 'text-success font-medium'
+                              : 'text-danger font-medium'
+                          }
+                        >
+                          {clienteSelecionado.situacaoContrato === 'assinado' ? 'Assinado' : 'Não Assinado'}
+                        </span>
                       </p>
                     </div>
                   </div>
