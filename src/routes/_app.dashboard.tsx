@@ -351,9 +351,6 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
           const dataInicial = cutoff.toISOString().split('T')[0]
           const dataFinal = new Date().toISOString().split('T')[0]
           
-          // Only apply date filters for historical/completed OSs to match the "Regra de Ouro"
-          const applyDateFilter = card.statusQuery === 'concluida' || card.statusQuery === 'cancelada'
-          
           return (
           <div
             key={card.label}
@@ -361,7 +358,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
               to: '/ordens-servico', 
               search: { 
                 status: card.statusQuery,
-                ...(applyDateFilter && periodoDias !== 'tudo' ? { dataInicial, dataFinal } : {})
+                ...(periodoDias !== 'tudo' ? { dataInicial, dataFinal } : {})
               } 
             })}
             className={`cursor-pointer bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all hover:-translate-y-1`}
