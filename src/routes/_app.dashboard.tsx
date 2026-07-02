@@ -342,9 +342,17 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       <div className="grid grid-cols-5 gap-4 overflow-x-auto pt-2 pb-2">
         {cards.map((card) => {
           const cutoff = new Date()
-          cutoff.setDate(cutoff.getDate() - periodoDias)
+          if (periodoDias !== 'tudo') {
+            cutoff.setDate(cutoff.getDate() - (periodoDias as number))
+          } else {
+            cutoff.setFullYear(2000)
+          }
+          
           const dataInicial = cutoff.toISOString().split('T')[0]
           const dataFinal = new Date().toISOString().split('T')[0]
+          
+          // Only apply date filters for historical/completed OSs to match the "Regra de Ouro"
+          const applyDateFilter = card.statusQuery === 'concluida' || card.statusQuery === 'cancelada'
           
           return (
           <div
@@ -353,8 +361,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
               to: '/ordens-servico', 
               search: { 
                 status: card.statusQuery,
-                dataInicial,
-                dataFinal
+                ...(applyDateFilter && periodoDias !== 'tudo' ? { dataInicial, dataFinal } : {})
               } 
             })}
             className={`cursor-pointer bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all hover:-translate-y-1`}
