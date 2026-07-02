@@ -282,9 +282,13 @@ export const osMateriaisRelations = relations(osMateriais, ({ one }) => ({
   }),
 }))
 
-export const materiaisRelations = relations(materiais, ({ many }) => ({
+export const materiaisRelations = relations(materiais, ({ many, one }) => ({
   movimentacoes: many(estoqueMovimentacoes),
   osMateriais: many(osMateriais),
+  tecnico: one(tecnicos, {
+    fields: [materiais.assignedTecnicoId],
+    references: [tecnicos.id],
+  }),
 }))
 
 export const estoqueMovimentacoesRelations = relations(

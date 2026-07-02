@@ -30,6 +30,23 @@ const navItems = [
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUiStore()
   const { location } = useRouterState()
+  const user = useAuthStore((s) => s.user)
+
+  // Lê do localStorage de forma 100% síncrona para garantir que o primeiro frame
+  // já tenha a informação correta, mesmo se o Zustand atrasar a hidratação no React 18.
+  const getSyncRole = () => {
+    if (user?.role) return user.role
+    if (typeof window === 'undefined') return null
+    try {
+      const raw = localStorage.getItem('unite-auth')
+      if (raw) return JSON.parse(raw)?.state?.user?.role
+    } catch {
+      return null
+    }
+    return null
+  }
+  
+  const currentRole = getSyncRole()
 
   const isActive = (to: string, exact?: boolean) => {
     if (exact) return location.pathname === to
@@ -62,9 +79,8 @@ export function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {navItems.filter(item => {
-          if (item.to === '/configuracoes') {
-            const role = useAuthStore.getState().user?.role
-            return role !== 'atendente'
+          if (item.to === '/configuracoes' || item.to === '/atendentes') {
+            return currentRole === 'admin'
           }
           return true
         }).map((item) => {

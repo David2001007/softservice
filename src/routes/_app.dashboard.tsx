@@ -288,7 +288,6 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
 
     return Object.values(map)
       .sort((a, b) => b.abertas + b.concluidas - (a.abertas + a.concluidas))
-      .slice(0, selectedTecnicos.length > 0 ? undefined : 8)
   }, [filteredOrdens, selectedTecnicos])
 
   // ── Próximos atendimentos ────────────────────────────────────────────────
@@ -479,11 +478,12 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
               Nenhum técnico com OS atribuídas
             </div>
           ) : (
-            <div className="px-2 pt-4 pb-2">
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart
-                  data={tecnicoData}
-                  margin={{ top: 0, right: 16, left: -20, bottom: 0 }}
+            <div className="px-2 pt-4 pb-2 overflow-x-auto styled-scrollbar">
+              <div style={{ minWidth: `${Math.max(100, tecnicoData.length * 10)}%` }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart
+                    data={tecnicoData}
+                    margin={{ top: 0, right: 16, left: -20, bottom: 0 }}
                   barSize={14}
                   barGap={3}
                 >
@@ -515,6 +515,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
                   <Bar dataKey="outros" name="Outros" fill="#4b5563" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             </div>
           )}
         </div>

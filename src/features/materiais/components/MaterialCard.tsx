@@ -16,9 +16,16 @@ export function MaterialCard({ material }: MaterialCardProps) {
           <h3 className="font-semibold text-base line-clamp-2" title={material.descricao}>
             {material.descricao}
           </h3>
-          <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground font-mono">
-            <Hash className="w-3.5 h-3.5" />
-            {material.codigo}
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground font-mono flex-wrap">
+            <span className="flex items-center gap-1">
+              <Hash className="w-3.5 h-3.5" />
+              {material.codigo}
+            </span>
+            {material.assignedTecnicoId && material.tecnico && (
+              <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-md font-sans font-medium text-[10px] uppercase tracking-wider">
+                {material.tecnico.nome}
+              </span>
+            )}
           </div>
         </div>
         {isEstoqueBaixo && (

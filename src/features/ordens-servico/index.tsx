@@ -41,7 +41,6 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     numero: '',
     cliente: '',
     tecnico: '',
-    status: '',
     tipoServico: '',
   })
   const [page, setPage] = useState(1)
@@ -49,6 +48,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     id: number
     numero: string
   } | null>(null)
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
   const [isDeleting, setIsDeleting] = useState(false)
   const user = useAuthStore((s) => s.user)
   const isTecnico = user?.type === 'tecnico'
@@ -67,6 +67,23 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
       setIsDeleting(false)
     }
   }
+
+  const toggleStatus = (st: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(st) ? prev.filter((p) => p !== st) : [...prev, st],
+    )
+  }
+
+  const statusOptions = [
+    { id: 'aberta', label: 'Aberta', activeClass: 'bg-info/15 text-info border-info/50 shadow-sm shadow-info/20 ring-1 ring-info/30' },
+    { id: 'agendada', label: 'Agendada', activeClass: 'bg-primary/15 text-primary border-primary/50 shadow-sm shadow-primary/20 ring-1 ring-primary/30' },
+    { id: 'em_execucao', label: 'Em Execução', activeClass: 'bg-warning/15 text-warning border-warning/50 shadow-sm shadow-warning/20 ring-1 ring-warning/30' },
+    { id: 'pendente', label: 'Pendente', activeClass: 'bg-text-muted/15 text-text-muted border-text-muted/50 shadow-sm ring-1 ring-text-muted/30' },
+    { id: 'concluida', label: 'Concluída', activeClass: 'bg-success/15 text-success border-success/50 shadow-sm shadow-success/20 ring-1 ring-success/30' },
+    { id: 'cancelada', label: 'Cancelada', activeClass: 'bg-danger/15 text-danger border-danger/50 shadow-sm shadow-danger/20 ring-1 ring-danger/30' },
+    { id: 'reagendada', label: 'Reagendada', activeClass: 'bg-gold/15 text-gold border-gold/50 shadow-sm shadow-gold/20 ring-1 ring-gold/30' },
+    { id: 'atrasada', label: 'Em Atraso', activeClass: 'bg-danger/10 text-danger border-danger/50 border-dashed shadow-sm shadow-danger/20 ring-1 ring-danger/30' },
+  ]
 
   const columns: Column<any>[] = [
     {
@@ -164,19 +181,30 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
   ]
 
   const filtered = ordens.filter(
-    (o: any) =>
-      (!filtros.numero ||
-        o.numero.toLowerCase().includes(filtros.numero.toLowerCase())) &&
-      (!filtros.cliente ||
-        o.cliente?.nome
-          .toLowerCase()
-          .includes(filtros.cliente.toLowerCase())) &&
-      (!filtros.tecnico ||
-        o.tecnico?.nome
-          .toLowerCase()
-          .includes(filtros.tecnico.toLowerCase())) &&
-      (!filtros.status || o.status === filtros.status) &&
-      (!filtros.tipoServico || o.tipoServico === filtros.tipoServico),
+    (o: any) => {
+      // Filtros de texto/select
+      if (filtros.numero && !o.numero.toLowerCase().includes(filtros.numero.toLowerCase())) return false;
+      if (filtros.cliente && !o.cliente?.nome.toLowerCase().includes(filtros.cliente.toLowerCase())) return false;
+      if (filtros.tecnico && !o.tecnico?.nome.toLowerCase().includes(filtros.tecnico.toLowerCase())) return false;
+      if (filtros.tipoServico && o.tipoServico !== filtros.tipoServico) return false;
+
+      // Filtros de Status Visual
+      if (selectedStatuses.length > 0) {
+        const isAtrasada = o.status === 'agendada' && o.dataAgendada && new Date(o.dataAgendada) < new Date();
+        const hasAtrasadaSelected = selectedStatuses.includes('atrasada');
+        const hasStatusSelected = selectedStatuses.includes(o.status);
+
+        if (hasAtrasadaSelected && isAtrasada) {
+          // Passa se "Em Atraso" foi selecionado e a OS está atrasada
+        } else if (hasStatusSelected) {
+          // Passa se o status exato foi selecionado
+        } else {
+          return false;
+        }
+      }
+
+      return true;
+    }
   )
 
   return (
@@ -196,6 +224,36 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
           ) : undefined
         }
       />
+
+      {/* Filtro Visual de Status */}
+      <div className="flex flex-wrap items-center gap-2 px-1">
+        <button
+          onClick={() => setSelectedStatuses([])}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+            selectedStatuses.length === 0
+              ? 'bg-primary text-white border-primary shadow-md'
+              : 'bg-surface text-text-muted border-border hover:border-primary/40 hover:text-text'
+          }`}
+        >
+          Todos
+        </button>
+        {statusOptions.map((opt) => {
+          const isActive = selectedStatuses.includes(opt.id)
+          return (
+            <button
+              key={opt.id}
+              onClick={() => toggleStatus(opt.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                isActive
+                  ? opt.activeClass
+                  : 'bg-surface text-text-muted border-border hover:bg-surface-hover hover:text-text'
+              }`}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
 
       {isTecnico ? (
         <OrdemServicoCardList data={filtered} />
@@ -232,29 +290,6 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
               }
               placeholder="Nome do técnico..."
             />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs">Status</Label>
-            <Select
-              value={filtros.status || 'todos'}
-              onValueChange={(value) =>
-                setFiltros((f) => ({ ...f, status: value === 'todos' ? '' : value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Todos" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="aberta">Aberta</SelectItem>
-                <SelectItem value="agendada">Agendada</SelectItem>
-                <SelectItem value="em_execucao">Em Execução</SelectItem>
-                <SelectItem value="concluida">Concluída</SelectItem>
-                <SelectItem value="cancelada">Cancelada</SelectItem>
-                <SelectItem value="reagendada">Reagendada</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Tipo de Serviço</Label>

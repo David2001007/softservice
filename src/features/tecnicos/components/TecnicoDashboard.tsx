@@ -39,10 +39,7 @@ export function TecnicoDashboard({
       new Date(o.dataAgendada) < new Date(),
   ).length
 
-  // Para o futuro: lógica de estoque do técnico específico
-  const estoqueBaixo = materiais.filter(
-    (m) => Number(m.quantidade) <= Number(m.estoqueMinimo),
-  )
+  const materiaisEmEstoque = materiais.filter((m) => Number(m.quantidade) > 0)
 
   const cards = [
     {
@@ -78,8 +75,8 @@ export function TecnicoDashboard({
       border: 'border-success/20',
     },
     {
-      label: 'Estoque Baixo',
-      value: estoqueBaixo.length,
+      label: 'Itens no Estoque',
+      value: materiaisEmEstoque.length,
       icon: PackageX,
       color: 'text-warning',
       bg: 'bg-warning/10',
@@ -189,19 +186,19 @@ export function TecnicoDashboard({
         )}
       </div>
 
-      {/* Estoque Baixo */}
+      {/* Meu Estoque */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center gap-2">
           <PackageX className="w-4 h-4 text-warning" />
-          <h2 className="font-semibold text-text text-sm">Abaixo do Mínimo</h2>
+          <h2 className="font-semibold text-text text-sm">Meu Estoque Atual</h2>
           <span className="ml-auto text-[10px] bg-warning/15 text-warning border border-warning/20 px-2 py-0.5 rounded-full font-medium">
-            {estoqueBaixo.length}
+            {materiaisEmEstoque.length}
           </span>
         </div>
 
-        {estoqueBaixo.length === 0 ? (
+        {materiaisEmEstoque.length === 0 ? (
           <div className="bg-surface border border-border border-dashed rounded-xl p-6 text-center">
-            <p className="text-sm text-text-muted">Estoque regularizado.</p>
+            <p className="text-sm text-text-muted">Seu estoque está vazio no momento.</p>
           </div>
         ) : (
           <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-soft">
@@ -213,15 +210,12 @@ export function TecnicoDashboard({
                       Item
                     </th>
                     <th className="text-right px-4 py-2.5 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                      Qtd
-                    </th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                      Min
+                      Quantidade Disponível
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {estoqueBaixo.map((mat) => (
+                  {materiaisEmEstoque.map((mat) => (
                     <tr
                       key={mat.id}
                       className="border-b border-border/50 hover:bg-surface-hover transition-colors"
@@ -235,16 +229,11 @@ export function TecnicoDashboard({
                         </p>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-xs font-bold text-danger">
+                        <span className="text-xs font-bold text-success">
                           {formatNumber(mat.quantidade)}
                         </span>
                         <span className="text-[10px] text-text-muted ml-1">
                           {mat.unidade}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="text-xs text-text-muted">
-                          {formatNumber(mat.estoqueMinimo)}
                         </span>
                       </td>
                     </tr>
