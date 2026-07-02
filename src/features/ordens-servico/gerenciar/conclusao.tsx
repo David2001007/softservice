@@ -216,7 +216,6 @@ export function ConclusaoForm({
       materiais: materiaisValidos,
       ...(speedTestResults
         ? {
-            speedTestPing: speedTestResults.ping,
             speedTestDownload: speedTestResults.download,
             speedTestUpload: speedTestResults.upload,
             speedTestDataHora: speedTestResults.dataHora,
@@ -234,7 +233,6 @@ export function ConclusaoForm({
       await salvarSpeedTestOs({
         data: {
           id: Number(osId),
-          speedTestPing: results.ping,
           speedTestDownload: results.download,
           speedTestUpload: results.upload,
           speedTestDataHora: results.dataHora,
@@ -302,11 +300,10 @@ export function ConclusaoForm({
             })}
           </div>
         )}
-        {(osSalva?.speedTestPing != null || speedTestResults) && (
+        {(osSalva?.speedTestDownload != null || osSalva?.speedTestUpload != null || speedTestResults) && (
           <div className="space-y-2">
             <p className="text-sm font-semibold">Teste de Conexão</p>
             <SpeedTestDisplay
-              ping={speedTestResults?.ping ?? osSalva?.speedTestPing}
               download={speedTestResults?.download ?? osSalva?.speedTestDownload}
               upload={speedTestResults?.upload ?? osSalva?.speedTestUpload}
               dataHora={speedTestResults?.dataHora ?? osSalva?.speedTestDataHora}
@@ -509,10 +506,9 @@ export function ConclusaoForm({
       </div>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-border">
-        {(speedTestResults || osSalva?.speedTestPing != null) ? (
+        {(speedTestResults || osSalva?.speedTestDownload != null || osSalva?.speedTestUpload != null) ? (
           <SpeedTestDisplay
             compact
-            ping={speedTestResults?.ping ?? osSalva?.speedTestPing}
             download={speedTestResults?.download ?? osSalva?.speedTestDownload}
             upload={speedTestResults?.upload ?? osSalva?.speedTestUpload}
             dataHora={speedTestResults?.dataHora ?? osSalva?.speedTestDataHora}
@@ -520,7 +516,7 @@ export function ConclusaoForm({
         ) : null}
         <DefaultButton
           type="button"
-          label={speedTestResults || osSalva?.speedTestPing != null ? 'Refazer Teste' : 'Testar Conexão'}
+          label={speedTestResults || osSalva?.speedTestDownload != null || osSalva?.speedTestUpload != null ? 'Refazer Teste' : 'Testar Conexão'}
           leftIcon={<Wifi className="w-4 h-4" />}
           onClick={() => setShowSpeedTest(true)}
           isLoading={isSavingSpeedTest}

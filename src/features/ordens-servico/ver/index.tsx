@@ -75,7 +75,7 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
 
   const isConcluida = os.status === 'concluida'
   const isCancelada = os.status === 'cancelada'
-  const hasSpeedTest = os.speedTestPing != null
+  const hasSpeedTest = os.speedTestDownload != null || os.speedTestUpload != null
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-0 space-y-5 fade-in">
@@ -203,7 +203,6 @@ export function VerOrdemServicoPage({ os, id }: { os: any; id: string }) {
             <span className="text-sm font-medium">Resultado registrado</span>
           </div>
           <SpeedTestDisplay
-            ping={os.speedTestPing}
             download={os.speedTestDownload}
             upload={os.speedTestUpload}
             dataHora={os.speedTestDataHora}

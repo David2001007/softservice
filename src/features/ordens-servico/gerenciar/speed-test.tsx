@@ -6,20 +6,18 @@ import {
   Check,
   ArrowDown,
   ArrowUp,
-  Activity,
 } from 'lucide-react'
 import { DefaultButton } from '@/components/default-button'
-import { speedTestPing, speedTestDownload, speedTestUpload } from '../server'
+import { speedTestDownload, speedTestUpload } from '../server'
 
 /* ── Types ── */
 export interface SpeedTestResults {
-  ping: number
   download: number
   upload: number
   dataHora: string
 }
 
-type TestPhase = 'idle' | 'ping' | 'download' | 'upload' | 'done'
+type TestPhase = 'idle' | 'download' | 'upload' | 'done'
 
 interface SpeedTestProps {
   onConfirm: (results: SpeedTestResults) => void
@@ -29,7 +27,6 @@ interface SpeedTestProps {
 
 /* ── Thresholds ── */
 const THRESHOLDS = {
-  ping: { good: 50, unit: 'ms', goodWhen: 'below' as const },
   download: { good: 10, unit: 'Mbps', goodWhen: 'above' as const },
   upload: { good: 5, unit: 'Mbps', goodWhen: 'above' as const },
 }
@@ -46,9 +43,6 @@ export function SpeedTest({
   initialResults,
 }: SpeedTestProps) {
   const [phase, setPhase] = useState<TestPhase>('idle')
-  const [pingResult, setPingResult] = useState<number | null>(
-    initialResults?.ping ?? null,
-  )
   const [downloadResult, setDownloadResult] = useState<number | null>(
     initialResults?.download ?? null,
   )
@@ -62,26 +56,11 @@ export function SpeedTest({
 
   const runTest = useCallback(async () => {
     setError(null)
-    setPingResult(null)
     setDownloadResult(null)
     setUploadResult(null)
     setTestDateTime('')
 
     try {
-      // ── PING ──
-      setPhase('ping')
-      const pingTimes: number[] = []
-      for (let i = 0; i < 3; i++) {
-        const start = performance.now()
-        await speedTestPing()
-        const end = performance.now()
-        pingTimes.push(end - start)
-      }
-      const avgPing = Math.round(
-        pingTimes.reduce((a, b) => a + b, 0) / pingTimes.length,
-      )
-      setPingResult(avgPing)
-
       // ── DOWNLOAD ──
       setPhase('download')
       const dlStart = performance.now()
@@ -92,7 +71,6 @@ export function SpeedTest({
       setDownloadResult(dlMbps)
 
       // ── UPLOAD ──
-      // Use a smaller payload for upload to avoid hitting server body-size limits.
       setPhase('upload')
       const uploadSizeKB = 512 // 512 kilobytes
       const payloadString = '0'.repeat(uploadSizeKB * 1024)
@@ -124,9 +102,8 @@ export function SpeedTest({
   }, [])
 
   const handleConfirm = () => {
-    if (pingResult != null && downloadResult != null && uploadResult != null) {
+    if (downloadResult != null && uploadResult != null) {
       onConfirm({
-        ping: pingResult,
         download: downloadResult,
         upload: uploadResult,
         dataHora: testDateTime,
@@ -136,7 +113,6 @@ export function SpeedTest({
 
   const allDone =
     phase === 'done' &&
-    pingResult != null &&
     downloadResult != null &&
     uploadResult != null
 
@@ -156,16 +132,7 @@ export function SpeedTest({
       </div>
 
       {/* Progress Steps */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <PhaseCard
-          label="Ping"
-          icon={Activity}
-          isActive={phase === 'ping'}
-          isDone={pingResult != null}
-          value={pingResult}
-          unit="ms"
-          metric="ping"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <PhaseCard
           label="Download"
           icon={ArrowDown}
@@ -191,9 +158,8 @@ export function SpeedTest({
         <div className="flex items-center justify-center gap-2 py-3">
           <div className="speed-test-spinner" />
           <span className="text-sm text-muted-foreground">
-            {phase === 'ping' && 'Medindo latência...'}
             {phase === 'download' && 'Testando download (10MB)...'}
-            {phase === 'upload' && 'Testando upload (1MB)...'}
+            {phase === 'upload' && 'Testando upload (512KB)...'}
           </span>
         </div>
       )}
@@ -236,7 +202,7 @@ interface PhaseCardProps {
   isDone: boolean
   value: number | null
   unit: string
-  metric: 'ping' | 'download' | 'upload'
+  metric: 'download' | 'upload'
 }
 
 function PhaseCard({

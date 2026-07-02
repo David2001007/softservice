@@ -577,7 +577,6 @@ export const salvarSpeedTestOs = createServerFn({ method: 'POST' })
   .validator(
     z.object({
       id: z.number(),
-      speedTestPing: z.number(),
       speedTestDownload: z.number(),
       speedTestUpload: z.number(),
       speedTestDataHora: z.string(),
@@ -605,7 +604,6 @@ export const salvarSpeedTestOs = createServerFn({ method: 'POST' })
     const [atualizada] = await db
       .update(ordensServico)
       .set({
-        speedTestPing: String(data.speedTestPing),
         speedTestDownload: String(data.speedTestDownload),
         speedTestUpload: String(data.speedTestUpload),
         speedTestDataHora: new Date(data.speedTestDataHora),

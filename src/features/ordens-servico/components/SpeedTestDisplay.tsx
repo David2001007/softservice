@@ -2,7 +2,6 @@ import { Wifi } from 'lucide-react'
 import { formatDate, formatNumber } from '@/lib/utils'
 
 interface SpeedTestDisplayProps {
-  ping?: string | number | null
   download?: string | number | null
   upload?: string | number | null
   dataHora?: string | Date | null
@@ -10,13 +9,12 @@ interface SpeedTestDisplayProps {
 }
 
 export function SpeedTestDisplay({
-  ping,
   download,
   upload,
   dataHora,
   compact = false,
 }: SpeedTestDisplayProps) {
-  if (ping == null && download == null && upload == null) return null
+  if (download == null && upload == null) return null
 
   if (compact) {
     return (
@@ -24,8 +22,6 @@ export function SpeedTestDisplay({
         <span className="text-green-500 flex items-center gap-1.5 shrink-0">
           <Wifi className="w-3.5 h-3.5" /> Teste de Conexão
         </span>
-        <div className="hidden sm:block w-px h-3 bg-border" />
-        <span className="shrink-0">Ping: {formatNumber(ping)}ms</span>
         <div className="hidden sm:block w-px h-3 bg-border" />
         <span className="shrink-0">↓ {formatNumber(download)}Mbps</span>
         <div className="hidden sm:block w-px h-3 bg-border" />
@@ -45,10 +41,6 @@ export function SpeedTestDisplay({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div className="p-3 rounded-lg bg-background border border-border text-center">
-        <p className="text-xs text-text-muted uppercase tracking-wider">Ping</p>
-        <p className="text-lg font-bold mt-1">{formatNumber(ping)} ms</p>
-      </div>
-      <div className="p-3 rounded-lg bg-background border border-border text-center">
         <p className="text-xs text-text-muted uppercase tracking-wider">Download</p>
         <p className="text-lg font-bold mt-1">{formatNumber(download)} Mbps</p>
       </div>
@@ -67,15 +59,13 @@ export function SpeedTestDisplay({
 }
 
 export function parseSpeedTestFromOs(os: {
-  speedTestPing?: string | number | null
   speedTestDownload?: string | number | null
   speedTestUpload?: string | number | null
   speedTestDataHora?: string | Date | null
 }) {
-  if (os.speedTestPing == null) return null
+  if (os.speedTestDownload == null || os.speedTestUpload == null) return null
 
   return {
-    ping: Number(os.speedTestPing),
     download: Number(os.speedTestDownload),
     upload: Number(os.speedTestUpload),
     dataHora: os.speedTestDataHora
