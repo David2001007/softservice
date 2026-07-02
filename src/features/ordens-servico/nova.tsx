@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { CopyableOsNumber } from '@/components/copyable-os-number'
 import { osSchema } from '@/features/ordens-servico/schema'
 import type { OsInput } from '@/features/ordens-servico/schema'
 import { createOrdemServico } from '@/features/ordens-servico/server'
@@ -151,8 +152,13 @@ export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: Nova
   const processSubmit = async (data: OsInput) => {
     setIsConfirming(true)
     try {
-      await createOrdemServico({ data })
-      toast.success('Ordem de Serviço criada com sucesso!')
+      const novaOs = await createOrdemServico({ data })
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={novaOs.numero} /> criada com sucesso!
+        </span>,
+        { duration: 5000 }
+      )
       setShowRetroactiveModal(false)
       await navigate({ to: '/ordens-servico' })
     } catch (e) {

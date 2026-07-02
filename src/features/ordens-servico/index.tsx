@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import { Plus, Settings2, Pencil, Trash2, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { AccordionFilters } from '@/components/accordion-filters'
 import { DefaultTable  } from '@/components/default-table'
 import type {Column} from '@/components/default-table';
+import { CopyableOsNumber } from '@/components/copyable-os-number'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
@@ -37,6 +38,8 @@ interface OrdensServicoPageProps {
 
 export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
   const router = useRouter()
+  const search: any = useSearch({ strict: false })
+  
   const [filtros, setFiltros] = useState({
     numero: '',
     cliente: '',
@@ -48,7 +51,9 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     id: number
     numero: string
   } | null>(null)
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
+  
+  const initialStatuses = search.status ? search.status.split(',') : []
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialStatuses)
   const [isDeleting, setIsDeleting] = useState(false)
   const user = useAuthStore((s) => s.user)
   const isTecnico = user?.type === 'tecnico'
@@ -58,7 +63,12 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     setIsDeleting(true)
     try {
       await deleteOrdemServico({ data: deleteTarget.id })
-      toast.success(`OS "${deleteTarget.numero}" excluída com sucesso!`)
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={deleteTarget.numero} asQuotes /> excluída com sucesso!
+        </span>,
+        { duration: 5000 }
+      )
       setDeleteTarget(null)
       router.invalidate()
     } catch {
@@ -190,7 +200,10 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
 
       // Filtros de Status Visual
       if (selectedStatuses.length > 0) {
-        const isAtrasada = o.status === 'agendada' && o.dataAgendada && new Date(o.dataAgendada) < new Date();
+        const isAtrasada =
+        (o.status === 'agendada' || o.status === 'reagendada') &&
+        o.dataAgendada &&
+        new Date(o.dataAgendada) < new Date();
         const hasAtrasadaSelected = selectedStatuses.includes('atrasada');
         const hasStatusSelected = selectedStatuses.includes(o.status);
 

@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, Save, Search, User } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
+import { CopyableOsNumber } from '@/components/copyable-os-number'
 import { osSchema  } from '@/features/ordens-servico/schema'
 import type {OsInput} from '@/features/ordens-servico/schema';
 import { createOrdemServico } from '@/features/ordens-servico/server'
@@ -100,10 +101,15 @@ export function NovaOrdemServicoPage({
 
   const onSubmit = async (data: OsInput) => {
     try {
-      await createOrdemServico({
+      const novaOs = await createOrdemServico({
         data,
       })
-      toast.success('Ordem de serviço aberta com sucesso!')
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={novaOs.numero} /> aberta com sucesso!
+        </span>,
+        { duration: 5000 }
+      )
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
       toast.error('Erro ao abrir ordem de serviço')

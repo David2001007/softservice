@@ -6,6 +6,7 @@ import {
   PackageX,
   Clock,
 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 import { StatusBadge } from '@/components/status-badge'
 import { formatDate, formatNumber } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -20,10 +21,13 @@ export function TecnicoDashboard({
   ordens,
   materiais,
 }: TecnicoDashboardProps) {
+  const navigate = useNavigate()
   const minhasOrdens = ordens
 
   const abertas = minhasOrdens.filter((o) => o.status === 'aberta').length
-  const agendadas = minhasOrdens.filter((o) => o.status === 'agendada').length
+  const agendadas = minhasOrdens.filter(
+    (o) => o.status === 'agendada' || o.status === 'reagendada'
+  ).length
   const emExecucao = minhasOrdens.filter(
     (o) => o.status === 'em_execucao',
   ).length
@@ -34,7 +38,7 @@ export function TecnicoDashboard({
   ).length
   const atrasadas = minhasOrdens.filter(
     (o) =>
-      o.status === 'agendada' &&
+      (o.status === 'agendada' || o.status === 'reagendada') &&
       o.dataAgendada &&
       new Date(o.dataAgendada) < new Date(),
   ).length
@@ -43,12 +47,13 @@ export function TecnicoDashboard({
 
   const cards = [
     {
-      label: 'OS Abertas',
+      label: 'Aguardando Agendamento',
       value: abertas + emExecucao,
       icon: ClipboardList,
       color: 'text-info',
       bg: 'bg-info/10',
       border: 'border-info/20',
+      statusQuery: 'aberta,em_execucao'
     },
     {
       label: 'Agendadas',
@@ -57,6 +62,7 @@ export function TecnicoDashboard({
       color: 'text-primary',
       bg: 'bg-primary/10',
       border: 'border-primary/20',
+      statusQuery: 'agendada,reagendada'
     },
     {
       label: 'Atrasadas',
@@ -65,6 +71,7 @@ export function TecnicoDashboard({
       color: 'text-danger',
       bg: 'bg-danger/10',
       border: 'border-danger/20',
+      statusQuery: 'atrasada'
     },
     {
       label: 'Concluídas',
@@ -73,6 +80,7 @@ export function TecnicoDashboard({
       color: 'text-success',
       bg: 'bg-success/10',
       border: 'border-success/20',
+      statusQuery: 'concluida'
     },
     {
       label: 'Itens no Estoque',
@@ -111,11 +119,18 @@ export function TecnicoDashboard({
       </div>
 
       {/* Cards - Scroll horizontal no mobile */}
-      <div className="flex overflow-x-auto gap-4 pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-5">
+      <div className="flex overflow-x-auto gap-4 pt-2 pb-2 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-5">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`min-w-[140px] snap-center bg-surface border ${card.border} rounded-2xl p-4 flex flex-col gap-3 shadow-soft`}
+            onClick={() => {
+              if (card.label === 'Itens no Estoque') {
+                navigate({ to: '/materiais' })
+              } else {
+                navigate({ to: '/ordens-servico', search: { status: card.statusQuery } })
+              }
+            }}
+            className={`min-w-[140px] snap-center cursor-pointer bg-surface border ${card.border} rounded-2xl p-4 flex flex-col gap-3 shadow-soft hover:border-opacity-50 transition-all hover:-translate-y-1`}
           >
             <div
               className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center`}

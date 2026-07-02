@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ClipboardList,
   Clock,
@@ -103,15 +103,6 @@ function CustomTooltip({
             <span style={{ color: 'var(--color-text-muted)' }}>{entry.name}: </span>
             <strong style={{ color: 'var(--color-text)' }}>{entry.value}</strong>
           </p>
-          {entry.name === 'Outros' && entry.payload.outrosDetalhe && Object.keys(entry.payload.outrosDetalhe).length > 0 && (
-            <div style={{ paddingLeft: 14, marginTop: 2, marginBottom: 4 }}>
-              {Object.entries(entry.payload.outrosDetalhe).map(([k, v]) => (
-                <p key={k} style={{ margin: 0, fontSize: 11, color: 'var(--color-text-muted)' }}>
-                  - <span style={{ textTransform: 'capitalize' }}>{k.replace('_', ' ')}</span>: {v as number}
-                </p>
-              ))}
-            </div>
-          )}
         </div>
       ))}
     </div>
@@ -155,15 +146,22 @@ function CustomPieTooltip({
 
 // ─── AdminDashboard ───────────────────────────────────────────────────────────
 function AdminDashboard({ ordens }: { ordens: any[] }) {
+  const navigate = useNavigate()
   const [selectedTecnicos, setSelectedTecnicos] = useState<number[]>([])
   const [periodoDias, setPeriodoDias] = useState<number>(30)
 
   const filteredOrdens = useMemo(() => {
     const cutoff = new Date()
     cutoff.setDate(cutoff.getDate() - periodoDias)
-    return ordens.filter(
-      (o) => new Date(o.dataAbertura || o.createdAt) >= cutoff
-    )
+    
+    return ordens.filter((o) => {
+      // Regra de Ouro: Trabalho pendente NUNCA desaparece por causa do tempo.
+      const isPendente = !['concluida', 'cancelada'].includes(o.status)
+      if (isPendente) return true
+      
+      // O filtro de tempo (ex: 30 dias) aplica-se apenas para o histórico concluído
+      return new Date(o.dataAbertura || o.createdAt) >= cutoff
+    })
   }, [ordens, periodoDias])
 
   const abertas = filteredOrdens.filter((o) => o.status === 'aberta').length
@@ -173,22 +171,23 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
   ).length
   const atrasadas = filteredOrdens.filter(
     (o) =>
-      o.status === 'agendada' &&
+      (o.status === 'agendada' || o.status === 'reagendada') &&
       o.dataAgendada &&
       new Date(o.dataAgendada) < new Date(),
   ).length
   const agendadasFuturas = filteredOrdens.filter(
-    (o) => o.status === 'agendada' && new Date(o.dataAgendada) >= new Date(),
+    (o) => (o.status === 'agendada' || o.status === 'reagendada') && new Date(o.dataAgendada) >= new Date(),
   ).length
 
   const cards = [
     {
-      label: 'OS Abertas',
+      label: 'Aguardando Agendamento',
       value: abertas,
       icon: ClipboardList,
       color: 'text-info',
       bg: 'bg-info/10',
       border: 'border-info/20',
+      statusQuery: 'aberta'
     },
     {
       label: 'Em Execução',
@@ -197,6 +196,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       color: 'text-warning',
       bg: 'bg-warning/10',
       border: 'border-warning/20',
+      statusQuery: 'em_execucao'
     },
     {
       label: 'Concluídas',
@@ -205,6 +205,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       color: 'text-success',
       bg: 'bg-success/10',
       border: 'border-success/20',
+      statusQuery: 'concluida'
     },
     {
       label: 'Atrasadas',
@@ -213,6 +214,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       color: 'text-danger',
       bg: 'bg-danger/10',
       border: 'border-danger/20',
+      statusQuery: 'atrasada'
     },
     {
       label: 'OS Agendadas',
@@ -221,6 +223,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       color: 'text-primary',
       bg: 'bg-primary/10',
       border: 'border-primary/20',
+      statusQuery: 'agendada,reagendada'
     },
   ]
 
@@ -260,7 +263,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
   }, [filteredOrdens])
 
   const tecnicoData = useMemo(() => {
-    const map: Record<number, { id: number; name: string; abertas: number; concluidas: number; outros: number; outrosDetalhe: Record<string, number> }> = {}
+    const map: Record<number, { id: number; name: string; abertas: number; concluidas: number; emExecucao: number }> = {}
     
     for (const o of filteredOrdens) {
       if (!o.tecnico?.id) continue
@@ -273,16 +276,15 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       const name = o.tecnico.nome ? o.tecnico.nome.split(' ')[0] : 'Desconhecido'
 
       if (!map[tId]) {
-        map[tId] = { id: tId, name, abertas: 0, concluidas: 0, outros: 0, outrosDetalhe: {} }
+        map[tId] = { id: tId, name, abertas: 0, concluidas: 0, emExecucao: 0 }
       }
 
-      if (o.status === 'aberta' || o.status === 'em_execucao' || o.status === 'agendada') {
+      if (o.status === 'aberta' || o.status === 'agendada' || o.status === 'reagendada' || o.status === 'pendente') {
         map[tId].abertas++
+      } else if (o.status === 'em_execucao') {
+        map[tId].emExecucao++
       } else if (o.status === 'concluida') {
         map[tId].concluidas++
-      } else {
-        map[tId].outros++
-        map[tId].outrosDetalhe[o.status] = (map[tId].outrosDetalhe[o.status] || 0) + 1
       }
     }
 
@@ -341,11 +343,12 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-5 gap-4 overflow-x-auto">
+      <div className="grid grid-cols-5 gap-4 overflow-x-auto pt-2 pb-2">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all`}
+            onClick={() => navigate({ to: '/ordens-servico', search: { status: card.statusQuery } })}
+            className={`cursor-pointer bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all hover:-translate-y-1`}
           >
             <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}>
               <card.icon className={`w-5 h-5 ${card.color}`} />
@@ -510,9 +513,9 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
                     iconType="circle"
                     iconSize={8}
                   />
-                  <Bar dataKey="abertas" name="Em Aberto" fill="#7c6af7" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="abertas" name="Fila de Trabalho" fill="#7c6af7" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="emExecucao" name="Em Execução" fill="#fbbd23" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="concluidas" name="Concluídas" fill="#36d399" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="outros" name="Outros" fill="#4b5563" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
               </div>
