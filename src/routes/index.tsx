@@ -1,9 +1,23 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { lazy, Suspense, useMemo, useState } from 'react'
-import { LogIn, ArrowRight, X, Users, CheckCircle2 } from 'lucide-react'
+import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import {
+  ArrowRight,
+  ArrowUp,
+  CheckCircle2,
+  LogIn,
+  Maximize2,
+  PlayCircle,
+  X,
+  Users,
+} from 'lucide-react'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
 // Lazy-load the heavy WebGL component - page content renders immediately
 const FloatingLines = lazy(
@@ -45,22 +59,21 @@ type TeamMember = {
 const TEAM: TeamMember[] = [
   {
     name: 'David Lucas Machado',
-    role: 'Desenvolvedor',
+    role: 'DevOps/Desenvolvedor',
     photo: '/assets/pessoas/david.png',
     photoClass: 'scale-90',
   },
   {
     name: 'Fabricio Milioransa Dalanhol',
-    role: 'Testes/Desenvolvedor',
+    role: 'Analista/Desenvolvedor',
     photo: '/assets/pessoas/fabricio.png',
   },
   {
     name: 'Felipe de Lima Rodrigues',
-    role: 'Analista/Desenvolvedor',
+    role: 'QA/Desenvolvedor',
     photo: '/assets/pessoas/felipe.jpeg',
   },
 ]
-
 
 const TECHNOLOGIES = [
   { name: 'React', logo: '/assets/tecnologias/react.png' },
@@ -71,8 +84,14 @@ const TECHNOLOGIES = [
   { name: 'TanStack', logo: '/assets/tecnologias/tanstack.png' },
 ]
 
+const DEMO_EMBED_SRC = import.meta.env.VITE_DEMO_EMBED_URL ?? ''
+const DEMO_VIDEO_SRC = import.meta.env.VITE_DEMO_VIDEO_URL ?? ''
+
 function LandingPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
+  const demoEmbedRef = useRef<HTMLIFrameElement>(null)
+  const demoVideoRef = useRef<HTMLVideoElement>(null)
 
   const floatingLinesProps = useMemo(
     () => ({
@@ -99,6 +118,13 @@ function LandingPage() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
     }
+  }
+
+  const openDemoFullscreen = () => {
+    const player = demoEmbedRef.current ?? demoVideoRef.current
+    if (!player?.requestFullscreen) return
+
+    void player.requestFullscreen().catch(() => undefined)
   }
 
   return (
@@ -134,7 +160,10 @@ function LandingPage() {
       {/* Main content with snap scrolling */}
       <main className="relative z-10 flex flex-col items-center text-center h-screen overflow-y-scroll snap-y snap-mandatory">
         {/* Hero */}
-        <section id="hero" className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start">
+        <section
+          id="hero"
+          className="flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 snap-start"
+        >
           <div className="mb-10 max-w-3xl space-y-5 sm:mb-14 sm:space-y-8">
             <h2
               className="text-[2.4rem] font-black uppercase italic leading-[0.9] tracking-tight text-white
@@ -194,11 +223,13 @@ function LandingPage() {
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
-         
         </section>
 
         {/* Nossa Equipe */}
-        <section id="equipe" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section
+          id="equipe"
+          className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start"
+        >
           <div className="w-full max-w-5xl">
             <div className="mb-10 sm:mb-12 md:mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
@@ -221,7 +252,11 @@ function LandingPage() {
                   <div className="w-full h-20 bg-[#2A0A5E]/40 flex items-center justify-center border-b border-white/5 relative">
                     {/* Lanyard hole */}
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 border-4 border-[#11061f] rounded-full bg-background shadow-inner" />
-                    <img src="/logo.webp" alt="Unite Logo" className="h-8 opacity-80 mt-2" />
+                    <img
+                      src="/logo.webp"
+                      alt="Unite Logo"
+                      className="h-8 opacity-80 mt-2"
+                    />
                   </div>
                   <div className="p-8 w-full flex flex-col items-center text-center relative">
                     <div className="mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white/10 bg-gradient-to-br from-primary/20 to-transparent text-4xl font-black text-white shadow-lg ring-2 ring-primary/20">
@@ -241,7 +276,9 @@ function LandingPage() {
                       </p>
                     </div>
                     <div className="mt-8 w-full pt-4 border-t border-white/10 flex justify-between items-center px-2">
-                      <div className="text-[10px] font-mono text-white/30">ID: 00{index + 1}</div>
+                      <div className="text-[10px] font-mono text-white/30">
+                        ID: 00{index + 1}
+                      </div>
                       <div className="h-4 w-12 bg-white/20 rounded-sm"></div>
                     </div>
                   </div>
@@ -252,7 +289,10 @@ function LandingPage() {
         </section>
 
         {/* Sobre a Unite */}
-        <section id="sobre" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section
+          id="sobre"
+          className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start"
+        >
           <div className="w-full max-w-5xl">
             <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-8 sm:p-10 md:p-12 lg:p-16 shadow-2xl">
               <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
@@ -260,23 +300,33 @@ function LandingPage() {
               </h2>
               <div className="space-y-6 text-left text-text-muted">
                 <p className="text-lg leading-relaxed">
-                  A <span className="text-white font-semibold">Unite</span> é um sistema de gestão de serviços
-                  completo, desenvolvido para otimizar processos, centralizar informações e conectar equipes
-                  de atendimento, técnicos e clientes em uma única plataforma intuitiva e moderna.
+                  A <span className="text-white font-semibold">Unite</span> é um
+                  sistema de gestão de serviços completo, desenvolvido para
+                  otimizar processos, centralizar informações e conectar equipes
+                  de atendimento, técnicos e clientes em uma única plataforma
+                  intuitiva e moderna.
                 </p>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-primary" />
                     <div>
-                      <h4 className="font-semibold text-white">O que atende?</h4>
-                      <p className="text-sm">Gestão de ordens de serviço, clientes, técnicos, materiais e relatórios.</p>
+                      <h4 className="font-semibold text-white">
+                        O que atende?
+                      </h4>
+                      <p className="text-sm">
+                        Gestão de ordens de serviço, clientes, técnicos,
+                        materiais e relatórios.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-primary" />
                     <div>
                       <h4 className="font-semibold text-white">Beneficios</h4>
-                      <p className="text-sm">Interface moderna, relatórios em tempo real, segurança de dados e integração total.</p>
+                      <p className="text-sm">
+                        Interface moderna, segurança de dados e integração
+                        total.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -285,9 +335,11 @@ function LandingPage() {
           </div>
         </section>
 
-
         {/* Tecnologias */}
-        <section id="tecnologias" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section
+          id="tecnologias"
+          className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start"
+        >
           <div className="w-full max-w-5xl">
             <h2 className="mb-12 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl text-center">
               Tecnologias Utilizadas
@@ -307,7 +359,9 @@ function LandingPage() {
                       loading="lazy"
                     />
                   </div>
-                  <span className="font-semibold text-white text-sm tracking-wide">{tech.name}</span>
+                  <span className="font-semibold text-white text-sm tracking-wide">
+                    {tech.name}
+                  </span>
                 </div>
               ))}
             </div>
@@ -315,28 +369,108 @@ function LandingPage() {
         </section>
 
         {/* CTA Final */}
-        <section id="cta" className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start">
+        <section
+          id="cta"
+          className="hidden sm:flex min-h-screen w-full flex-col items-center justify-center px-5 sm:px-8 md:px-12 lg:px-16 py-16 sm:py-20 md:py-24 snap-start"
+        >
           <div className="w-full max-w-3xl">
             <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] to-[#11061f] p-8 sm:p-10 md:p-12 lg:p-16 shadow-2xl">
               <h2 className="mb-4 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
                 Vamos conhecer nosso sistema?
               </h2>
               <p className="mb-8 text-text-muted">
-                Acesse agora e descubra como a Unite pode transformar a gestão dos seus serviços.
+                Assista a uma demonstração rápida e veja a Unite em ação.
               </p>
-              <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    size="lg"
-                    className="group h-14 w-full rounded-2xl bg-gradient-to-r from-primary to-primary-hover px-8
-                               font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-5px_rgba(125,18,255,0.5)]
-                               transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:h-16"
-                  >
-                    Acessar o Sistema
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+                <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      size="lg"
+                      className="group h-14 w-full rounded-2xl bg-gradient-to-r from-primary to-primary-hover px-8
+                                 font-black uppercase tracking-widest text-white shadow-[0_10px_30px_-5px_rgba(125,18,255,0.5)]
+                                 transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:h-16"
+                    >
+                      <PlayCircle className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
+                      Ver demonstração
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[95dvh] w-[95vw] max-w-[95vw] overflow-hidden border-white/10 bg-[#11061f] p-0 shadow-2xl sm:max-w-[95vw] lg:w-[92vw] lg:max-w-7xl [&>button]:hidden">
+                    <DialogTitle className="sr-only">
+                      Demonstração Unite
+                    </DialogTitle>
+                    <div className="relative flex max-h-[95dvh] flex-col">
+                      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-left sm:px-5">
+                        <div className="min-w-0">
+                          <h3 className="text-base font-black uppercase tracking-wider text-white sm:text-lg">
+                            Demonstração Unite
+                          </h3>
+                          <p className="mt-1 truncate text-xs text-text-muted sm:text-sm">
+                            Veja os principais fluxos do sistema.
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={openDemoFullscreen}
+                            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white/60 transition-all hover:border-primary/30 hover:bg-primary/20 hover:text-white"
+                            aria-label="Abrir vídeo em tela cheia"
+                          >
+                            <Maximize2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsDemoOpen(false)}
+                            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white/50 transition-all hover:border-primary/30 hover:bg-primary/20 hover:text-white"
+                            aria-label="Fechar demonstração"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex min-h-0 flex-1 items-center justify-center bg-black">
+                        {DEMO_EMBED_SRC ? (
+                          <iframe
+                            ref={demoEmbedRef}
+                            src={DEMO_EMBED_SRC}
+                            title="Demonstra??o Unite"
+                            className="aspect-video max-h-[calc(95dvh-72px)] w-full bg-black"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        ) : DEMO_VIDEO_SRC ? (
+                          <video
+                            ref={demoVideoRef}
+                            src={DEMO_VIDEO_SRC}
+                            className="max-h-[calc(95dvh-72px)] w-full bg-black object-contain"
+                            controls
+                            playsInline
+                            preload="metadata"
+                          >
+                            Seu navegador nao suporta a reproducao de video.
+                          </video>
+                        ) : (
+                          <p className="px-6 py-16 text-sm text-text-muted">
+                            Configure a URL do video para exibir a demonstracao.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={() => scrollToSection('hero')}
+                  className="group h-14 w-full rounded-2xl border-white/10 bg-white/5 px-8 font-black
+                             uppercase tracking-widest text-white transition-all hover:bg-white/10
+                             sm:w-auto sm:px-12 sm:h-16"
+                >
+                  <ArrowUp className="mr-2 h-5 w-5 transition-transform group-hover:-translate-y-1" />
+                  Voltar ao topo
+                </Button>
+              </div>
             </div>
           </div>
         </section>

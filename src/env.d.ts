@@ -1,23 +1,25 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY: string;
-  readonly GOOGLE_DRIVE_FOLDER_ID: string;
+  readonly GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY: string
+  readonly GOOGLE_DRIVE_FOLDER_ID: string
+  readonly VITE_DEMO_EMBED_URL?: string
+  readonly VITE_DEMO_VIDEO_URL?: string
   // Add other environment variables here
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv;
+  readonly env: ImportMetaEnv
 }
 
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      readonly GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY: string;
-      readonly GOOGLE_DRIVE_FOLDER_ID: string;
+      readonly GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY: string
+      readonly GOOGLE_DRIVE_FOLDER_ID: string
       // Add other environment variables here
     }
   }
 }
 
-export {};
+export {}
