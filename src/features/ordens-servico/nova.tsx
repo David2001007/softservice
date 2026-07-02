@@ -16,10 +16,10 @@ import { CopyableOsNumber } from '@/components/copyable-os-number'
 import { osSchema } from '@/features/ordens-servico/schema'
 import type { OsInput } from '@/features/ordens-servico/schema'
 import { createOrdemServico } from '@/features/ordens-servico/server'
+import { gerarNumeroOs } from '@/features/ordens-servico/numero-os'
 import { cn, formatDate, formatPhone } from '@/lib/utils'
 import { isHoliday, isWeekend, checkBusinessHours } from '@/lib/holidays'
 import type { BusinessHoursConfig } from '@/lib/holidays'
-
 
 function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -122,9 +122,7 @@ export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: Nova
       (c.telefone && c.telefone.includes(searchCliente)),
   )
 
-  const numeroOs = `OS${new Date().getFullYear()}${Math.floor(Math.random() * 10000)
-    .toString()
-    .padStart(4, '0')}`
+  const numeroOs = gerarNumeroOs()
 
   const handleSelectCliente = (cliente: any) => {
     setValue('clienteId', cliente.id)
@@ -162,7 +160,9 @@ export function NovaOrdemServicoPage({ clientes, tecnicos, configuracoes }: Nova
       setShowRetroactiveModal(false)
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
-      toast.error('Erro ao criar Ordem de Serviço')
+      console.error('Erro ao criar Ordem de Serviço', e)
+      const message = e instanceof Error ? e.message : 'Erro inesperado ao criar a ordem de serviço.'
+      toast.error(message)
       setIsConfirming(false)
     }
   }

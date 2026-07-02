@@ -15,6 +15,7 @@ import { getEstoqueUnidadeLabel } from '@/lib/utils'
 import { getSettingValue } from '@/features/configuracoes/db'
 import { isHoliday, isWeekend, checkBusinessHours } from '@/lib/holidays'
 import type { BusinessHoursConfig } from '@/lib/holidays'
+import { gerarNumeroOs } from './numero-os'
 
 /**
  * Valida a data de agendamento contra as regras globais configuradas.
@@ -54,7 +55,6 @@ async function validateAgendamento(dataAgendada: string | Date | null | undefine
     }
   }
 }
-
 
 export const getOrdensServico = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -222,11 +222,7 @@ export const createOrdemServico = createServerFn({ method: 'POST' })
     const [novaOs] = await db
       .insert(ordensServico)
       .values({
-        numero: `OS${new Date().getFullYear()}${Math.floor(
-          Math.random() * 10000,
-        )
-          .toString()
-          .padStart(4, '0')}`,
+        numero: gerarNumeroOs(),
         clienteId: data.clienteId,
         tipoServico: data.tipoServico,
         descricaoProblema: data.descricaoProblema,
