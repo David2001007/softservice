@@ -84,14 +84,12 @@ const TECHNOLOGIES = [
   { name: 'TanStack', logo: '/assets/tecnologias/tanstack.png' },
 ]
 
-const DEMO_EMBED_SRC = import.meta.env.VITE_DEMO_EMBED_URL ?? ''
-const DEMO_VIDEO_SRC = import.meta.env.VITE_DEMO_VIDEO_URL ?? ''
+const DEMO_EMBED_SRC = 'https://www.youtube.com/embed/bclfnNrCfoI'
 
 function LandingPage() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isDemoOpen, setIsDemoOpen] = useState(false)
   const demoEmbedRef = useRef<HTMLIFrameElement>(null)
-  const demoVideoRef = useRef<HTMLVideoElement>(null)
 
   const floatingLinesProps = useMemo(
     () => ({
@@ -121,7 +119,7 @@ function LandingPage() {
   }
 
   const openDemoFullscreen = () => {
-    const player = demoEmbedRef.current ?? demoVideoRef.current
+    const player = demoEmbedRef.current
     if (!player?.requestFullscreen) return
 
     void player.requestFullscreen().catch(() => undefined)
@@ -428,31 +426,14 @@ function LandingPage() {
                         </div>
                       </div>
                       <div className="flex min-h-0 flex-1 items-center justify-center bg-black">
-                        {DEMO_EMBED_SRC ? (
-                          <iframe
-                            ref={demoEmbedRef}
-                            src={DEMO_EMBED_SRC}
-                            title="Demonstra??o Unite"
-                            className="aspect-video max-h-[calc(95dvh-72px)] w-full bg-black"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                          />
-                        ) : DEMO_VIDEO_SRC ? (
-                          <video
-                            ref={demoVideoRef}
-                            src={DEMO_VIDEO_SRC}
-                            className="max-h-[calc(95dvh-72px)] w-full bg-black object-contain"
-                            controls
-                            playsInline
-                            preload="metadata"
-                          >
-                            Seu navegador nao suporta a reproducao de video.
-                          </video>
-                        ) : (
-                          <p className="px-6 py-16 text-sm text-text-muted">
-                            Configure a URL do video para exibir a demonstracao.
-                          </p>
-                        )}
+                        <iframe
+                          ref={demoEmbedRef}
+                          src={DEMO_EMBED_SRC}
+                          title="Demonstracao Unite"
+                          className="aspect-video max-h-[calc(95dvh-72px)] w-full bg-black"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
                       </div>
                     </div>
                   </DialogContent>

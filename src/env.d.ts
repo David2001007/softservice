@@ -3,8 +3,6 @@
 interface ImportMetaEnv {
   readonly GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY: string
   readonly GOOGLE_DRIVE_FOLDER_ID: string
-  readonly VITE_DEMO_EMBED_URL?: string
-  readonly VITE_DEMO_VIDEO_URL?: string
   // Add other environment variables here
 }
 
