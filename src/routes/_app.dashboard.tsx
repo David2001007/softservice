@@ -27,6 +27,8 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts'
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 
 import { getOrdensServico } from '@/features/ordens-servico/server'
 import { getMateriais } from '@/features/materiais/server'
@@ -223,11 +225,14 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
     },
   ]
 
-  // ── Chart data: tipo de serviço ──────────────────────────────────────────
+  // ── Chart data: tipo de serviço ───────────────────────────────────────────
   const tiposCount: Record<string, number> = {}
+  const ordensPorTipo: Record<string, any[]> = {}
   for (const o of filteredOrdens) {
     if (o.tipoServico) {
       tiposCount[o.tipoServico] = (tiposCount[o.tipoServico] ?? 0) + 1
+      if (!ordensPorTipo[o.tipoServico]) ordensPorTipo[o.tipoServico] = []
+      ordensPorTipo[o.tipoServico].push(o)
     }
   }
   const totalTipos = Object.values(tiposCount).reduce((a, b) => a + b, 0)
@@ -382,9 +387,54 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
             <PieChartIcon className="w-4 h-4 text-primary" />
             <h2 className="font-semibold text-text text-sm">OS por Tipo de Serviço</h2>
-            <span className="ml-auto text-xs bg-primary/15 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">
-              {totalTipos} total
-            </span>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="ml-auto text-xs bg-primary/15 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium cursor-pointer hover:bg-primary/25 transition-colors">
+                  {totalTipos} total
+                </button>
+              </DialogTrigger>
+              <DialogContent showCloseButton={false} className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+                <h2 className="text-xl font-bold text-text mb-4">OS por Categoria</h2>
+                {Object.keys(ordensPorTipo).length === 0 ? (
+                  <p className="text-text-muted">Nenhuma OS encontrada neste período.</p>
+                ) : (
+                  <Accordion type="multiple" defaultValue={Object.keys(ordensPorTipo)} className="space-y-3">
+                    {Object.entries(ordensPorTipo).map(([tipo, ordensList]) => (
+                      <AccordionItem key={tipo} value={tipo} className="border border-border rounded-lg bg-surface px-4 shadow-sm">
+                        <AccordionTrigger className="hover:no-underline py-3">
+                          <div className="flex items-center justify-between w-full pr-4">
+                            <span className="font-semibold text-text">{tipoServicoLabel[tipo] ?? tipo}</span>
+                            <span className="bg-primary/20 text-primary text-xs px-2 py-1 rounded-full">{ordensList.length}</span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="flex flex-col gap-2 pt-2">
+                              {ordensList.map((o) => {
+                                const isAtrasada = o.dataAgendada && new Date(o.dataAgendada) < new Date();
+                                return (
+                                <div key={o.id} className="flex justify-between items-center bg-background border border-border p-3 rounded-md">
+                                  <div>
+                                    <p className="font-medium text-sm text-text">{o.numero}</p>
+                                    <p className="text-xs text-text-muted mb-1">{o.cliente?.nome}</p>
+                                    {o.dataAgendada && (
+                                      <p className={`text-xs flex items-center gap-1 ${isAtrasada ? 'text-danger font-medium' : 'text-text-muted'}`}>
+                                        <CalendarClock className="w-3 h-3" />
+                                        {formatDate(o.dataAgendada)}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <StatusBadge value={o.status} type="os" />
+                                </div>
+                                );
+                              })}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
 
           {tiposData.length === 0 ? (
