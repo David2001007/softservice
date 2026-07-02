@@ -370,9 +370,11 @@ Para maior segurança e controle de acesso, agora é possível gerenciar quais A
 
 ### 15.8 Evolução do Dashboard, Usuários e Técnicos
 - O **Dashboard** agora possui um filtro de período global (canto superior direito), permitindo analisar os indicadores de ordens (de 7 dias até 1 ano). Os gráficos e os cards de contadores refletem os dados com precisão, filtrando sempre baseados na data de criação (abertura) de cada OS.
+- Os cards rápidos de métricas (Abertas, Agendadas, Concluídas, etc.) presentes no painel do Administrador e do Técnico são **clicáveis**, funcionando como um atalho direto para a lista de Ordens de Serviço já filtrada para a categoria selecionada.
 - O gráfico interativo de **Carga de OS por Técnico** ganhou um filtro para que o gestor possa cruzar e exibir informações de apenas um ou mais técnicos específicos em segundos, ajudando a gerir a carga de trabalho de forma clara. Os balões flutuantes (tooltips) ganharam detalhamento extra mostrando exatidão de OS canceladas ou reagendadas.
 - O antigo módulo de **Atendentes** passou por um reajuste semântico e agora atende universalmente pelo nome de **Usuários**, tanto na listagem quanto nas telas de criação e edição.
 - A tela de **Técnicos** recebeu polimento na interface de filtros, trocando entradas genéricas pelos novos padrões gráficos adotados nas listagens, além da correção crucial e padronização visual do indicador de Status (Ativo/Inativo).
+- Nas notificações do sistema (alertas verdes), o código da OS (ex: #OS-1234) agora é **copiável**, exibindo o aviso de "Copiado!" para que atendentes repassam números com maior rapidez e experiência fluida.
 
 ---
 
