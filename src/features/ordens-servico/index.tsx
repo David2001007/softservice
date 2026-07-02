@@ -216,15 +216,14 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
         (o.status === 'agendada' || o.status === 'reagendada') &&
         o.dataAgendada &&
         new Date(o.dataAgendada) < new Date();
+        
         const hasAtrasadaSelected = selectedStatuses.includes('atrasada');
         const hasStatusSelected = selectedStatuses.includes(o.status);
 
-        if (hasAtrasadaSelected && isAtrasada) {
-          // Passa se "Em Atraso" foi selecionado e a OS está atrasada
-        } else if (hasStatusSelected) {
-          // Passa se o status exato foi selecionado
+        if (isAtrasada) {
+          if (!hasAtrasadaSelected) return false;
         } else {
-          return false;
+          if (!hasStatusSelected) return false;
         }
       }
 

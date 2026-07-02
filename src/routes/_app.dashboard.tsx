@@ -172,7 +172,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
       new Date(o.dataAgendada) < new Date(),
   ).length
   const agendadasFuturas = filteredOrdens.filter(
-    (o) => (o.status === 'agendada' || o.status === 'reagendada') && new Date(o.dataAgendada) >= new Date(),
+    (o) => (o.status === 'agendada' || o.status === 'reagendada') && (!o.dataAgendada || new Date(o.dataAgendada) >= new Date()),
   ).length
 
   const cards = [
