@@ -14,6 +14,8 @@ import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { StatusBadge } from '@/components/status-badge'
+import { FileSignature, Play, Settings2 } from 'lucide-react'
+import { CopyableOsNumber } from '@/components/copyable-os-number'
 import { formatDate } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth.store'
 import type {OsConclusaoInput, OsReagendamentoInput, OsCancelamentoInput} from '@/features/ordens-servico/schema';
@@ -126,7 +128,12 @@ export function GerenciarOSPage({
       setIsLoading(true)
       const resultado = await concluirOrdemServico({ data: { id: Number(os.id), data } })
       clearCache(os.id)
-      toast.success('OS concluída e materiais baixados com sucesso!')
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={resultado?.os.numero || ''} /> concluída e materiais baixados com sucesso!
+        </span>,
+        { duration: 5000 }
+      )
 
       // Alertar sobre materiais abaixo do estoque mínimo após a baixa
       if (resultado?.materiaisAbaixoMinimo && resultado.materiaisAbaixoMinimo.length > 0) {
@@ -155,8 +162,13 @@ export function GerenciarOSPage({
   const handleReagendar = async (data: OsReagendamentoInput) => {
     try {
       setIsLoading(true)
-      await reagendarOrdemServico({ data: { id: Number(os.id), data } })
-      toast.success('OS reagendada com sucesso!')
+      const osAtualizada = await reagendarOrdemServico({ data: { id: Number(os.id), data } })
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={osAtualizada.numero} /> reagendada com sucesso!
+        </span>,
+        { duration: 5000 }
+      )
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
       toast.error('Erro ao reagendar OS')
@@ -169,8 +181,13 @@ export function GerenciarOSPage({
   const handleCancelar = async (data: OsCancelamentoInput) => {
     try {
       setIsLoading(true)
-      await cancelarOrdemServico({ data: { id: Number(os.id), data } })
-      toast.success('OS cancelada.')
+      const osAtualizada = await cancelarOrdemServico({ data: { id: Number(os.id), data } })
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={osAtualizada.numero} /> cancelada.
+        </span>,
+        { duration: 5000 }
+      )
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
       toast.error('Erro ao cancelar OS')

@@ -11,12 +11,14 @@ export const getMateriais = createServerFn({ method: 'GET' }).handler(
   async () => {
     const auth = await getAuthContext()
     if (auth && auth.userType === 'tecnico') {
-      return await db
-        .select()
-        .from(materiais)
-        .where(eq(materiais.assignedTecnicoId, auth.userId))
+      return await db.query.materiais.findMany({
+        where: eq(materiais.assignedTecnicoId, auth.userId),
+        with: { tecnico: true }
+      })
     }
-    return await db.select().from(materiais)
+    return await db.query.materiais.findMany({
+      with: { tecnico: true }
+    })
   },
 )
 

@@ -332,7 +332,8 @@ Se você tiver dúvidas ou encontrar problemas:
 ### 15.1 Configurações Globais
 A aba de **Configurações** foi criada para centralizar as regras de negócio da empresa. *Nota: Atendentes não possuem acesso a esta tela; ela é exclusiva para Administradores (acesso bloqueado e menu oculto).*
 - **Horário de Atendimento:** Permite configurar a Jornada de Trabalho (Entrada e Saída) e o Horário de Intervalo (Almoço).
-- **Regras de Agendamento:** Permite configurar o bloqueio em finais de semana, feriados nacionais (consulta dinâmica via API pública) e definir a política de agendamentos com datas passadas (Aviso, Bloqueio ou Livre).
+- **Regras de Agendamento:** Permite configurar o bloqueio em finais de semana, feriados nacionais (consulta dinâmica via API pública), política de agendamentos retroativos (Aviso, Bloqueio ou Livre) e também o **bloqueio de criação/edição de OS para clientes que não possuem o contrato assinado**.
+- **Cadastro de Clientes:** Permite escolher se os campos de "Telefone" e "CPF/CNPJ" são opcionais ou obrigatórios, além de oferecer a opção de ligar uma verificação rígida (matemática) sobre a validade do CPF/CNPJ inserido.
 
 ### 15.2 Alertas e Bloqueios Visuais no Cadastro
 Ao cadastrar ou editar uma Ordem de Serviço, o sistema agora conta com validação inteligente na **Data** e na **Hora**:
@@ -368,7 +369,21 @@ Para maior segurança e controle de acesso, agora é possível gerenciar quais A
 - A tela de listagem geral agora exibe selos/badges indicando o status do usuário, bem como novos filtros de pesquisa que facilitam a localização de contas desativadas.
 - Dessa forma, se um colaborador se desligar da empresa, basta editar o perfil dele e alterar para "Inativo" ao invés de apagá-lo, preservando todo o histórico de suas ações no Unite.
 
+### 15.8 Evolução do Dashboard, Usuários e Técnicos
+- O **Dashboard** agora possui um filtro de período global (canto superior direito), permitindo analisar os indicadores de ordens (de 7 dias até 1 ano). Os gráficos e os cards de contadores refletem os dados com precisão, filtrando sempre baseados na data de criação (abertura) de cada OS.
+- Os cards rápidos de métricas (Abertas, Agendadas, Concluídas, etc.) presentes no painel do Administrador e do Técnico são **clicáveis**, funcionando como um atalho direto para a lista de Ordens de Serviço já filtrada para a categoria selecionada.
+- O gráfico interativo de **Carga de OS por Técnico** ganhou um filtro para que o gestor possa cruzar e exibir informações de apenas um ou mais técnicos específicos em segundos, ajudando a gerir a carga de trabalho de forma clara. Os balões flutuantes (tooltips) ganharam detalhamento extra mostrando exatidão de OS canceladas ou reagendadas.
+- O antigo módulo de **Atendentes** passou por um reajuste semântico e agora atende universalmente pelo nome de **Usuários**, tanto na listagem quanto nas telas de criação e edição.
+- Na tela de **Usuários (Atendentes)** foi adicionado um botão de limpeza visual "Limpar Todos" nos filtros, e o grid das listagens foi reajustado, harmonizando a simetria com a tela de OS.
+- Nas notificações do sistema (alertas verdes), o código da OS (ex: #OS-1234) agora é **copiável**, exibindo o aviso de "Copiado!" para que atendentes repassam números com maior rapidez e experiência fluida.
+
+### 15.9 Automatização de Endereços (ViaCEP) e UI Dinâmica
+Para facilitar ainda mais a vida no momento de preencher dados:
+- O **Cadastro e Edição de Clientes** agora conta com preenchimento automático de endereço! Basta digitar um CEP válido (com 8 dígitos), e o sistema consulta os correios nos bastidores (ViaCEP), auto-completando a Rua, Bairro e Cidade, restando apenas o número para o usuário.
+- O Dashboard agora integra seus cards com inteligência de estado: ao clicar num painel numérico do Dashboard, você será levado para a tela de Ordens de Serviço já com a seção de Filtros (Accordion) **aberta por padrão**, evitando passos extras.
+- Os asteriscos obrigatórios `*` nos campos de Telefone e Documento agora se adaptam e somem em tempo real no formulário baseados nas escolhas definidas pela gerência nas Configurações Globais.
+
 ---
 
-**Última atualização:** Junho/2026  
+**Última atualização:** Julho/2026  
 **Versão do Sistema:** Unite v1.1

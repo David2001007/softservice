@@ -7,8 +7,8 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
-import { clienteSchema  } from '@/features/clientes/schema'
-import type {ClienteInput} from '@/features/clientes/schema';
+import { getClienteSchema } from '@/features/clientes/schema'
+import type { ClienteInput } from '@/features/clientes/schema'
 import { updateCliente, deleteCliente } from '@/features/clientes/server'
 import { applyPhoneMask, applyCepMask, applyCpfCnpjMask } from '@/lib/utils'
 
@@ -59,13 +59,19 @@ function FormSection({
 export function EditarClientePage({
   clienteData,
   id,
+  configMap,
 }: {
   clienteData: any
   id: string
+  configMap: Record<string, string>
 }) {
   const navigate = useNavigate()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  
+  const obrigarCpfCnpj = configMap['obrigar_cpf_cnpj'] === 'true'
+  const validarCpfCnpj = configMap['validar_cpf_cnpj'] === 'true'
+  const obrigarTelefone = configMap['obrigar_telefone'] === 'true'
 
   const {
     register,
@@ -73,7 +79,7 @@ export function EditarClientePage({
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClienteInput>({
-    resolver: zodResolver(clienteSchema),
+    resolver: zodResolver(getClienteSchema({ obrigarCpfCnpj, validarCpfCnpj, obrigarTelefone })),
     values: clienteData
       ? {
           nome: clienteData.nome,
@@ -101,6 +107,33 @@ export function EditarClientePage({
       await navigate({ to: '/clientes' })
     } catch (e) {
       toast.error('Erro ao atualizar cliente')
+    }
+  }
+
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = applyCepMask(e.target.value)
+    e.target.value = masked
+    setValue('cep', masked, { shouldValidate: true })
+
+    if (masked.length === 9) {
+      try {
+        const cepOnly = masked.replace(/\D/g, '')
+        const res = await fetch(`https://viacep.com.br/ws/${cepOnly}/json/`)
+        const data = await res.json()
+        if (data.erro) {
+          toast.error('CEP não encontrado!')
+          return
+        }
+        
+        if (data.logradouro) setValue('logradouro', data.logradouro, { shouldValidate: true })
+        if (data.bairro) setValue('bairro', data.bairro, { shouldValidate: true })
+        if (data.localidade) setValue('cidade', data.localidade, { shouldValidate: true })
+        if (data.uf) setValue('uf', data.uf, { shouldValidate: true })
+        
+        toast.success('Endereço preenchido pelo CEP!')
+      } catch (err) {
+        toast.error('Erro ao buscar o CEP')
+      }
     }
   }
 
@@ -148,7 +181,7 @@ export function EditarClientePage({
                 className={inputCls}
               />
             </Field>
-            <Field label="CPF / CNPJ" required error={errors.cpfCnpj?.message}>
+            <Field label="CPF / CNPJ" required={obrigarCpfCnpj} error={errors.cpfCnpj?.message}>
               <input
                 {...register('cpfCnpj')}
                 placeholder="000.000.000-00 ou 00.000.000/0001-00"
@@ -161,7 +194,7 @@ export function EditarClientePage({
                 }}
               />
             </Field>
-            <Field label="Telefone" required error={errors.telefone?.message}>
+            <Field label="Telefone" required={obrigarTelefone} error={errors.telefone?.message}>
               <input
                 {...register('telefone')}
                 placeholder="(44) 99999-0000"
@@ -185,17 +218,13 @@ export function EditarClientePage({
 
         <FormSection title="Endereço">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Field label="CEP">
+            <Field label="CEP" error={errors.cep?.message}>
               <input
                 {...register('cep')}
                 placeholder="00000-000"
                 className={inputCls}
                 maxLength={9}
-                onChange={(e) => {
-                  const masked = applyCepMask(e.target.value)
-                  e.target.value = masked
-                  setValue('cep', masked, { shouldValidate: true })
-                }}
+                onChange={handleCepChange}
               />
             </Field>
             <div className="sm:col-span-2">

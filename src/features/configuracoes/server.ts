@@ -32,6 +32,14 @@ export const getConfiguracoes = createServerFn({ method: 'GET' }).handler(
     if (configMap['comportamento_agendamento_retroativo'] === undefined) {
       configMap['comportamento_agendamento_retroativo'] = 'aviso'
     }
+    if (configMap['bloquear_os_contrato_nao_assinado'] === undefined) {
+      configMap['bloquear_os_contrato_nao_assinado'] = 'false'
+    }
+    
+    // Configurações de Cliente
+    if (configMap['obrigar_telefone'] === undefined) configMap['obrigar_telefone'] = 'true'
+    if (configMap['obrigar_cpf_cnpj'] === undefined) configMap['obrigar_cpf_cnpj'] = 'true'
+    if (configMap['validar_cpf_cnpj'] === undefined) configMap['validar_cpf_cnpj'] = 'false'
 
     return configMap
   },

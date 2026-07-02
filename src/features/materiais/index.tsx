@@ -73,6 +73,18 @@ export function MateriaisPage({ materiais }: { materiais: any[] }) {
       accessorKey: 'categoria',
       className: 'text-text-muted text-sm',
     },
+    ...(!isTecnico
+      ? [
+          {
+            header: 'Estoque de',
+            cell: (r: any) =>
+              r.assignedTecnicoId && r.tecnico
+                ? r.tecnico.nome
+                : 'Principal',
+            className: 'text-sm font-bold text-primary',
+          },
+        ]
+      : []),
     {
       header: 'Unidade de Medida',
       cell: (r) => getEstoqueUnidadeLabel(r),

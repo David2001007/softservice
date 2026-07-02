@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { CopyableOsNumber } from '@/components/copyable-os-number'
 import { osSchema  } from '@/features/ordens-servico/schema'
 import type {OsInput} from '@/features/ordens-servico/schema';
 import {
@@ -202,9 +203,23 @@ export function EditarOrdemServicoPage({
       toast.error('Verifique os avisos no campo de agendamento antes de salvar.')
       return
     }
+
+    if (configuracoes?.['bloquear_os_contrato_nao_assinado'] === 'true') {
+      const selectedClient = clientes.find(c => c.id === data.clienteId)
+      if (selectedClient && selectedClient.situacaoContrato !== 'assinado') {
+        toast.error('Edição bloqueada: o cliente não possui contrato assinado.')
+        return
+      }
+    }
+
     try {
-      await updateOrdemServico({ data: { id: Number(id), data } })
-      toast.success('Ordem de Serviço atualizada com sucesso!')
+      const osAtualizada = await updateOrdemServico({ data: { id: os.id, data } })
+      toast.success(
+        <span>
+          OS <CopyableOsNumber numero={osAtualizada.numero} /> atualizada com sucesso!
+        </span>,
+        { duration: 5000 }
+      )
       await navigate({ to: '/ordens-servico' })
     } catch (e) {
       toast.error('Erro ao atualizar Ordem de Serviço')

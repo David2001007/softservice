@@ -94,8 +94,8 @@ export const clientes = pgTable('clientes', {
   id: serial('id').primaryKey(),
   codigo: text('codigo').notNull().unique(),
   nome: text('nome').notNull(),
-  cpfCnpj: text('cpf_cnpj').notNull().unique(),
-  telefone: text('telefone').notNull(),
+  cpfCnpj: text('cpf_cnpj').unique(),
+  telefone: text('telefone'),
   cep: text('cep'),
   logradouro: text('logradouro'),
   numero: text('numero'),
@@ -282,9 +282,13 @@ export const osMateriaisRelations = relations(osMateriais, ({ one }) => ({
   }),
 }))
 
-export const materiaisRelations = relations(materiais, ({ many }) => ({
+export const materiaisRelations = relations(materiais, ({ many, one }) => ({
   movimentacoes: many(estoqueMovimentacoes),
   osMateriais: many(osMateriais),
+  tecnico: one(tecnicos, {
+    fields: [materiais.assignedTecnicoId],
+    references: [tecnicos.id],
+  }),
 }))
 
 export const estoqueMovimentacoesRelations = relations(

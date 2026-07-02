@@ -5,8 +5,8 @@ import { toast } from 'sonner'
 import { ArrowLeft, Save } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { DefaultButton } from '@/components/default-button'
-import { clienteSchema  } from '@/features/clientes/schema'
-import type {ClienteInput} from '@/features/clientes/schema';
+import { getClienteSchema } from '@/features/clientes/schema'
+import type { ClienteInput } from '@/features/clientes/schema'
 import { createCliente } from '@/features/clientes/server'
 import { applyPhoneMask, applyCepMask, applyCpfCnpjMask } from '@/lib/utils'
 
@@ -30,10 +30,12 @@ function FormSection({
 function Field({
   label,
   required,
+  error,
   children,
 }: {
   label: string
   required?: boolean
+  error?: string
   children: React.ReactNode
 }) {
   return (
@@ -42,6 +44,7 @@ function Field({
         {label} {required && <span className="text-danger">*</span>}
       </label>
       {children}
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
     </div>
   )
 }
@@ -50,15 +53,20 @@ const inputCls =
   'w-full h-10 px-3 rounded-lg bg-background border border-border text-text text-sm placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors'
 const selectCls = `${inputCls} cursor-pointer`
 
-export function NovoClientePage() {
+export function NovoClientePage({ configMap }: { configMap: Record<string, string> }) {
   const navigate = useNavigate()
+  
+  const obrigarCpfCnpj = configMap['obrigar_cpf_cnpj'] === 'true'
+  const validarCpfCnpj = configMap['validar_cpf_cnpj'] === 'true'
+  const obrigarTelefone = configMap['obrigar_telefone'] === 'true'
+
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClienteInput>({
-    resolver: zodResolver(clienteSchema),
+    resolver: zodResolver(getClienteSchema({ obrigarCpfCnpj, validarCpfCnpj, obrigarTelefone })),
     defaultValues: { status: 'ativo', situacaoContrato: 'nao_assinado' },
   })
 
@@ -68,7 +76,35 @@ export function NovoClientePage() {
       toast.success('Cliente cadastrado com sucesso!')
       await navigate({ to: '/clientes' })
     } catch (e) {
-      toast.error('Erro ao cadastrar cliente')
+      console.error(e)
+      toast.error('Erro ao cadastrar cliente. Verifique os dados.')
+    }
+  }
+
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = applyCepMask(e.target.value)
+    e.target.value = masked
+    setValue('cep', masked, { shouldValidate: true })
+
+    if (masked.length === 9) {
+      try {
+        const cepOnly = masked.replace(/\D/g, '')
+        const res = await fetch(`https://viacep.com.br/ws/${cepOnly}/json/`)
+        const data = await res.json()
+        if (data.erro) {
+          toast.error('CEP não encontrado!')
+          return
+        }
+        
+        if (data.logradouro) setValue('logradouro', data.logradouro, { shouldValidate: true })
+        if (data.bairro) setValue('bairro', data.bairro, { shouldValidate: true })
+        if (data.localidade) setValue('cidade', data.localidade, { shouldValidate: true })
+        if (data.uf) setValue('uf', data.uf, { shouldValidate: true })
+        
+        toast.success('Endereço preenchido pelo CEP!')
+      } catch (err) {
+        toast.error('Erro ao buscar o CEP')
+      }
     }
   }
 
@@ -90,19 +126,14 @@ export function NovoClientePage() {
         {/* Dados principais */}
         <FormSection title="Dados Principais">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Nome / Razão Social" required>
+            <Field label="Nome / Razão Social" required error={errors.nome?.message}>
               <input
                 {...register('nome')}
                 placeholder="Nome completo ou razão social"
                 className={inputCls}
               />
-              {errors.nome && (
-                <p className="text-xs text-danger mt-1">
-                  {errors.nome.message}
-                </p>
-              )}
             </Field>
-            <Field label="CPF / CNPJ" required>
+            <Field label="CPF / CNPJ" required={obrigarCpfCnpj} error={errors.cpfCnpj?.message}>
               <input
                 {...register('cpfCnpj')}
                 placeholder="000.000.000-00 ou 00.000.000/0001-00"
@@ -114,13 +145,8 @@ export function NovoClientePage() {
                   setValue('cpfCnpj', masked, { shouldValidate: true })
                 }}
               />
-              {errors.cpfCnpj && (
-                <p className="text-xs text-danger mt-1">
-                  {errors.cpfCnpj.message}
-                </p>
-              )}
             </Field>
-            <Field label="Telefone" required>
+            <Field label="Telefone" required={obrigarTelefone} error={errors.telefone?.message}>
               <input
                 {...register('telefone')}
                 placeholder="(44) 99999-0000"
@@ -156,11 +182,7 @@ export function NovoClientePage() {
                 placeholder="00000-000"
                 className={inputCls}
                 maxLength={9}
-                onChange={(e) => {
-                  const masked = applyCepMask(e.target.value)
-                  e.target.value = masked
-                  setValue('cep', masked, { shouldValidate: true })
-                }}
+                onChange={handleCepChange}
               />
             </Field>
             <div className="sm:col-span-2">

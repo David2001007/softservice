@@ -13,6 +13,7 @@ import {
   Save,
   CalendarOff,
   Coffee,
+  Users,
 } from 'lucide-react'
 import {
   Select,
@@ -93,6 +94,9 @@ export function ConfiguracoesPage({ configMap }: ConfiguracoesPageProps) {
   const [bloquearFDS, setBloquearFDS] = useState(
     configMap['bloquear_finais_de_semana'] === 'true',
   )
+  const [bloquearOsContratoNaoAssinado, setBloquearOsContratoNaoAssinado] = useState(
+    configMap['bloquear_os_contrato_nao_assinado'] === 'true',
+  )
   const [comportamentoRetroativo, setComportamentoRetroativo] = useState(
     configMap['comportamento_agendamento_retroativo'] || 'aviso',
   )
@@ -118,6 +122,17 @@ export function ConfiguracoesPage({ configMap }: ConfiguracoesPageProps) {
     saida: configMap['horario_saida'] ?? '',
   })
   const [isSavingHorario, setIsSavingHorario] = useState(false)
+
+  // --- Cadastro de Clientes ---
+  const [obrigarTelefone, setObrigarTelefone] = useState(
+    configMap['obrigar_telefone'] === 'true',
+  )
+  const [obrigarCpfCnpj, setObrigarCpfCnpj] = useState(
+    configMap['obrigar_cpf_cnpj'] === 'true',
+  )
+  const [validarCpfCnpj, setValidarCpfCnpj] = useState(
+    configMap['validar_cpf_cnpj'] === 'true',
+  )
 
   const handleToggle = async (key: string, checked: boolean, setter: (v: boolean) => void) => {
     if (isTecnico) return
@@ -201,6 +216,17 @@ export function ConfiguracoesPage({ configMap }: ConfiguracoesPageProps) {
           checked={bloquearFDS}
           onCheckedChange={(v) =>
             handleToggle('bloquear_finais_de_semana', v, setBloquearFDS)
+          }
+          disabled={isTecnico}
+        />
+
+        <ToggleRow
+          id="bloquear-os-contrato"
+          label="Bloquear abertura de OS (Contrato não assinado)"
+          description="Impede a criação de Ordens de Serviço se a Situação do Contrato do cliente não estiver como 'Assinado'."
+          checked={bloquearOsContratoNaoAssinado}
+          onCheckedChange={(v) =>
+            handleToggle('bloquear_os_contrato_nao_assinado', v, setBloquearOsContratoNaoAssinado)
           }
           disabled={isTecnico}
         />
@@ -360,6 +386,51 @@ export function ConfiguracoesPage({ configMap }: ConfiguracoesPageProps) {
             />
           </div>
         )}
+      </div>
+
+      {/* Seção: Cadastro de Clientes */}
+      <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-1">
+        <SectionHeader
+          icon={Users}
+          title="Cadastro de Clientes"
+          description="Regras de obrigatoriedade e validação no formulário de clientes."
+        />
+
+        <ToggleRow
+          id="obrigar-telefone"
+          label="Obrigar preenchimento de Telefone"
+          description="Torna o campo de telefone obrigatório na criação e edição de clientes."
+          checked={obrigarTelefone}
+          onCheckedChange={(v) =>
+            handleToggle('obrigar_telefone', v, setObrigarTelefone)
+          }
+          disabled={isTecnico}
+        />
+
+        <ToggleRow
+          id="obrigar-cpf-cnpj"
+          label="Obrigar preenchimento de CPF/CNPJ"
+          description="Torna o campo de documento obrigatório."
+          checked={obrigarCpfCnpj}
+          onCheckedChange={(v) => {
+            handleToggle('obrigar_cpf_cnpj', v, setObrigarCpfCnpj)
+            if (!v && validarCpfCnpj) {
+              handleToggle('validar_cpf_cnpj', false, setValidarCpfCnpj)
+            }
+          }}
+          disabled={isTecnico}
+        />
+
+        <ToggleRow
+          id="validar-cpf-cnpj"
+          label="Validar veracidade do CPF/CNPJ"
+          description="Verifica os dígitos verificadores para impedir a inserção de CPFs inválidos (ex: 111.111.111-11)."
+          checked={validarCpfCnpj}
+          onCheckedChange={(v) =>
+            handleToggle('validar_cpf_cnpj', v, setValidarCpfCnpj)
+          }
+          disabled={isTecnico || !obrigarCpfCnpj}
+        />
       </div>
     </div>
   )
