@@ -344,10 +344,23 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
 
       {/* Cards */}
       <div className="grid grid-cols-5 gap-4 overflow-x-auto pt-2 pb-2">
-        {cards.map((card) => (
+        {cards.map((card) => {
+          const cutoff = new Date()
+          cutoff.setDate(cutoff.getDate() - periodoDias)
+          const dataInicial = cutoff.toISOString().split('T')[0]
+          const dataFinal = new Date().toISOString().split('T')[0]
+          
+          return (
           <div
             key={card.label}
-            onClick={() => navigate({ to: '/ordens-servico', search: { status: card.statusQuery } })}
+            onClick={() => navigate({ 
+              to: '/ordens-servico', 
+              search: { 
+                status: card.statusQuery,
+                dataInicial,
+                dataFinal
+              } 
+            })}
             className={`cursor-pointer bg-surface border ${card.border} rounded-xl p-3 flex items-center gap-2 shadow-soft hover:border-opacity-50 transition-all hover:-translate-y-1`}
           >
             <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}>
@@ -358,7 +371,7 @@ function AdminDashboard({ ordens }: { ordens: any[] }) {
               <p className="text-xs text-text-muted mt-1">{card.label}</p>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Charts row */}

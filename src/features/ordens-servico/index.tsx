@@ -45,6 +45,8 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
     cliente: '',
     tecnico: '',
     tipoServico: '',
+    dataInicial: search.dataInicial || '',
+    dataFinal: search.dataFinal || '',
   })
   const [page, setPage] = useState(1)
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -198,6 +200,16 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
       if (filtros.tecnico && !o.tecnico?.nome.toLowerCase().includes(filtros.tecnico.toLowerCase())) return false;
       if (filtros.tipoServico && o.tipoServico !== filtros.tipoServico) return false;
 
+      // Filtros de Data de Criação (Abertura)
+      if (filtros.dataInicial) {
+        const osDate = new Date(o.dataAbertura).toISOString().split('T')[0]
+        if (osDate < filtros.dataInicial) return false
+      }
+      if (filtros.dataFinal) {
+        const osDate = new Date(o.dataAbertura).toISOString().split('T')[0]
+        if (osDate > filtros.dataFinal) return false
+      }
+
       // Filtros de Status Visual
       if (selectedStatuses.length > 0) {
         const isAtrasada =
@@ -273,7 +285,7 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
       ) : (
         <>
           <AccordionFilters>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end">
           <div className="space-y-2">
             <Label className="text-xs">Nº OS</Label>
             <Input
@@ -326,6 +338,46 @@ export function OrdensServicoPage({ ordens }: OrdensServicoPageProps) {
                 <SelectItem value="outro">Outro</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs">Data Inicial</Label>
+            <Input
+              type="date"
+              value={filtros.dataInicial}
+              onChange={(e) =>
+                setFiltros((f) => ({ ...f, dataInicial: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs">Data Final</Label>
+            <Input
+              type="date"
+              value={filtros.dataFinal}
+              onChange={(e) =>
+                setFiltros((f) => ({ ...f, dataFinal: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <DefaultButton 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                setFiltros({
+                  numero: '',
+                  cliente: '',
+                  tecnico: '',
+                  tipoServico: '',
+                  dataInicial: '',
+                  dataFinal: '',
+                })
+                setSelectedStatuses([])
+                router.navigate({ to: '/ordens-servico', search: {} })
+              }}
+            >
+              Limpar Todos
+            </DefaultButton>
           </div>
         </div>
       </AccordionFilters>
